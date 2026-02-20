@@ -23,7 +23,9 @@ interface SyncResult {
   success: boolean
   updated: boolean
   beforeHash?: string
+  beforeTime?: string
   afterHash?: string
+  afterTime?: string
   error?: string
 }
 
@@ -56,18 +58,24 @@ export class SyncCoreService {
         await runCommand('git submodule update --init', targetDir)
       }
 
-      // 记录更新前的 commit hash
+      // 记录更新前的 commit hash 和时间
       const beforeHash = (
         await runCommand('git rev-parse HEAD', submodulePath)
+      ).trim()
+      const beforeTime = (
+        await runCommand('git log -1 --format=%ci HEAD', submodulePath)
       ).trim()
 
       // fetch + reset 到 origin/main
       await runCommand('git fetch origin', submodulePath)
       await runCommand('git reset --hard origin/main', submodulePath)
 
-      // 记录更新后的 commit hash
+      // 记录更新后的 commit hash 和时间
       const afterHash = (
         await runCommand('git rev-parse HEAD', submodulePath)
+      ).trim()
+      const afterTime = (
+        await runCommand('git log -1 --format=%ci HEAD', submodulePath)
       ).trim()
 
       const updated = beforeHash !== afterHash
@@ -84,7 +92,9 @@ export class SyncCoreService {
         success: true,
         updated,
         beforeHash: beforeHash.substring(0, 7),
+        beforeTime,
         afterHash: afterHash.substring(0, 7),
+        afterTime,
       }
     } catch (error) {
       const errorMessage =
@@ -132,10 +142,12 @@ export class SyncCoreService {
         if (result.success) {
           if (result.updated) {
             logger.success(
-              `  ✓ 已更新 ${result.beforeHash} → ${result.afterHash}\n`,
+              `  ✓ 已更新 ${result.beforeHash}(${result.beforeTime}) → ${result.afterHash}(${result.afterTime})\n`,
             )
           } else {
-            logger.info(`  - 已是最新 (${result.afterHash})\n`)
+            logger.info(
+              `  - 已是最新 ${result.afterHash}(${result.afterTime})\n`,
+            )
           }
         } else {
           logger.error(`  ✗ 失败: ${result.error}\n`)

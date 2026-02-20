@@ -4,9 +4,7 @@
  * 统一的错误处理系统
  */
 
-/**
- * TNotes 错误代码枚举
- */
+/** TNotes 错误代码枚举 */
 export enum ErrorCode {
   // 文件系统错误
   FILE_NOT_FOUND = 'FILE_NOT_FOUND',

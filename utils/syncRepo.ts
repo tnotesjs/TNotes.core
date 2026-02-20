@@ -4,7 +4,7 @@
  * 同步 Git 仓库的工具函数
  */
 import { runCommand } from './runCommand'
-import { TNOTES_BASE_DIR, EN_WORDS_DIR } from '../config/constants'
+import { TNOTES_BASE_DIR, EN_WORDS_DIR, TNOTES_CORE_DIR } from '../config/constants'
 import { getTargetDirs } from './getTargetDirs'
 import { logger } from './logger'
 
@@ -33,7 +33,7 @@ export async function pushAllRepos(options?: {
     continueOnError = true,
     force = false,
   } = options || {}
-  const targetDirs = getTargetDirs(TNOTES_BASE_DIR, 'TNotes.', [EN_WORDS_DIR])
+  const targetDirs = getTargetDirs(TNOTES_BASE_DIR, 'TNotes.', [EN_WORDS_DIR, TNOTES_CORE_DIR])
 
   logger.info(`正在推送 ${targetDirs.length} 个仓库...`)
   if (force) {
@@ -113,7 +113,7 @@ export async function pullAllRepos(options?: {
   continueOnError?: boolean
 }): Promise<void> {
   const { parallel = true, continueOnError = true } = options || {}
-  const targetDirs = getTargetDirs(TNOTES_BASE_DIR, 'TNotes.', [EN_WORDS_DIR])
+  const targetDirs = getTargetDirs(TNOTES_BASE_DIR, 'TNotes.', [EN_WORDS_DIR, TNOTES_CORE_DIR])
 
   logger.info(`正在拉取 ${targetDirs.length} 个仓库...`)
 
@@ -189,7 +189,7 @@ export async function syncAllRepos(options?: {
   continueOnError?: boolean
 }): Promise<void> {
   const { parallel = true, continueOnError = true } = options || {}
-  const targetDirs = getTargetDirs(TNOTES_BASE_DIR, 'TNotes.', [EN_WORDS_DIR])
+  const targetDirs = getTargetDirs(TNOTES_BASE_DIR, 'TNotes.', [EN_WORDS_DIR, TNOTES_CORE_DIR])
 
   logger.info(`正在同步 ${targetDirs.length} 个仓库...`)
 

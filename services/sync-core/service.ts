@@ -63,7 +63,10 @@ export class SyncCoreService {
         await runCommand('git rev-parse HEAD', submodulePath)
       ).trim()
       const beforeTime = (
-        await runCommand('git log -1 --format=%ci HEAD', submodulePath)
+        await runCommand(
+          'git log -1 --format=%Y-%m-%d\ %H:%M:%S HEAD',
+          submodulePath,
+        )
       ).trim()
 
       // fetch + reset 到 origin/main
@@ -75,7 +78,10 @@ export class SyncCoreService {
         await runCommand('git rev-parse HEAD', submodulePath)
       ).trim()
       const afterTime = (
-        await runCommand('git log -1 --format=%ci HEAD', submodulePath)
+        await runCommand(
+          'git log -1 --format=%Y-%m-%d\ %H:%M:%S HEAD',
+          submodulePath,
+        )
       ).trim()
 
       const updated = beforeHash !== afterHash

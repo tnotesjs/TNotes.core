@@ -14,7 +14,7 @@ import {
   UpdateNoteConfigCommand,
   RenameNoteCommand,
 } from './note'
-import { SyncScriptsCommand, FixTimestampsCommand } from './maintenance'
+import { SyncCoreCommand, FixTimestampsCommand } from './maintenance'
 import { HelpCommand } from './misc'
 import { type Command, type CommandName } from './models'
 
@@ -29,7 +29,7 @@ const commandFactories: Record<CommandName, () => Command> = {
   pull: () => new PullCommand(),
   sync: () => new SyncCommand(),
   'create-notes': () => new CreateNoteCommand(),
-  'sync-scripts': () => new SyncScriptsCommand(),
+  'sync-core': () => new SyncCoreCommand(),
   'fix-timestamps': () => new FixTimestampsCommand(),
   'update-note-config': () => new UpdateNoteConfigCommand(),
   'rename-note': () => new RenameNoteCommand(),

@@ -29,6 +29,7 @@ const __dirname = configManager.getDirname()
  * @example `/Users/huyouda/zm/notes/` 【在此目录下存放其它 TNotes.* 笔记仓库】
  */
 export const TNOTES_BASE_DIR = resolve(__dirname, '..', '..', '..', '..')
+export const TNOTES_CORE_DIR = resolve(TNOTES_BASE_DIR, 'TNotes.core')
 export const EN_WORDS_DIR = resolve(TNOTES_BASE_DIR, 'TNotes.en-words')
 
 /**

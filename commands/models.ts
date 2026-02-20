@@ -18,7 +18,7 @@ export const COMMAND_NAMES = {
   PULL: 'pull',
   PUSH: 'push',
   RENAME_NOTE: 'rename-note',
-  SYNC_SCRIPTS: 'sync-scripts',
+  SYNC_CORE: 'sync-core',
   SYNC: 'sync',
   UPDATE: 'update',
   UPDATE_COMPLETED_COUNT: 'update-completed-count',
@@ -45,7 +45,7 @@ export const COMMAND_DESCRIPTIONS: Record<CommandName, string> = {
   [COMMAND_NAMES.PULL]: '将 GitHub 的知识库拉下来 (使用 --all 拉取所有知识库)',
   [COMMAND_NAMES.SYNC]:
     '同步本地和远程的知识库状态 (使用 --all 同步所有知识库)',
-  [COMMAND_NAMES.SYNC_SCRIPTS]: '同步知识库脚本到其它 TNotes.xxx 知识库中',
+  [COMMAND_NAMES.SYNC_CORE]: '同步所有兄弟知识库的 TNotes.core 到最新版本',
   [COMMAND_NAMES.FIX_TIMESTAMPS]: '修复所有笔记的时间戳（基于 git 历史）',
   [COMMAND_NAMES.UPDATE_NOTE_CONFIG]: '更新笔记配置文件',
   [COMMAND_NAMES.RENAME_NOTE]: '重命名笔记',

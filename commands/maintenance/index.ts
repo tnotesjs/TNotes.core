@@ -3,5 +3,5 @@
  *
  * Maintenance 命令统一导出
  */
-export { SyncScriptsCommand } from './SyncScriptsCommand'
+export { SyncCoreCommand } from './SyncCoreCommand'
 export { FixTimestampsCommand } from './FixTimestampsCommand'

@@ -89,12 +89,14 @@
 <script setup lang="ts">
 import mermaid from 'mermaid'
 import { nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue'
-import icon__zoom_in from '/icon__zoom_in.svg'
-import icon__zoom_out from '/icon__zoom_out.svg'
-import icon__zoom_reset from '/icon__zoom_reset.svg'
-import icon__zoom_fit from '/icon__zoom_fit.svg'
-import icon__fullscreen from '/icon__fullscreen.svg'
-import icon__fullscreen_exit from '/icon__fullscreen_exit.svg'
+import {
+  icon__zoom_in,
+  icon__zoom_out,
+  icon__zoom_reset,
+  icon__zoom_fit,
+  icon__fullscreen,
+  icon__fullscreen_exit,
+} from '../../assets/icons'
 
 const props = defineProps({
   graph: {

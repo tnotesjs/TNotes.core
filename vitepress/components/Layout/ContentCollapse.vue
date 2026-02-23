@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import { useRoute, onContentUpdated } from 'vitepress'
-import icon__collapse from '/icon__collapse.svg'
+import { icon__collapse } from '../../assets/icons'
 
 const route = useRoute()
 

@@ -91,10 +91,7 @@ import { useData } from 'vitepress'
 import ToggleSidebar from './ToggleSidebar.vue'
 import ToggleFullContent from './ToggleFullContent.vue'
 
-import icon__github from '/icon__github.svg'
-import icon__vscode from '/icon__vscode.svg'
-import icon__fold from '/icon__fold.svg'
-import icon__clipboard from '/icon__clipboard.svg'
+import { icon__github, icon__vscode, icon__fold, icon__clipboard } from '../../assets/icons'
 
 const props = defineProps<{
   isFullContentMode: boolean

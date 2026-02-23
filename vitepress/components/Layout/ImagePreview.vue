@@ -56,12 +56,14 @@
 </template>
 
 <script setup>
-import icon__close from '/icon__close.svg'
-import icon__next from '/icon__next.svg'
-import icon__prev from '/icon__prev.svg'
-import icon__restore from '/icon__restore.svg'
-import icon__zoom_in from '/icon__zoom_in.svg'
-import icon__zoom_out from '/icon__zoom_out.svg'
+import {
+  icon__close,
+  icon__next,
+  icon__prev,
+  icon__restore,
+  icon__zoom_in,
+  icon__zoom_out,
+} from '../../assets/icons'
 
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 

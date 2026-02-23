@@ -55,10 +55,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import icon__copy from '/icon__copy.svg'
-import icon__check from '/icon__check.svg'
-import icon__close from '/icon__close.svg'
-import icon__rotate from '/icon__rotate.svg'
+import { icon__copy, icon__check, icon__close, icon__rotate } from '../../assets/icons'
 
 const ORIENTATION_KEY = 'code-fullscreen-orientation'
 

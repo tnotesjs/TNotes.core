@@ -5,7 +5,7 @@ import { Markmap, IMarkmapOptions } from 'markmap-view'
 import { Toolbar } from 'markmap-toolbar'
 import 'markmap-toolbar/dist/style.css'
 import { MARKMAP_THEME_KEY, MARKMAP_EXPAND_LEVEL_KEY } from '../constants'
-import { withBase } from 'vitepress'
+import { icon__fullscreen, icon__fullscreen_exit, icon__confirm } from '../../assets/icons'
 
 // doc: https://github.com/markmap/markmap/blob/205367a24603dc187f67da1658940c6cade20dce/packages/markmap-view/src/constants.ts#L15
 import { scaleOrdinal, schemePastel2, schemeSet3, schemeTableau10 } from 'd3'
@@ -142,14 +142,9 @@ function addFullscreenButton(toolbar: HTMLElement) {
   const fullscreenBtn = document.createElement('div')
   fullscreenBtn.className = 'mm-toolbar-item'
   fullscreenBtn.title = isFullscreen.value ? '退出全屏' : '全屏'
-  // 使用 public 目录下的 svg 图标，保持大小和可访问性
   fullscreenBtn.innerHTML = isFullscreen.value
-    ? `<img src="${withBase(
-        '/icon__fullscreen_exit.svg'
-      )}" alt="退出全屏" style="width:18px;height:18px;display:block" />`
-    : `<img src="${withBase(
-        '/icon__fullscreen.svg'
-      )}" alt="全屏" style="width:18px;height:18px;display:block" />`
+    ? `<img src="${icon__fullscreen_exit}" alt="退出全屏" style="width:18px;height:18px;display:block" />`
+    : `<img src="${icon__fullscreen}" alt="全屏" style="width:18px;height:18px;display:block" />`
   fullscreenBtn.addEventListener('click', toggleFullscreen)
   toolbar.appendChild(fullscreenBtn)
 }
@@ -235,10 +230,7 @@ function addUpdateButton(toolbar: HTMLElement) {
   const updateBtn = document.createElement('button')
   updateBtn.type = 'button'
   updateBtn.title = '确定层级并更新'
-  // 使用确认图标（public 目录）
-  updateBtn.innerHTML = `<img src="${withBase(
-    '/icon__confirm.svg'
-  )}" alt="确定" style="width:16px;height:16px;display:block" />`
+  updateBtn.innerHTML = `<img src="${icon__confirm}" alt="确定" style="width:16px;height:16px;display:block" />`
   updateBtn.addEventListener('click', onUpdateClick)
 
   updateContainer.appendChild(levelInput)
@@ -292,14 +284,9 @@ function handleFullscreenChange() {
       fullscreenBtn.title = isFullscreen.value
         ? '退出全屏（Exit Fullscreen）'
         : '全屏（Fullscreen）'
-      // 切换图标（全屏 / 退出全屏）
       fullscreenBtn.innerHTML = isFullscreen.value
-        ? `<img src="${withBase(
-            '/icon__fullscreen_exit.svg'
-          )}" alt="退出全屏" style="width:18px;height:18px;display:block" />`
-        : `<img src="${withBase(
-            '/icon__fullscreen.svg'
-          )}" alt="全屏" style="width:18px;height:18px;display:block" />`
+        ? `<img src="${icon__fullscreen_exit}" alt="退出全屏" style="width:18px;height:18px;display:block" />`
+        : `<img src="${icon__fullscreen}" alt="全屏" style="width:18px;height:18px;display:block" />`
     }
   }
 

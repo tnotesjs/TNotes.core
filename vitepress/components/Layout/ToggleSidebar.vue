@@ -5,8 +5,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import icon__next from '/icon__next.svg'
-import icon__prev from '/icon__prev.svg'
+import { icon__next, icon__prev } from '../../assets/icons'
 
 const KEY = 'vp:sidebar:hidden'
 const hidden = ref(false)

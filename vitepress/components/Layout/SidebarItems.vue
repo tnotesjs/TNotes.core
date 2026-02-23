@@ -56,8 +56,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import icon__sidebar_opened from '/icon__sidebar_opened.svg'
-import icon__sidebar_collapsed from '/icon__sidebar_collapsed.svg'
+import { icon__sidebar_opened, icon__sidebar_collapsed } from '../../assets/icons'
 
 interface SidebarItem {
   text: string

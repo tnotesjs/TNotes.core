@@ -4,8 +4,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import icon__fullscreen from '/icon__fullscreen.svg'
-import icon__fullscreen_exit from '/icon__fullscreen_exit.svg'
+import { icon__fullscreen, icon__fullscreen_exit } from '../../assets/icons'
 
 const KEY = 'vp:content:fullscreen'
 const full = ref(false)

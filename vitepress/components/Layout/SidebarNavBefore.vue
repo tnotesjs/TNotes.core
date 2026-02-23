@@ -34,10 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import icon__fold from '/icon__fold.svg'
-import icon__number_purple from '/icon__number_purple.svg'
-import icon__number_gray from '/icon__number_gray.svg'
-import icon__focus from '/icon__focus.svg'
+import { icon__fold, icon__number_purple, icon__number_gray, icon__focus } from '../../assets/icons'
 
 defineProps<{
   isExpanded: boolean

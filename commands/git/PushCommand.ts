@@ -51,30 +51,37 @@ export class PushCommand extends BaseCommand {
     }
 
     try {
-      // 1. 检查是否有更改
+      // 1. 检查是否有更改或已有未推送的提交
       this.logger.info('检查是否有更改...')
       const status = await this.gitService.getStatus()
+      const hasPendingCommits = (status.ahead ?? 0) > 0
 
-      if (!status.hasChanges) {
+      if (!status.hasChanges && !hasPendingCommits) {
         this.logger.info('没有更改需要推送')
         return
       }
 
-      // 获取变更的文件列表
-      const changedFiles = status.files.map((f) => f.path)
+      if (hasPendingCommits && !status.hasChanges) {
+        this.logger.info(`检测到 ${status.ahead} 个未推送的提交，直接推送...`)
+      }
 
-      // 2. 检查本次 push 是否有笔记 README.md 文件变更
-      this.logger.info(`共计检测到 ${changedFiles.length} 个变更文件`)
-      const changedNotes = this.timestampService.getChangedNotes(changedFiles)
-      this.logger.info(
-        `工具检测到 ${changedNotes.length} 个变更笔记（README.md）`,
-      )
+      if (status.hasChanges) {
+        // 获取变更的文件列表
+        const changedFiles = status.files.map((f) => f.path)
 
-      if (changedNotes.length > 0) {
+        // 2. 检查本次 push 是否有笔记 README.md 文件变更
+        this.logger.info(`共计检测到 ${changedFiles.length} 个变更文件`)
+        const changedNotes = this.timestampService.getChangedNotes(changedFiles)
         this.logger.info(
-          `检测到 ${changedNotes.length} 篇笔记的 README.md 有变更，更新时间戳...`,
+          `工具检测到 ${changedNotes.length} 个变更笔记（README.md）`,
         )
-        await this.timestampService.updateNotesTimestamp(changedNotes)
+
+        if (changedNotes.length > 0) {
+          this.logger.info(
+            `检测到 ${changedNotes.length} 篇笔记的 README.md 有变更，更新时间戳...`,
+          )
+          await this.timestampService.updateNotesTimestamp(changedNotes)
+        }
       }
 
       // 3. 推送到远程仓库

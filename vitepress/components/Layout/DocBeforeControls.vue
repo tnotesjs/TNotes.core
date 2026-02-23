@@ -34,6 +34,20 @@
       </div>
     </div>
     <div :class="$style.rightArea">
+      <!-- 一键复制笔记内容按钮 -->
+      <div :class="$style.collapseAllBtn" v-show="currentNoteId">
+        <button
+          :class="$style.collapseAllButton"
+          @click="copyNoteContent"
+          title="复制笔记原始内容"
+          type="button"
+        >
+          <img :src="icon__clipboard" alt="copy note content" />
+        </button>
+      </div>
+      <Transition name="toast">
+        <div v-if="showCopyToast" :class="$style.toast">✓ 复制成功</div>
+      </Transition>
       <!-- 全局折叠/展开按钮 -->
       <div
         :class="$style.collapseAllBtn"
@@ -72,6 +86,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useData } from 'vitepress'
 import ToggleSidebar from './ToggleSidebar.vue'
 import ToggleFullContent from './ToggleFullContent.vue'
@@ -79,6 +94,7 @@ import ToggleFullContent from './ToggleFullContent.vue'
 import icon__github from '/icon__github.svg'
 import icon__vscode from '/icon__vscode.svg'
 import icon__fold from '/icon__fold.svg'
+import icon__clipboard from '/icon__clipboard.svg'
 
 const props = defineProps<{
   isFullContentMode: boolean
@@ -92,6 +108,24 @@ const props = defineProps<{
   timeModalOpen: boolean
   allCollapsed: boolean
 }>()
+
+const showCopyToast = ref(false)
+let copyToastTimer: ReturnType<typeof setTimeout> | null = null
+
+async function copyNoteContent() {
+  const raw = vpData.frontmatter.value.rawContent
+  if (!raw) return
+  try {
+    await navigator.clipboard.writeText(raw)
+    if (copyToastTimer) clearTimeout(copyToastTimer)
+    showCopyToast.value = true
+    copyToastTimer = setTimeout(() => {
+      showCopyToast.value = false
+    }, 2000)
+  } catch (e) {
+    console.error('复制失败', e)
+  }
+}
 
 const emit = defineEmits<{
   (e: 'open-time-modal'): void

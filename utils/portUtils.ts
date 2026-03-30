@@ -11,12 +11,12 @@ import { logger } from './logger'
  */
 export function isPortInUse(port: number): boolean {
   try {
-    // Windows 系统使用 netstat 命令
+    // Windows 系统使用 netstat 命令，只检测 LISTENING 状态（忽略 TIME_WAIT）
     if (process.platform === 'win32') {
-      const output = execSync(`netstat -ano | findstr :${port}`, {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-      })
+      const output = execSync(
+        `netstat -ano | findstr :${port} | findstr LISTENING`,
+        { encoding: 'utf-8', stdio: 'pipe' },
+      )
       return output.trim().length > 0
     }
     // Unix-like 系统使用 lsof 命令

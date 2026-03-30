@@ -20,7 +20,7 @@ export class DevCommand extends BaseCommand {
     const pid = await this.vitepressService.startServer()
 
     if (pid) {
-      this.logger.success(`笔记服务已启动 - PID: ${pid}`)
+      this.logger.success(`笔记服务已启动，进程 ID 为: ${pid}`)
 
       await serviceManager.initialize()
     } else {

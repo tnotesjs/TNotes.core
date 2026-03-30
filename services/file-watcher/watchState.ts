@@ -40,6 +40,8 @@ export class WatchState {
     try {
       if (!existsSync(filePath)) return null
       const content = readFileSync(filePath, 'utf-8')
+      // 跳过空内容（可能是其他进程写入时的 truncate 中间状态）
+      if (content.length === 0) return null
       return createHash('md5').update(content).digest('hex')
     } catch {
       return null

@@ -283,6 +283,10 @@ export class NoteService {
   async fixNoteTitle(noteInfo: NoteInfo): Promise<boolean> {
     try {
       const readmeContent = readFileSync(noteInfo.readmePath, 'utf-8')
+
+      // 跳过空内容（可能是其他进程写入时的 truncate 中间状态）
+      if (readmeContent.length === 0) return false
+
       const lines = readmeContent.split('\n')
 
       // 提取目录名中的标题（去掉编号）

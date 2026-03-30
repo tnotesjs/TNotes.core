@@ -39,6 +39,10 @@ export class ReadmeGenerator {
     }
 
     const content = readFileSync(noteInfo.readmePath, 'utf-8')
+
+    // 跳过空内容（可能是其他进程写入时的 truncate 中间状态）
+    if (content.length === 0) return
+
     const lines = content.split(EOL)
 
     const repoName = this.configManager.get('repoName')

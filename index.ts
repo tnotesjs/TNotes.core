@@ -39,9 +39,7 @@ import type {
       const logger = createLogger('command-not-found', {
         timestamp: false,
       })
-      console.log(
-        `\n------------------------------------------------------------------\n`,
-      )
+      console.log(`\n${'-'.repeat(66)}\n`)
       if (commandName) {
         logger.warn(`未找到命令：${commandName}`)
         logger.info(`请检查命令名是否正确！`)
@@ -51,9 +49,7 @@ import type {
         logger.info(`pnpm tn:<命令名>`)
         logger.info(`npx tsx ./.vitepress/tnotes/index.ts --<命令名>`)
       }
-      console.log(
-        `\n------------------------------------------------------------------\n`,
-      )
+      console.log(`\n${'-'.repeat(66)}\n`)
 
       const helpCommand = getCommand(COMMAND_NAMES.HELP)
       if (helpCommand) {

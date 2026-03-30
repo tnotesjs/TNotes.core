@@ -21,18 +21,6 @@ export interface NoteConfig {
 }
 
 /**
- * 笔记数量统计结果
- */
-export interface NoteCountResult {
-  /** 去重前的笔记目录总数 */
-  total: number
-  /** 去重后的笔记数量（唯一编号数量） */
-  unique: number
-  /** 存在编号冲突的笔记列表 */
-  conflicts: Array<{ index: string; dirNames: string[] }>
-}
-
-/**
  * 笔记信息
  */
 export interface NoteInfo {

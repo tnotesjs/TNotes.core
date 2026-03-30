@@ -4,17 +4,11 @@
  * 笔记管理器 - 负责笔记的扫描、验证和基本操作
  */
 
-import {
-  existsSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from 'fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { NoteInfo, NoteConfig } from '../types'
 import { NOTES_PATH } from '../config/constants'
-import { logger, extractNoteIndex } from '../utils'
+import { logger } from '../utils'
 
 /**
  * 笔记管理器类（单例）
@@ -22,13 +16,89 @@ import { logger, extractNoteIndex } from '../utils'
 export class NoteManager {
   private static instance: NoteManager
 
+  /** 笔记索引正则：4 位数字开头，后接小数点 */
+  private static readonly NOTE_INDEX_REGEX = /^(\d{4})\./
+
   private constructor() {}
+
+  /**
+   * 从文件夹名称或文本中提取笔记索引
+   *
+   * @param text - 要解析的文本（通常是文件夹名称）
+   * @returns 笔记索引（4 位数字字符串）或 null
+   *
+   * @example
+   * NoteManager.extractNoteIndex('0001. TNotes 简介') // '0001'
+   * NoteManager.extractNoteIndex('invalid-folder')     // null
+   */
+  static extractNoteIndex(text: string): string | null {
+    const match = text.match(NoteManager.NOTE_INDEX_REGEX)
+    return match ? match[1] : null
+  }
+
+  /**
+   * 输出无效笔记名称的警告日志
+   *
+   * @param name - 无效的笔记名称
+   */
+  static warnInvalidNoteIndex(name: string): void {
+    logger.warn(`无效的笔记名: ${name}`)
+    logger.warn('笔记名必须以 4 个数字开头')
+    logger.warn('范围：0001-9999')
+  }
 
   static getInstance(): NoteManager {
     if (!NoteManager.instance) {
       NoteManager.instance = new NoteManager()
     }
     return NoteManager.instance
+  }
+
+  /**
+   * 获取 notes 目录下所有合法的笔记目录名（已排序）
+   * 合法条件：是目录、不以 . 开头、以 4 位数字 + . 开头
+   */
+  private getNoteDirs(): string[] {
+    if (!existsSync(NOTES_PATH)) return []
+
+    return readdirSync(NOTES_PATH, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() &&
+          !entry.name.startsWith('.') &&
+          /^\d{4}\./.test(entry.name),
+      )
+      .map((entry) => entry.name)
+      .sort()
+  }
+
+  /**
+   * 根据目录名构建单条 NoteInfo
+   * @returns NoteInfo 或 undefined（README 不存在时）
+   */
+  private buildNoteInfo(dirName: string): NoteInfo | undefined {
+    const notePath = join(NOTES_PATH, dirName)
+    const readmePath = join(notePath, 'README.md')
+    const configPath = join(notePath, '.tnotes.json')
+
+    if (!existsSync(readmePath)) {
+      logger.warn(`README not found in note: ${dirName}`)
+      return undefined
+    }
+
+    let config: NoteConfig | undefined
+    if (existsSync(configPath)) {
+      config = this.validateAndFixConfig(configPath) || undefined
+    }
+
+    return {
+      index: this.getNoteIndexFromDir(dirName),
+      path: notePath,
+      dirName,
+      readmePath,
+      configPath,
+      config,
+    }
   }
 
   /**
@@ -40,54 +110,16 @@ export class NoteManager {
    * @returns 笔记信息数组
    */
   scanNotes(): NoteInfo[] {
-    const notes: NoteInfo[] = []
-
-    if (!existsSync(NOTES_PATH)) {
+    const noteDirs = this.getNoteDirs()
+    if (noteDirs.length === 0) {
       logger.warn(`Notes directory not found: ${NOTES_PATH}`)
-      return notes
+      return []
     }
 
-    const noteDirs = readdirSync(NOTES_PATH)
-      .filter((dir) => {
-        const fullPath = join(NOTES_PATH, dir)
-        return (
-          statSync(fullPath).isDirectory() &&
-          !dir.startsWith('.') &&
-          /^\d{4}\./.test(dir)
-        )
-      })
-      .sort()
-
+    const notes: NoteInfo[] = []
     for (const dirName of noteDirs) {
-      const notePath = join(NOTES_PATH, dirName)
-      const readmePath = join(notePath, 'README.md')
-      const configPath = join(notePath, '.tnotes.json')
-
-      if (!existsSync(readmePath)) {
-        logger.warn(`README not found in note: ${dirName}`)
-        continue
-      }
-
-      let config: NoteConfig | undefined
-      if (existsSync(configPath)) {
-        try {
-          config = this.validateAndFixConfig(configPath) || undefined
-        } catch {
-          // validateAndFixConfig 内部已输出错误信息，此处静默处理
-          // config id 缺失等问题由 validateNotes() 统一报告
-        }
-      }
-
-      const id = this.getNoteIndexFromDir(dirName)
-
-      notes.push({
-        index: id,
-        path: notePath,
-        dirName,
-        readmePath,
-        configPath,
-        config,
-      })
+      const note = this.buildNoteInfo(dirName)
+      if (note) notes.push(note)
     }
 
     this.validateNotes(notes)
@@ -171,7 +203,7 @@ export class NoteManager {
    * @returns 笔记索引
    */
   private getNoteIndexFromDir(dirName: string): string {
-    return extractNoteIndex(dirName) || dirName
+    return NoteManager.extractNoteIndex(dirName) || dirName
   }
 
   /** 配置字段顺序 */
@@ -207,74 +239,65 @@ export class NoteManager {
    * @returns 修复后的配置对象，失败时返回 null
    */
   private validateAndFixConfig(configPath: string): NoteConfig | null {
+    const configContent = readFileSync(configPath, 'utf-8')
+    let config: Partial<NoteConfig>
+
     try {
-      const configContent = readFileSync(configPath, 'utf-8')
-      let config: Partial<NoteConfig>
-
-      try {
-        config = JSON.parse(configContent)
-      } catch (error) {
-        logger.error(`配置文件 JSON 解析失败: ${configPath}`, error)
-        return null
-      }
-
-      let needsUpdate = false
-
-      // 1. 检查必需字段
-      for (const field of NoteManager.REQUIRED_FIELDS) {
-        if (!config[field]) {
-          logger.error(
-            `配置文件缺少必需字段 "${field}": ${configPath}\n` +
-              `请手动添加该字段或删除配置文件后重新生成`,
-          )
-          throw new Error(`Missing required field: ${field}`)
-        }
-      }
-
-      // 2. 补充缺失的可选字段
-      for (const [key, defaultValue] of Object.entries(
-        NoteManager.DEFAULT_CONFIG_FIELDS,
-      )) {
-        if (!(key in config)) {
-          ;(config as Record<string, unknown>)[key] = defaultValue
-          needsUpdate = true
-          logger.info(`补充缺失字段 "${key}": ${configPath}`)
-        }
-      }
-
-      // 3. 确保时间戳字段存在
-      // 这里仅用 Date.now() 占位，确保字段不缺失。
-      // 真实的 git 时间戳由 tn:fix-timestamps 命令统一校准。
-      const now = Date.now()
-      if (!config.created_at) {
-        config.created_at = now
-        needsUpdate = true
-        logger.info(
-          `检测到 ${configPath} 缺失  created_at 字段，请执行 tn:fix-timestamps 校准为笔记首次 git commit 的时间）`,
-        )
-      }
-      if (!config.updated_at) {
-        config.updated_at = now
-        needsUpdate = true
-        logger.info(
-          `检测到 ${configPath} 缺失  updated_at 字段，请执行 tn:fix-timestamps 校准为笔记最后一次 git commit 的时间）`,
-        )
-      }
-
-      // 4. 按字段顺序排序
-      const sortedConfig = this.sortConfigKeys(config as NoteConfig)
-
-      // 5. 写回文件（如果有变更）
-      if (needsUpdate) {
-        this.writeNoteConfig(configPath, sortedConfig)
-        logger.info(`配置文件已修复: ${configPath}`)
-      }
-
-      return sortedConfig
+      config = JSON.parse(configContent)
     } catch (error) {
-      logger.error(`配置文件验证失败: ${configPath}`, error)
+      logger.error(`配置文件 JSON 解析失败: ${configPath}`, error)
       return null
     }
+
+    let needsUpdate = false
+
+    // 1. 检查必需字段 —— 缺失时直接返回 null，由 validateNotes() 统一报告
+    for (const field of NoteManager.REQUIRED_FIELDS) {
+      if (!config[field]) {
+        return null
+      }
+    }
+
+    // 2. 补充缺失的可选字段
+    for (const [key, defaultValue] of Object.entries(
+      NoteManager.DEFAULT_CONFIG_FIELDS,
+    )) {
+      if (!(key in config)) {
+        ;(config as Record<string, unknown>)[key] = defaultValue
+        needsUpdate = true
+        logger.info(`补充缺失字段 "${key}": ${configPath}`)
+      }
+    }
+
+    // 3. 确保时间戳字段存在
+    // 这里仅用 Date.now() 占位，确保字段不缺失。
+    // 真实的 git 时间戳由 tn:fix-timestamps 命令统一校准。
+    const now = Date.now()
+    if (!config.created_at) {
+      config.created_at = now
+      needsUpdate = true
+      logger.info(
+        `检测到 ${configPath} 缺失  created_at 字段，请执行 tn:fix-timestamps 校准为笔记首次 git commit 的时间）`,
+      )
+    }
+    if (!config.updated_at) {
+      config.updated_at = now
+      needsUpdate = true
+      logger.info(
+        `检测到 ${configPath} 缺失  updated_at 字段，请执行 tn:fix-timestamps 校准为笔记最后一次 git commit 的时间）`,
+      )
+    }
+
+    // 4. 按字段顺序排序
+    const sortedConfig = this.sortConfigKeys(config as NoteConfig)
+
+    // 5. 写回文件（如果有变更）
+    if (needsUpdate) {
+      this.writeNoteConfig(configPath, sortedConfig)
+      logger.info(`配置文件已修复: ${configPath}`)
+    }
+
+    return sortedConfig
   }
 
   /**
@@ -303,7 +326,7 @@ export class NoteManager {
    * 序列化 NoteConfig 为格式化的 JSON 字符串
    * 保持字段顺序，使用 2 空格缩进，末尾含换行符
    */
-  serializeNoteConfig(config: NoteConfig): string {
+  private serializeNoteConfig(config: NoteConfig): string {
     const sorted = this.sortConfigKeys(config)
     return JSON.stringify(sorted, null, 2) + '\n'
   }
@@ -318,11 +341,11 @@ export class NoteManager {
   }
 
   /**
-   * 验证笔记配置
+   * 验证笔记配置对象的结构合法性
    * @param config - 笔记配置
    * @returns 是否有效
    */
-  validateConfig(config: NoteConfig): boolean {
+  private validateConfig(config: NoteConfig): boolean {
     if (!config.id) {
       logger.error('Note config missing id')
       return false
@@ -372,63 +395,16 @@ export class NoteManager {
   }
 
   /**
-   * 获取笔记信息（通过索引）- 优化版本，直接查找不扫描所有笔记
+   * 获取笔记信息（通过索引）- 直接查找不扫描所有笔记
    * @param noteIndex - 笔记索引
    * @returns 笔记信息，未找到时返回 undefined
    */
   getNoteByIndex(noteIndex: string): NoteInfo | undefined {
-    if (!existsSync(NOTES_PATH)) {
-      return undefined
-    }
-
-    // 直接遍历目录查找匹配的笔记，而不是扫描所有笔记
-    const noteDirs = readdirSync(NOTES_PATH)
+    const noteDirs = this.getNoteDirs()
 
     for (const dirName of noteDirs) {
-      const fullPath = join(NOTES_PATH, dirName)
-
-      // 跳过非目录、隐藏目录、不符合笔记命名规范的目录
-      if (
-        !statSync(fullPath).isDirectory() ||
-        dirName.startsWith('.') ||
-        !/^\d{4}\./.test(dirName)
-      ) {
-        continue
-      }
-
-      // 提取笔记索引
-      const id = this.getNoteIndexFromDir(dirName)
-
-      // 找到匹配的笔记
-      if (id === noteIndex) {
-        const notePath = fullPath
-        const readmePath = join(notePath, 'README.md')
-        const configPath = join(notePath, '.tnotes.json')
-
-        if (!existsSync(readmePath)) {
-          return undefined
-        }
-
-        let config: NoteConfig | undefined
-        if (existsSync(configPath)) {
-          try {
-            config = this.validateAndFixConfig(configPath) || undefined
-          } catch (error) {
-            logger.error(
-              `Failed to validate config for note: ${dirName}`,
-              error,
-            )
-          }
-        }
-
-        return {
-          index: id,
-          path: notePath,
-          dirName,
-          readmePath,
-          configPath,
-          config,
-        }
+      if (this.getNoteIndexFromDir(dirName) === noteIndex) {
+        return this.buildNoteInfo(dirName)
       }
     }
 

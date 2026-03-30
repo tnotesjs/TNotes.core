@@ -9,7 +9,7 @@ import { watch } from 'fs'
 import { basename, dirname, join, sep } from 'path'
 import type { WatchEvent, WatchEventType } from './internal'
 import { WATCH_EVENT_TYPES } from './internal'
-import { extractNoteIndex, warnInvalidNoteIndex } from '../../utils'
+import { NoteManager } from '../../core/NoteManager'
 
 import type { Logger } from '../../utils'
 
@@ -107,9 +107,9 @@ export class FsWatcherAdapter {
     filename: string,
   ): WatchEvent | null {
     const noteDirName = basename(dirname(fullPath))
-    const noteIndex = extractNoteIndex(noteDirName)
+    const noteIndex = NoteManager.extractNoteIndex(noteDirName)
     if (!noteIndex) {
-      warnInvalidNoteIndex(noteDirName)
+      NoteManager.warnInvalidNoteIndex(noteDirName)
       return null
     }
 

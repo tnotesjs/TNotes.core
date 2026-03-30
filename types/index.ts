@@ -8,4 +8,4 @@
 export type { TNotesConfig } from './config'
 
 // 笔记相关类型
-export type { NoteConfig, NoteCountResult, NoteInfo } from './note'
+export type { NoteConfig, NoteInfo } from './note'

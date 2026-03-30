@@ -6,7 +6,7 @@
 
 import { existsSync } from 'fs'
 import { join } from 'path'
-import { extractNoteIndex } from '../../utils'
+import { NoteManager } from '../../core/NoteManager'
 import type { Logger } from '../../utils'
 
 const FOLDER_RENAME_DETECT_WINDOW_MS = 500
@@ -53,7 +53,7 @@ export class RenameDetector {
 
     const folderPath = join(notesDir, folderName)
     const folderExists = existsSync(folderPath)
-    const noteIndex = extractNoteIndex(folderName)
+    const noteIndex = NoteManager.extractNoteIndex(folderName)
     if (!noteIndex) {
       logger.warn(`无法从文件夹名称提取笔记索引: ${folderName}`)
       return
@@ -86,7 +86,7 @@ export class RenameDetector {
           FOLDER_RENAME_DETECT_WINDOW_MS
       ) {
         const oldName = this.pendingFolderRename.oldName
-        const oldNoteIndex = extractNoteIndex(oldName)
+        const oldNoteIndex = NoteManager.extractNoteIndex(oldName)
         if (oldNoteIndex && oldNoteIndex === noteIndex) {
           logger.info(`检测到文件夹重命名: ${oldName} → ${folderName}`)
           if (this.folderRenameTimer) {

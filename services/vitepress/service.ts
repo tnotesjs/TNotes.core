@@ -9,33 +9,6 @@ import { ConfigManager } from '../../config/ConfigManager'
 import { logger, isPortInUse, killPortProcess, waitForPort } from '../../utils'
 import { ROOT_DIR_PATH } from '../../config/constants'
 
-/** VitePress 开发服务器默认端口 */
-const VITEPRESS_DEV_PORT = 5173
-
-/** VitePress 预览服务器默认端口 */
-const VITEPRESS_PREVIEW_PORT = 4173
-
-/** 开发服务器进程 ID 后缀 */
-const PROCESS_ID_DEV_SUFFIX = 'vitepress-dev'
-
-/** 预览服务器进程 ID 后缀 */
-const PROCESS_ID_PREVIEW_SUFFIX = 'vitepress-preview'
-
-/** 服务启动超时时间（毫秒） */
-const SERVER_STARTUP_TIMEOUT = 60000
-
-/** 端口释放等待超时时间（毫秒） */
-const PORT_RELEASE_TIMEOUT = 3000
-
-/** 进程清理等待时间（毫秒） */
-const PROCESS_CLEANUP_DELAY = 3000
-
-/** 显示启动服务状态行间隔（毫秒） */
-const SERVER_STATUS_LINE_INTERVAL = 1000
-
-/** 默认包管理器 */
-const DEFAULT_PACKAGE_MANAGER = 'pnpm'
-
 /** VitePress 服务启动结果 */
 export interface VitepressStartResult {
   pid: number
@@ -45,6 +18,33 @@ export interface VitepressStartResult {
 }
 
 export class VitepressService {
+  /** VitePress 开发服务器默认端口 */
+  static readonly DEFAULT_DEV_PORT = 5173
+
+  /** VitePress 预览服务器默认端口 */
+  static readonly DEFAULT_PREVIEW_PORT = 4173
+
+  /** 开发服务器进程 ID 后缀 */
+  private static readonly PROCESS_ID_DEV_SUFFIX = 'vitepress-dev'
+
+  /** 预览服务器进程 ID 后缀 */
+  private static readonly PROCESS_ID_PREVIEW_SUFFIX = 'vitepress-preview'
+
+  /** 服务启动超时时间（毫秒） */
+  private static readonly SERVER_STARTUP_TIMEOUT = 60000
+
+  /** 端口释放等待超时时间（毫秒） */
+  private static readonly PORT_RELEASE_TIMEOUT = 3000
+
+  /** 进程清理等待时间（毫秒） */
+  private static readonly PROCESS_CLEANUP_DELAY = 3000
+
+  /** 显示启动服务状态行间隔（毫秒） */
+  private static readonly SERVER_STATUS_LINE_INTERVAL = 1000
+
+  /** 默认包管理器 */
+  private static readonly DEFAULT_PACKAGE_MANAGER = 'pnpm'
+
   private processManager: ProcessManager
   private configManager: ConfigManager
 
@@ -58,9 +58,10 @@ export class VitepressService {
    * @returns 启动结果（服务就绪后返回），失败时返回 undefined
    */
   async startServer(): Promise<VitepressStartResult | undefined> {
-    const port = this.configManager.get('port') || VITEPRESS_DEV_PORT
+    const port =
+      this.configManager.get('port') || VitepressService.DEFAULT_DEV_PORT
     const repoName = this.configManager.get('repoName')
-    const processId = `${repoName}-${PROCESS_ID_DEV_SUFFIX}`
+    const processId = `${repoName}-${VitepressService.PROCESS_ID_DEV_SUFFIX}`
 
     // 检查内存中的进程管理器（清理残留）
     if (
@@ -68,14 +69,19 @@ export class VitepressService {
       this.processManager.isRunning(processId)
     ) {
       this.processManager.kill(processId)
-      await new Promise((resolve) => setTimeout(resolve, PROCESS_CLEANUP_DELAY))
+      await new Promise((resolve) =>
+        setTimeout(resolve, VitepressService.PROCESS_CLEANUP_DELAY),
+      )
     }
 
     // 检查目标端口是否被占用，如果是则强制清理
     if (isPortInUse(port)) {
       logger.warn(`端口 ${port} 被占用，正在清理...`)
       killPortProcess(port)
-      const available = await waitForPort(port, PORT_RELEASE_TIMEOUT)
+      const available = await waitForPort(
+        port,
+        VitepressService.PORT_RELEASE_TIMEOUT,
+      )
 
       if (available) {
         logger.info(`端口 ${port} 已释放，继续启动服务`)
@@ -88,7 +94,8 @@ export class VitepressService {
 
     // 启动 VitePress 开发服务器
     const pm =
-      this.configManager.get('packageManager') || DEFAULT_PACKAGE_MANAGER
+      this.configManager.get('packageManager') ||
+      VitepressService.DEFAULT_PACKAGE_MANAGER
     const args = ['vitepress', 'dev', '--port', port.toString()]
 
     const processInfo = this.processManager.spawn(processId, pm, args, {
@@ -133,7 +140,7 @@ export class VitepressService {
         process.stderr.clearLine?.(0)
         process.stderr.cursorTo?.(0)
         process.stderr.write(`⏳ 启动中: 已用 ${seconds}s...`)
-      }, SERVER_STATUS_LINE_INTERVAL)
+      }, VitepressService.SERVER_STATUS_LINE_INTERVAL)
 
       // 处理输出
       const handleOutput = (data: string) => {
@@ -199,9 +206,9 @@ export class VitepressService {
           process.stderr.clearLine?.(0)
           process.stderr.cursorTo?.(0)
           logger.warn('启动超时，请检查 VitePress 输出')
-          resolve({ version, elapsed: SERVER_STARTUP_TIMEOUT })
+          resolve({ version, elapsed: VitepressService.SERVER_STARTUP_TIMEOUT })
         }
-      }, SERVER_STARTUP_TIMEOUT)
+      }, VitepressService.SERVER_STARTUP_TIMEOUT)
     })
   }
 
@@ -226,7 +233,8 @@ export class VitepressService {
   private runBuildWithProgress(): Promise<void> {
     return new Promise((resolve, reject) => {
       const pm =
-        this.configManager.get('packageManager') || DEFAULT_PACKAGE_MANAGER
+        this.configManager.get('packageManager') ||
+        VitepressService.DEFAULT_PACKAGE_MANAGER
       const child = spawn(pm, ['vitepress', 'build'], {
         cwd: ROOT_DIR_PATH,
         shell: true,
@@ -292,11 +300,12 @@ export class VitepressService {
    */
   async preview(): Promise<number | undefined> {
     const repoName = this.configManager.get('repoName')
-    const processId = `${repoName}-${PROCESS_ID_PREVIEW_SUFFIX}`
+    const processId = `${repoName}-${VitepressService.PROCESS_ID_PREVIEW_SUFFIX}`
     const pm =
-      this.configManager.get('packageManager') || DEFAULT_PACKAGE_MANAGER
+      this.configManager.get('packageManager') ||
+      VitepressService.DEFAULT_PACKAGE_MANAGER
     const args = ['vitepress', 'preview']
-    const previewPort = VITEPRESS_PREVIEW_PORT
+    const previewPort = VitepressService.DEFAULT_PREVIEW_PORT
 
     // 检查端口是否被占用
     if (isPortInUse(previewPort)) {
@@ -305,7 +314,10 @@ export class VitepressService {
 
       if (killed) {
         // 等待端口释放
-        const available = await waitForPort(previewPort, PORT_RELEASE_TIMEOUT)
+        const available = await waitForPort(
+          previewPort,
+          VitepressService.PORT_RELEASE_TIMEOUT,
+        )
         if (!available) {
           logger.error(`端口 ${previewPort} 释放超时，请手动清理`)
           return undefined

@@ -10,6 +10,7 @@ import { VitepressService, FileWatcherService } from '../../services'
 import { ConfigManager } from '../../config/ConfigManager'
 
 export class DevCommand extends BaseCommand {
+  private fileWatcherService: FileWatcherService
   private vitepressService: VitepressService
   private noteManager: NoteManager
   private noteIndexCache: NoteIndexCache
@@ -17,6 +18,7 @@ export class DevCommand extends BaseCommand {
 
   constructor() {
     super('dev')
+    this.fileWatcherService = new FileWatcherService()
     this.vitepressService = new VitepressService()
     this.noteManager = NoteManager.getInstance()
     this.noteIndexCache = NoteIndexCache.getInstance()
@@ -42,12 +44,13 @@ export class DevCommand extends BaseCommand {
 
       // 4. 启动文件监听服务
       const watcherStart = Date.now()
-      new FileWatcherService().start()
+      this.fileWatcherService.start()
       const watcherElapsed = Date.now() - watcherStart
       this.logger.success(`文件监听服务已就绪，耗时：${watcherElapsed} ms`)
 
       // 5. 显示本地开发服务地址
-      const port = this.configManager.get('port') || 5173
+      const port =
+        this.configManager.get('port') || VitepressService.DEFAULT_DEV_PORT
       const repoName = this.configManager.get('repoName')
       this.logger.info(
         `本地开发服务地址：http://localhost:${port}/${repoName}/`,

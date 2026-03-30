@@ -84,7 +84,7 @@ export class Logger {
    */
   info(message: string, ...args: any[]): void {
     if (this.level <= LogLevel.INFO) {
-      console.log(`ℹ️  ${this.formatMessage(message)}`, ...args)
+      console.log(`ℹ️ ${this.formatMessage(message)}`, ...args)
     }
   }
 

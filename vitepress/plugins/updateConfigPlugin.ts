@@ -5,30 +5,14 @@
  */
 import type { PluginOption } from 'vite'
 import { UpdateNoteConfigCommand } from '../../commands/note/UpdateNoteConfigCommand'
-import { serviceManager } from '../../services'
-import { logger } from '../../utils'
 
 export function updateConfigPlugin(): PluginOption {
   let updateCommand: UpdateNoteConfigCommand
-  let isInitialized = false
 
   return {
     name: 'tnotes-update-config',
 
-    async configureServer(server) {
-      // 初始化 ServiceManager（包含笔记索引缓存）
-      if (!isInitialized) {
-        try {
-          await serviceManager.initialize()
-          isInitialized = true
-        } catch (error) {
-          logger.error('updateConfigPlugin: 服务初始化失败，插件将无法正常工作')
-          logger.error(error)
-          // 不中断服务器启动，但记录错误
-        }
-      }
-
-      // 初始化命令实例
+    configureServer(server) {
       updateCommand = new UpdateNoteConfigCommand()
 
       // 添加中间件处理配置更新请求

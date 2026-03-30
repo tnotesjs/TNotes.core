@@ -18,14 +18,13 @@ interface ProcessInfo {
 }
 
 /**
- * 进程管理器类（单例）
+ * 进程管理器类
  */
 export class ProcessManager {
-  private static instance: ProcessManager | null = null
   private processes: Map<string, ProcessInfo> = new Map()
   private logger: Logger
 
-  private constructor() {
+  constructor() {
     this.logger = new Logger({ prefix: 'process' })
 
     // 清理进程在程序退出时
@@ -42,16 +41,6 @@ export class ProcessManager {
       this.killAll()
       process.exit(0)
     })
-  }
-
-  /**
-   * 获取单例实例
-   */
-  static getInstance(): ProcessManager {
-    if (!ProcessManager.instance) {
-      ProcessManager.instance = new ProcessManager()
-    }
-    return ProcessManager.instance
   }
 
   /**

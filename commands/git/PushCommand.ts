@@ -4,7 +4,7 @@
  * Git Push 命令 - 使用 GitService 和 TimestampService
  */
 import { BaseCommand } from '../BaseCommand'
-import { GitService, TimestampService, serviceManager } from '../../services'
+import { GitService, TimestampService } from '../../services'
 import { pushAllRepos } from '../../utils'
 
 export class PushCommand extends BaseCommand {
@@ -43,13 +43,6 @@ export class PushCommand extends BaseCommand {
     }
 
     // 单仓库推送逻辑
-    // 0. 暂停文件监听（如果正在运行）
-    const isWatcherActive = serviceManager.isFileWatcherActive()
-    if (isWatcherActive) {
-      const fileWatcherService = serviceManager.getFileWatcherService()
-      fileWatcherService.pause()
-    }
-
     try {
       // 1. 检查是否有更改或已有未推送的提交
       this.logger.info('检查是否有更改...')
@@ -93,12 +86,9 @@ export class PushCommand extends BaseCommand {
       await this.gitService.quickPush({ force, skipCheck: true })
 
       this.logger.success('推送完成')
-    } finally {
-      // 恢复文件监听
-      if (isWatcherActive) {
-        const fileWatcherService = serviceManager.getFileWatcherService()
-        fileWatcherService.resume()
-      }
+    } catch (error) {
+      this.logger.error('推送失败:', error)
+      throw error
     }
   }
 }

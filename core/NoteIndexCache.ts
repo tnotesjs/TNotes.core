@@ -70,7 +70,6 @@ export class NoteIndexCache {
     }
 
     this._initialized = true
-    logger.info(`笔记索引初始化完成，共 ${notes.length} 篇笔记`)
   }
 
   /**

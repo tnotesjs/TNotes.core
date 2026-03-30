@@ -5,6 +5,7 @@
  */
 
 export { NoteManager } from './NoteManager'
+export { NoteIndexCache } from './NoteIndexCache'
 export { ReadmeGenerator } from './ReadmeGenerator'
 export { TocGenerator } from './TocGenerator'
 export { GitManager } from './GitManager'

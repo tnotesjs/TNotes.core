@@ -36,21 +36,28 @@ const SERVER_STATUS_LINE_INTERVAL = 1000
 /** 默认包管理器 */
 const DEFAULT_PACKAGE_MANAGER = 'pnpm'
 
+/** VitePress 服务启动结果 */
+export interface VitepressStartResult {
+  pid: number
+  version: string
+  /** 启动耗时（毫秒） */
+  elapsed: number
+}
+
 export class VitepressService {
   private processManager: ProcessManager
   private configManager: ConfigManager
 
   constructor() {
-    this.processManager = ProcessManager.getInstance()
+    this.processManager = new ProcessManager()
     this.configManager = ConfigManager.getInstance()
   }
 
   /**
    * 启动 VitePress 开发服务器
-   * @param noteCount - 笔记数量（用于启动状态显示）
-   * @returns 进程 ID（服务就绪后返回）
+   * @returns 启动结果（服务就绪后返回），失败时返回 undefined
    */
-  async startServer(noteCount: number): Promise<number | undefined> {
+  async startServer(): Promise<VitepressStartResult | undefined> {
     const port = this.configManager.get('port') || VITEPRESS_DEV_PORT
     const repoName = this.configManager.get('repoName')
     const processId = `${repoName}-${PROCESS_ID_DEV_SUFFIX}`
@@ -90,23 +97,28 @@ export class VitepressService {
     })
 
     // 等待服务就绪，显示启动状态
-    await this.waitForServerReady(processInfo.process, noteCount)
+    const serverInfo = await this.waitForServerReady(processInfo.process)
 
-    return processInfo.pid
+    if (!processInfo.pid) return undefined
+
+    return {
+      pid: processInfo.pid,
+      version: serverInfo.version,
+      elapsed: serverInfo.elapsed,
+    }
   }
 
   /**
    * 等待服务就绪，显示启动状态
    * @param childProcess - 子进程
-   * @param noteCount - 笔记数量
    */
   private waitForServerReady(
     childProcess: import('child_process').ChildProcess,
-    noteCount: number,
-  ): Promise<void> {
+  ): Promise<{ version: string; elapsed: number }> {
     return new Promise((resolve) => {
       const startTime = Date.now()
       let serverReady = false
+      let version = ''
 
       // 定时器：显示启动状态（真实的已用时间）
       const statusTimer = setInterval(() => {
@@ -120,14 +132,18 @@ export class VitepressService {
         // 使用 stderr 输出，避免与 VitePress 输出混在一起
         process.stderr.clearLine?.(0)
         process.stderr.cursorTo?.(0)
-        process.stderr.write(
-          `⏳ 启动中: 共 ${noteCount} 篇笔记，已用 ${seconds}s...`,
-        )
+        process.stderr.write(`⏳ 启动中: 已用 ${seconds}s...`)
       }, SERVER_STATUS_LINE_INTERVAL)
 
       // 处理输出
       const handleOutput = (data: string) => {
         const text = data.toString()
+
+        // 提取版本号
+        const versionMatch = text.match(/vitepress v([\d.]+)/)
+        if (versionMatch) {
+          version = versionMatch[1]
+        }
 
         // 检测服务就绪
         if (
@@ -139,27 +155,20 @@ export class VitepressService {
           serverReady = true
           clearInterval(statusTimer)
 
-          // 清除状态行，显示完成信息
+          // 清除状态行
           process.stderr.clearLine?.(0)
           process.stderr.cursorTo?.(0)
-          const elapsed = Date.now() - startTime
-          const seconds = (elapsed / 1000).toFixed(1)
-          console.log(
-            `✅ VitePress 服务已就绪 - 共 ${noteCount} 篇笔记，启动耗时 ${seconds}s\n`,
-          )
 
-          // 显示 VitePress 输出
-          process.stdout.write(data)
+          const elapsed = Date.now() - startTime
 
           // 延迟 resolve，让后续输出完成
-          setTimeout(resolve, 200)
+          setTimeout(() => resolve({ version, elapsed }), 200)
           return
         }
 
-        // 服务就绪前隐藏大部分输出，只显示关键信息
+        // 服务就绪前只显示错误信息
         if (!serverReady) {
           if (
-            text.includes('vitepress v') ||
             text.includes('error') ||
             text.includes('Error') ||
             (text.includes('Port') && text.includes('is in use'))
@@ -168,9 +177,6 @@ export class VitepressService {
             process.stderr.cursorTo?.(0)
             process.stdout.write(data)
           }
-        } else {
-          // 服务就绪后直接输出
-          process.stdout.write(data)
         }
       }
 
@@ -192,8 +198,8 @@ export class VitepressService {
           clearInterval(statusTimer)
           process.stderr.clearLine?.(0)
           process.stderr.cursorTo?.(0)
-          console.log('⚠️  启动超时，请检查 VitePress 输出')
-          resolve()
+          logger.warn('启动超时，请检查 VitePress 输出')
+          resolve({ version, elapsed: SERVER_STARTUP_TIMEOUT })
         }
       }, SERVER_STARTUP_TIMEOUT)
     })

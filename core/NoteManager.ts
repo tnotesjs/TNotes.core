@@ -66,7 +66,7 @@ export class NoteManager {
         (entry) =>
           entry.isDirectory() &&
           !entry.name.startsWith('.') &&
-          /^\d{4}\./.test(entry.name),
+          NoteManager.NOTE_INDEX_REGEX.test(entry.name),
       )
       .map((entry) => entry.name)
       .sort()
@@ -92,7 +92,7 @@ export class NoteManager {
     }
 
     return {
-      index: this.getNoteIndexFromDir(dirName),
+      index: NoteManager.extractNoteIndex(dirName)!,
       path: notePath,
       dirName,
       readmePath,
@@ -104,15 +104,12 @@ export class NoteManager {
   /**
    * 扫描所有笔记并校验数据完整性
    *
-   * 校验内容：noteIndex 冲突、config id 缺失、config id 重复
-   * 任一检查失败则终止进程
-   *
    * @returns 笔记信息数组
    */
   scanNotes(): NoteInfo[] {
     const noteDirs = this.getNoteDirs()
     if (noteDirs.length === 0) {
-      logger.warn(`Notes directory not found: ${NOTES_PATH}`)
+      logger.warn(`${NOTES_PATH} 未检测到笔记目录`)
       return []
     }
 
@@ -128,19 +125,23 @@ export class NoteManager {
   }
 
   /**
-   * 校验笔记数据完整性（noteIndex 冲突 + config id 缺失/重复）
-   * 任一检查失败则终止进程
+   * 校验笔记数据完整性
+   *
+   * - 检查 noteIndex 冲突 + config id 缺失/重复
+   * - 任一检查失败则终止进程
    */
   private validateNotes(notes: NoteInfo[]): void {
     const errors: string[] = []
+    const L1 = ' '.repeat(3)
+    const L2 = ' '.repeat(6)
 
     // 检查 noteIndex 冲突
     const indexMap = this.buildNoteIndexMap(notes.map((n) => n.dirName))
     for (const [index, dirNames] of indexMap.entries()) {
       if (dirNames.length > 1) {
         errors.push(`⚠️  检测到重复的笔记编号：`)
-        errors.push(`   编号 ${index} 被以下笔记重复使用：`)
-        dirNames.forEach((dirName) => errors.push(`      - ${dirName}`))
+        errors.push(`${L1}索引 ${index} 被以下笔记重复使用：`)
+        dirNames.forEach((dirName) => errors.push(`${L2}- ${dirName}`))
       }
     }
 
@@ -153,7 +154,7 @@ export class NoteManager {
     }
     if (missingConfigId.length > 0) {
       errors.push(`⚠️  检测到笔记配置 ID 缺失：`)
-      missingConfigId.forEach((dirName) => errors.push(`      - ${dirName}`))
+      missingConfigId.forEach((dirName) => errors.push(`${L2}- ${dirName}`))
     }
 
     // 检查 config id 重复
@@ -168,8 +169,8 @@ export class NoteManager {
     for (const [configId, dirNames] of configIdMap.entries()) {
       if (dirNames.length > 1) {
         errors.push(`⚠️  检测到重复的笔记配置 ID：`)
-        errors.push(`   配置 ID ${configId} 被以下笔记重复使用：`)
-        dirNames.forEach((dirName) => errors.push(`      - ${dirName}`))
+        errors.push(`${L1}配置 ID ${configId} 被以下笔记重复使用：`)
+        dirNames.forEach((dirName) => errors.push(`${L2}- ${dirName}`))
       }
     }
 
@@ -177,7 +178,7 @@ export class NoteManager {
       for (const line of errors) {
         logger.error(line)
       }
-      logger.error('\n请修复上述问题后重新启动服务。\n')
+      logger.error('\n\n请修复上述问题后重新启动服务。\n\n')
       process.exit(1)
     }
   }
@@ -190,20 +191,11 @@ export class NoteManager {
   private buildNoteIndexMap(dirNames: string[]): Map<string, string[]> {
     const indexMap = new Map<string, string[]>()
     for (const name of dirNames) {
-      const index = name.slice(0, 4)
+      const index = NoteManager.extractNoteIndex(name)!
       if (!indexMap.has(index)) indexMap.set(index, [])
       indexMap.get(index)!.push(name)
     }
     return indexMap
-  }
-
-  /**
-   * 从目录名提取笔记索引
-   * @param dirName - 目录名
-   * @returns 笔记索引
-   */
-  private getNoteIndexFromDir(dirName: string): string {
-    return NoteManager.extractNoteIndex(dirName) || dirName
   }
 
   /** 配置字段顺序 */
@@ -403,7 +395,7 @@ export class NoteManager {
     const noteDirs = this.getNoteDirs()
 
     for (const dirName of noteDirs) {
-      if (this.getNoteIndexFromDir(dirName) === noteIndex) {
+      if (NoteManager.extractNoteIndex(dirName) === noteIndex) {
         return this.buildNoteInfo(dirName)
       }
     }

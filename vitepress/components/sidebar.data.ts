@@ -41,7 +41,7 @@ export default {
         '/notes/': sidebarArray,
       }
 
-      console.log('✅ [sidebar.data.ts] Sidebar loaded,')
+      console.log('[sidebar.data.ts] Sidebar loaded,')
 
       return sidebarData
     } catch (error) {

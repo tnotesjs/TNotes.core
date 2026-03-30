@@ -4,7 +4,7 @@
  * VitePress 插件 - 根据 configId 查询笔记信息
  */
 import type { PluginOption } from 'vite'
-import { serviceManager } from '../../services'
+import { NoteIndexCache } from '../../core'
 import { logger } from '../../utils'
 
 export function getNoteByConfigIdPlugin(): PluginOption {
@@ -30,26 +30,26 @@ export function getNoteByConfigIdPlugin(): PluginOption {
                 JSON.stringify({
                   success: false,
                   error: 'Missing configId parameter',
-                })
+                }),
               )
               return
             }
 
-            // 确保 ServiceManager 已初始化
-            if (!serviceManager.isInitialized()) {
+            // 确保笔记索引缓存已初始化
+            const noteIndexCache = NoteIndexCache.getInstance()
+            if (!noteIndexCache.isInitialized()) {
               res.statusCode = 503
               res.setHeader('Content-Type', 'application/json')
               res.end(
                 JSON.stringify({
                   success: false,
                   error: 'Service not initialized',
-                })
+                }),
               )
               return
             }
 
             // 从索引缓存中查询笔记
-            const noteIndexCache = serviceManager.getNoteIndexCache()
             const noteItem = noteIndexCache.getByConfigId(configId)
 
             if (!noteItem) {
@@ -61,7 +61,7 @@ export function getNoteByConfigIdPlugin(): PluginOption {
                   success: true,
                   found: false,
                   data: null,
-                })
+                }),
               )
               return
             }
@@ -78,14 +78,14 @@ export function getNoteByConfigIdPlugin(): PluginOption {
                   folderName: noteItem.folderName,
                   // 构建笔记的完整 URL（包含 README）
                   url: `/notes/${encodeURIComponent(
-                    noteItem.folderName
+                    noteItem.folderName,
                   )}/README`,
                 },
-              })
+              }),
             )
 
             logger.debug(
-              `查询笔记: configId=${configId}, noteIndex=${noteItem.noteIndex}`
+              `查询笔记: configId=${configId}, noteIndex=${noteItem.noteIndex}`,
             )
           } catch (error) {
             logger.error('查询笔记失败:', error)
@@ -95,7 +95,7 @@ export function getNoteByConfigIdPlugin(): PluginOption {
               JSON.stringify({
                 success: false,
                 error: error instanceof Error ? error.message : String(error),
-              })
+              }),
             )
           }
         } else {

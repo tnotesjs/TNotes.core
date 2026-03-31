@@ -26,11 +26,7 @@ const COMMAND_CATEGORIES = {
     COMMAND_NAMES.CREATE_NOTES,
   ],
   'Git 操作': [COMMAND_NAMES.PUSH, COMMAND_NAMES.PULL, COMMAND_NAMES.SYNC],
-  其他: [
-    COMMAND_NAMES.SYNC_SCRIPTS,
-    COMMAND_NAMES.FIX_TIMESTAMPS,
-    COMMAND_NAMES.HELP,
-  ],
+  其他: [COMMAND_NAMES.FIX_TIMESTAMPS, COMMAND_NAMES.HELP],
 } as const
 
 /** 命令选项描述（用于帮助信息展示） */
@@ -38,10 +34,6 @@ const COMMAND_OPTIONS_INFO: Record<
   CommandOption,
   { description: string; applicableTo: string }
 > = {
-  [COMMAND_OPTIONS.ALL]: {
-    description: '批量操作所有知识库',
-    applicableTo: 'update/update-completed-count/push/pull/sync',
-  },
   [COMMAND_OPTIONS.QUIET]: {
     description: '静默模式',
     applicableTo: 'update',
@@ -88,14 +80,9 @@ export class HelpCommand extends BaseCommand {
     this.logger.info('  pnpm tn:build')
     this.logger.info('  pnpm tn:create-notes     # 批量创建笔记')
     this.logger.info('  pnpm tn:update')
-    this.logger.info('  pnpm tn:update --all     # 更新所有知识库')
     this.logger.info(
       '  pnpm tn:update-completed-count           # 生成当前知识库最近 12 个月的完成笔记数量统计',
     )
-    this.logger.info(
-      '  pnpm tn:update-completed-count --all     # 生成所有知识库最近 12 个月的完成笔记数量统计',
-    )
-    this.logger.info('  pnpm tn:push --all       # 推送所有知识库')
     this.logger.info('')
     this.logger.info('参数：')
     for (const [option, info] of Object.entries(COMMAND_OPTIONS_INFO)) {

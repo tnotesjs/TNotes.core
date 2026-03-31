@@ -18,7 +18,6 @@ export const COMMAND_NAMES = {
   PULL: 'pull',
   PUSH: 'push',
   RENAME_NOTE: 'rename-note',
-  SYNC_CORE: 'sync-core',
   SYNC: 'sync',
   UPDATE: 'update',
   UPDATE_COMPLETED_COUNT: 'update-completed-count',
@@ -41,11 +40,9 @@ export const COMMAND_DESCRIPTIONS: Record<CommandName, string> = {
   [COMMAND_NAMES.UPDATE_COMPLETED_COUNT]:
     '更新完成笔记数量历史记录（近 1 年，最近 12 个月）',
   [COMMAND_NAMES.CREATE_NOTES]: '新建笔记（支持批量创建）',
-  [COMMAND_NAMES.PUSH]: '将知识库推送到 GitHub (使用 --all 推送所有知识库)',
-  [COMMAND_NAMES.PULL]: '将 GitHub 的知识库拉下来 (使用 --all 拉取所有知识库)',
-  [COMMAND_NAMES.SYNC]:
-    '同步本地和远程的知识库状态 (使用 --all 同步所有知识库)',
-  [COMMAND_NAMES.SYNC_CORE]: '同步所有兄弟知识库的 tnotesjs/core 到最新版本',
+  [COMMAND_NAMES.PUSH]: '将知识库推送到 GitHub',
+  [COMMAND_NAMES.PULL]: '将 GitHub 的知识库拉下来',
+  [COMMAND_NAMES.SYNC]: '同步本地和远程的知识库状态',
   [COMMAND_NAMES.FIX_TIMESTAMPS]: '修复所有笔记的时间戳（基于 git 历史）',
   [COMMAND_NAMES.UPDATE_NOTE_CONFIG]: '更新笔记配置文件',
   [COMMAND_NAMES.RENAME_NOTE]: '重命名笔记',
@@ -56,7 +53,6 @@ export const COMMAND_DESCRIPTIONS: Record<CommandName, string> = {
  * 命令参数选项常量
  */
 export const COMMAND_OPTIONS = {
-  ALL: 'all',
   QUIET: 'quiet',
   FORCE: 'force',
 } as const
@@ -69,7 +65,6 @@ export type CommandOption =
  */
 export interface CommandOptions {
   force?: boolean
-  all?: boolean
   quiet?: boolean
   [key: string]: unknown
 }
@@ -80,7 +75,6 @@ export interface CommandOptions {
 export type CommandArgs = {
   [K in CommandName]?: boolean
 } & {
-  [COMMAND_OPTIONS.ALL]?: boolean
   [COMMAND_OPTIONS.QUIET]?: boolean
   [COMMAND_OPTIONS.FORCE]?: boolean
 }

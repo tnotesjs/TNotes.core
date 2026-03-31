@@ -25,14 +25,6 @@ export const {
 const rootPath = configManager.getRootPath()
 
 /**
- * TNotes.* 笔记仓库的基路径
- * @example `/Users/huyouda/zm/notes/` 【在此目录下存放其它 TNotes.* 笔记仓库】
- */
-export const TNOTES_BASE_DIR = resolve(rootPath, '..')
-export const TNOTES_CORE_DIR = resolve(TNOTES_BASE_DIR, 'TNotes.core')
-export const EN_WORDS_DIR = resolve(TNOTES_BASE_DIR, 'TNotes.en-words')
-
-/**
  * TNotes.* 当前的笔记仓库根路径
  * @example `/Users/huyouda/zm/notes/TNotes.template/`
  */

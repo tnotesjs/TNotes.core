@@ -3,20 +3,21 @@ import { defineConfig } from 'tsup'
 /**
  * tsup 构建配置
  *
- * 只编译 CLI 部分（Node.js 运行时）。
- * src/vitepress/ 目录以源码形式发布，由 VitePress/Vite 在宿主仓库中处理。
+ * CLI 和 VitePress Config 需要预编译为 JS（Node.js 运行时加载）。
+ * VitePress Theme 和组件以源码形式发布（由 Vite 在宿主仓库中处理）。
  */
 export default defineConfig({
   entry: {
     'cli/index': 'index.ts',
     index: 'src/index.ts',
+    'vitepress/config/index': 'vitepress/config/index.ts',
   },
   format: ['esm'],
   target: 'node18',
   platform: 'node',
   splitting: true,
   clean: true,
-  dts: true,
+  dts: false,
   outDir: 'dist',
   // 外部依赖不打包
   external: [
@@ -32,7 +33,13 @@ export default defineConfig({
   },
   esbuildOptions(options, context) {
     // 只给 CLI 入口加 shebang，其他入口不加
-    if (context.entryPoints?.toString().includes('src/index.ts')) {
+    const entryPoints = (context as Record<string, unknown>).entryPoints
+    const entryStr = entryPoints?.toString() ?? ''
+    if (
+      !entryStr.includes('index.ts') ||
+      entryStr.includes('src/index.ts') ||
+      entryStr.includes('vitepress/config')
+    ) {
       options.banner = { js: '' }
     }
   },

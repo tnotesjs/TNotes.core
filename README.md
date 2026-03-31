@@ -1,15 +1,15 @@
-# TNotes.core
+# tnotesjs/core
 
 TNotes 知识库系统的核心共享脚本，通过 Git Submodule 被所有 [TNotes.xxx](https://github.com/orgs/tnotesjs/repositories) 知识库引用。
 
 ## 简介
 
-TNotes.core 包含了 TNotes 知识库系统的 CLI 命令、VitePress 主题/插件、服务层、工具函数等核心代码。各 TNotes.xxx 仓库不再各自拷贝脚本，而是统一以 Git Submodule 的形式引用本仓库，挂载到 `.vitepress/tnotes/` 路径下。
+tnotesjs/core 包含了 TNotes 知识库系统的 CLI 命令、VitePress 主题/插件、服务层、工具函数等核心代码。各 TNotes.xxx 仓库不再各自拷贝脚本，而是统一以 Git Submodule 的形式引用本仓库，挂载到 `.vitepress/tnotes/` 路径下。
 
 ## 目录结构
 
 ```
-TNotes.core/
+tnotesjs/core/
 ├── commands/           # CLI 命令（dev、build、push、update 等）
 ├── config/             # 配置管理（ConfigManager、默认配置、模板）
 ├── core/               # 核心模块（GitManager、NoteManager、ReadmeGenerator 等）

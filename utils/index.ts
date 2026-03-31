@@ -9,7 +9,6 @@ export { deleteDirectory, ensureDirectory } from './file'
 export { generateAnchor } from './generateAnchor'
 export { genHierarchicalSidebar } from './genHierarchicalSidebar'
 export { getChangedIds } from './getChangedIds'
-export { getTargetDirs } from './getTargetDirs'
 export { LogLevel, Logger, logger, createLogger } from './logger'
 export { createAddNumberToTitle, generateToc } from './markdown'
 export { parseArgs } from './parseArgs'
@@ -22,5 +21,4 @@ export {
   processEmptyLines,
 } from './readmeHelpers'
 export { runCommand } from './runCommand'
-export { pushAllRepos, pullAllRepos, syncAllRepos } from './syncRepo'
 export { validateNoteTitle } from './validators'

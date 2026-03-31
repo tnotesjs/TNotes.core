@@ -5,28 +5,16 @@
  */
 import { BaseCommand } from '../BaseCommand'
 import { ReadmeService, NoteService } from '../../services'
-import {
-  logger,
-  LogLevel,
-  getTargetDirs,
-  runCommand,
-  parseReadmeCompletedNotes,
-} from '../../utils'
+import { logger, LogLevel, parseReadmeCompletedNotes } from '../../utils'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import {
-  ROOT_DIR_PATH,
-  TNOTES_BASE_DIR,
-  ROOT_CONFIG_PATH,
-  EN_WORDS_DIR,
-} from '../../config'
+import { ROOT_DIR_PATH, ROOT_CONFIG_PATH } from '../../config'
 import type { TNotesConfig } from '../../types'
 
 export class UpdateCommand extends BaseCommand {
   private readmeService: ReadmeService
   private noteService: NoteService
   private quiet: boolean = false
-  private updateAll: boolean = false
 
   constructor() {
     super('update')
@@ -48,19 +36,8 @@ export class UpdateCommand extends BaseCommand {
     }
   }
 
-  /**
-   * 设置是否更新所有知识库
-   */
-  setUpdateAll(updateAll: boolean): void {
-    this.updateAll = updateAll
-  }
-
   protected async run(): Promise<void> {
-    if (this.updateAll) {
-      await this.updateAllRepos()
-    } else {
-      await this.updateCurrentRepo()
-    }
+    await this.updateCurrentRepo()
   }
 
   /**
@@ -94,73 +71,6 @@ export class UpdateCommand extends BaseCommand {
       this.logger.success(`知识库更新完成 (${duration}ms)`)
     } else {
       this.logger.success('知识库更新完成')
-    }
-  }
-
-  /**
-   * 更新所有知识库
-   */
-  private async updateAllRepos(): Promise<void> {
-    try {
-      // 获取所有目标知识库
-      const targetDirs = getTargetDirs(TNOTES_BASE_DIR, 'TNotes.', [
-        ROOT_DIR_PATH,
-        EN_WORDS_DIR,
-      ])
-
-      if (targetDirs.length === 0) {
-        this.logger.warn('未找到符合条件的知识库')
-        return
-      }
-
-      this.logger.info(`正在更新 ${targetDirs.length} 个知识库...`)
-
-      // 依次更新每个知识库
-      let successCount = 0
-      let failCount = 0
-
-      for (let i = 0; i < targetDirs.length; i++) {
-        const dir = targetDirs[i]
-        const repoName = dir.split('/').pop() || dir
-
-        try {
-          process.stdout.write(
-            `\r  [${i + 1}/${targetDirs.length}] 正在更新: ${repoName}...`,
-          )
-
-          // 执行更新命令
-          await runCommand('pnpm tn:update --quiet', dir)
-          successCount++
-        } catch (error) {
-          failCount++
-          console.log() // 换行
-          this.logger.error(
-            `更新失败: ${repoName} - ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          )
-        }
-      }
-
-      console.log() // 换行
-
-      // 显示汇总
-      if (failCount === 0) {
-        this.logger.success(
-          `✅ 所有知识库更新完成: ${successCount}/${targetDirs.length}`,
-        )
-      } else {
-        this.logger.warn(
-          `⚠️  更新完成: ${successCount} 成功, ${failCount} 失败 (共 ${targetDirs.length} 个)`,
-        )
-      }
-    } catch (error) {
-      this.logger.error(
-        `批量更新失败: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      )
-      throw error
     }
   }
 

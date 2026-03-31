@@ -4,7 +4,6 @@
  * Git 仓库管理器 - 提供统一的 Git 操作接口
  */
 import { resolve } from 'path'
-import { existsSync } from 'fs'
 import { Logger, runCommand, createError, handleError } from '../utils'
 
 /**
@@ -293,9 +292,6 @@ export class GitManager {
       } else {
         this.logger.info('已是最新，没有需要拉取的更新')
       }
-
-      // 拉取后同步 submodule
-      await this.updateSubmodules()
     } catch (error) {
       this.logger.error('拉取失败')
       handleError(error)
@@ -391,21 +387,11 @@ export class GitManager {
     }
 
     try {
-      // 推送前处理 submodule
-      await this.pushSubmodules(commitMessage)
-
-      // 推送后 submodule 指针可能变化，需要重新获取状态
-      const latestStatus = await this.getStatus()
-      if (!latestStatus.hasChanges) {
-        this.logger.info('没有需要提交的更改')
-        return
-      }
-
       // 显示开始信息和文件列表
-      this.logger.info(`正在推送 ${latestStatus.changedFiles} 个文件...`)
+      this.logger.info(`正在推送 ${status.changedFiles} 个文件...`)
 
       // 显示文件列表
-      latestStatus.files.forEach((file, index) => {
+      status.files.forEach((file, index) => {
         console.log(`  ${index + 1}. ${file.path}`)
       })
 
@@ -414,7 +400,7 @@ export class GitManager {
 
       // 生成提交信息
       const message =
-        commitMessage || `update: ${latestStatus.changedFiles} files modified`
+        commitMessage || `update: ${status.changedFiles} files modified`
 
       // 提交（静默执行）
       await runCommand(`git commit -m "${message}"`, this.dir)
@@ -429,10 +415,10 @@ export class GitManager {
       const remoteInfo = await this.getRemoteInfo()
       if (remoteInfo) {
         this.logger.success(
-          `推送成功: ${latestStatus.changedFiles} 个文件 → https://github.com/${remoteInfo.owner}/${remoteInfo.repo}`,
+          `推送成功: ${status.changedFiles} 个文件 → https://github.com/${remoteInfo.owner}/${remoteInfo.repo}`,
         )
       } else {
-        this.logger.success(`推送成功: ${latestStatus.changedFiles} 个文件`)
+        this.logger.success(`推送成功: ${status.changedFiles} 个文件`)
       }
     } catch (error) {
       // 失败时显示完整错误信息
@@ -461,101 +447,6 @@ export class GitManager {
       this.logger.error('Sync failed')
       handleError(error)
       throw error
-    }
-  }
-
-  // ==================== Submodule 操作 ====================
-
-  /**
-   * 检查仓库是否包含 submodule
-   */
-  hasSubmodules(): boolean {
-    return existsSync(resolve(this.dir, '.gitmodules'))
-  }
-
-  /**
-   * 获取所有 submodule 的路径
-   */
-  async getSubmodulePaths(): Promise<string[]> {
-    if (!this.hasSubmodules()) return []
-    try {
-      const output = await runCommand(
-        'git config --file .gitmodules --get-regexp path',
-        this.dir,
-      )
-      return output
-        .trim()
-        .split('\n')
-        .filter((line) => line)
-        .map((line) => line.replace(/^submodule\..*\.path\s+/, ''))
-    } catch {
-      return []
-    }
-  }
-
-  /**
-   * 推送前处理 submodule：检查未提交/未推送的更改，自动提交并推送
-   */
-  async pushSubmodules(commitMessage?: string): Promise<void> {
-    const paths = await this.getSubmodulePaths()
-    if (paths.length === 0) return
-
-    for (const subPath of paths) {
-      const absPath = resolve(this.dir, subPath)
-
-      // 检查 submodule 是否有未提交的更改
-      let hasChanges = false
-      try {
-        const status = await runCommand('git status --porcelain', absPath)
-        hasChanges = status.trim().length > 0
-      } catch {
-        continue
-      }
-
-      if (hasChanges) {
-        const message = commitMessage || 'update'
-        this.logger.info(`Submodule [${subPath}] 有未提交的更改，正在提交...`)
-        await runCommand('git add -A', absPath)
-        await runCommand(`git commit -m "${message}"`, absPath)
-      }
-
-      // 检查是否有未推送的 commit
-      let unpushed = 0
-      try {
-        const output = await runCommand(
-          'git rev-list @{u}..HEAD --count',
-          absPath,
-        )
-        unpushed = parseInt(output.trim()) || 0
-      } catch {
-        // 可能没有上游分支，尝试直接推送
-        unpushed = 1
-      }
-
-      if (unpushed > 0) {
-        this.logger.info(
-          `Submodule [${subPath}] 有 ${unpushed} 个未推送的提交，正在推送...`,
-        )
-        await runCommand('git push', absPath)
-        this.logger.success(`Submodule [${subPath}] 推送成功`)
-      }
-    }
-  }
-
-  /**
-   * 拉取后更新 submodule 到父仓库指针指向的 commit
-   */
-  async updateSubmodules(): Promise<void> {
-    if (!this.hasSubmodules()) return
-
-    try {
-      this.logger.info('正在更新 submodule...')
-      await runCommand('git submodule update --init', this.dir)
-      this.logger.success('Submodule 已同步到最新指针')
-    } catch (error) {
-      this.logger.warn(
-        'Submodule 更新失败，请手动执行 git submodule update --init',
-      )
     }
   }
 

@@ -102,6 +102,21 @@ export function defineNotesConfig(overrides: UserConfig = {}) {
         __TNOTES_ROOT_ITEM__: JSON.stringify(config.root_item),
         ...overrideVite?.define,
       },
+      resolve: {
+        dedupe: ['vue', 'vitepress'],
+        ...overrideVite?.resolve,
+      },
+      optimizeDeps: {
+        include: [
+          // VitePress 内部 CJS 依赖 —— 需要 Vite 预构建为 ESM
+          'vitepress > @vscode/markdown-it-katex',
+          'vitepress > @braintree/sanitize-url',
+          'vitepress > dayjs',
+          'vitepress > dayjs/plugin/utc',
+          'vitepress > dayjs/plugin/localizedFormat',
+        ],
+        ...overrideVite?.optimizeDeps,
+      },
     },
     transformPageData(pageData, ctx) {
       // 为笔记页面注入原始 Markdown 内容（用于一键复制功能）

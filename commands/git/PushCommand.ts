@@ -5,12 +5,10 @@
  */
 import { BaseCommand } from '../BaseCommand'
 import { GitService, TimestampService } from '../../services'
-import { pushAllRepos } from '../../utils'
 
 export class PushCommand extends BaseCommand {
   private gitService: GitService
   private timestampService: TimestampService
-  private pushAll: boolean = false
 
   constructor() {
     super('push')
@@ -18,31 +16,7 @@ export class PushCommand extends BaseCommand {
     this.timestampService = new TimestampService()
   }
 
-  /**
-   * 设置是否推送所有仓库
-   */
-  public setPushAll(value: boolean): void {
-    this.pushAll = value
-  }
-
   protected async run(): Promise<void> {
-    // 如果是 --all 模式，调用 pushAllRepos
-    if (this.pushAll) {
-      const parallel = process.env.PARALLEL_PUSH === 'true'
-      const force = this.options.force === true
-
-      if (parallel) {
-        this.logger.info('Parallel push mode enabled')
-      }
-      if (force) {
-        this.logger.warn('使用强制推送模式 (--force)')
-      }
-
-      await pushAllRepos({ parallel, force })
-      return
-    }
-
-    // 单仓库推送逻辑
     try {
       // 1. 检查是否有更改或已有未推送的提交
       this.logger.info('检查是否有更改...')

@@ -5,10 +5,8 @@
  */
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import type { TNotesConfig } from '../types'
 import { validateAndCompleteConfig } from './defaultConfig'
-import { logger } from '../utils'
 
 /**
  * 配置管理器（单例模式）
@@ -21,13 +19,11 @@ export class ConfigManager {
 
   private constructor(rootPath?: string) {
     if (rootPath) {
-      // 显式传入根路径（NPM 包模式）
+      // 显式传入根路径
       this.rootPath = rootPath
     } else {
-      // 从 __dirname 推导根路径（submodule 兼容模式）
-      // __dirname = .vitepress/tnotes/config/ → 向上 3 级 = 项目根目录
-      const __dirname = path.dirname(fileURLToPath(import.meta.url))
-      this.rootPath = path.resolve(__dirname, '..', '..', '..')
+      // 默认使用 process.cwd()（CLI 和 VitePress 均在项目根目录执行）
+      this.rootPath = process.cwd()
     }
     this.configPath = path.normalize(
       path.resolve(this.rootPath, '.tnotes.json'),
@@ -77,11 +73,11 @@ export class ConfigManager {
       validateAndCompleteConfig(rawConfig)
 
     if (modified) {
-      logger.warn(`检测到知识库配置缺失字段，已自动补全`)
+      console.warn(`[ConfigManager] 检测到知识库配置缺失字段，已自动补全`)
       // 写回配置文件
       fs.writeFileSync(path, JSON.stringify(validatedConfig, null, 2), 'utf-8')
-      logger.info('知识库配置文件已更新')
-      logger.info(`知识库配置文件路径: ${path}`)
+      console.log(`[ConfigManager] 知识库配置文件已更新`)
+      console.log(`[ConfigManager] 知识库配置文件路径: ${path}`)
     }
 
     this.config = validatedConfig

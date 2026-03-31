@@ -7,13 +7,7 @@
 import { getCommand, COMMAND_NAMES } from './commands'
 import type { CommandArgs } from './commands'
 import { handleError, parseArgs, createLogger } from './utils'
-import type {
-  UpdateCommand,
-  UpdateCompletedCountCommand,
-  PushCommand,
-  PullCommand,
-  SyncCommand,
-} from './commands'
+import type { UpdateCommand, PushCommand } from './commands'
 
 /**
  * TNotes 内置命令入口函数
@@ -25,7 +19,7 @@ import type {
 
     // 查找第一个为 true 的参数作为命令名
     const commandName = Object.keys(args).find(
-      (key) => key !== '_' && args[key] === true,
+      (key) => key !== '_' && (args as Record<string, unknown>)[key] === true,
     )
 
     // #region - 非法命令处理
@@ -66,20 +60,9 @@ import type {
     if (commandName === COMMAND_NAMES.UPDATE) {
       const cmd = command as UpdateCommand
       if (args.quiet) cmd.setQuiet(true)
-      if (args.all) cmd.setUpdateAll(true)
-    } else if (commandName === COMMAND_NAMES.UPDATE_COMPLETED_COUNT) {
-      const cmd = command as UpdateCompletedCountCommand
-      if (args.all) cmd.setUpdateAll(true)
     } else if (commandName === COMMAND_NAMES.PUSH) {
       const cmd = command as PushCommand
       if (args.force) cmd.setOptions({ force: true })
-      if (args.all) cmd.setPushAll(true)
-    } else if (commandName === COMMAND_NAMES.PULL) {
-      const cmd = command as PullCommand
-      if (args.all) cmd.setPullAll(true)
-    } else if (commandName === COMMAND_NAMES.SYNC) {
-      const cmd = command as SyncCommand
-      if (args.all) cmd.setSyncAll(true)
     }
 
     // #endregion - 处理合法命令选项

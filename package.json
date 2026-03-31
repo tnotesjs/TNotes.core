@@ -1,6 +1,6 @@
 {
   "name": "@tnotesjs/core",
-  "version": "0.1.0",
+  "version": "0.1.10",
   "description": "TNotes 知识库核心框架 —— 基于 VitePress 的笔记管理系统",
   "type": "module",
   "bin": {
@@ -12,13 +12,13 @@
       "import": "./dist/index.js"
     },
     "./vitepress/config": {
-      "types": "./vitepress/config/index.ts",
-      "import": "./vitepress/config/index.ts"
+      "import": "./dist/vitepress/config/index.js"
     },
     "./vitepress/theme": {
       "types": "./vitepress/theme/index.ts",
       "import": "./vitepress/theme/index.ts"
-    }
+    },
+    "./vitepress/*": "./vitepress/*"
   },
   "files": [
     "dist/",
@@ -41,10 +41,13 @@
     "markdown-it-container": "^4.0.0",
     "markdown-it-link-attributes": "^4.0.1",
     "markdown-it-mathjax3": "^4.3.2",
+    "markdown-it-task-lists": "^2.1.1",
     "marked": "^15.0.11",
     "markmap-lib": "^0.18.12",
     "markmap-toolbar": "^0.18.12",
     "markmap-view": "^0.18.12",
+    "mermaid": "^11.5.0",
+    "sass-embedded": "^1.90.0",
     "swiper": "^11.2.1",
     "uuid": "^11.1.0",
     "vue-echarts": "^8.0.1"
@@ -52,8 +55,6 @@
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^24.6.2",
-    "markdown-it-task-lists": "^2.1.1",
-    "sass-embedded": "^1.90.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },

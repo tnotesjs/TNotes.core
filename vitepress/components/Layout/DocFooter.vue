@@ -25,10 +25,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useData } from 'vitepress'
+import { SIDEBAR_SHOW_NOTE_ID_KEY } from '../constants'
 // @ts-expect-error - VitePress Data Loader
 import { data as sidebarConfig } from '../sidebar.data'
+
+const showNoteId = ref(false)
+
+onMounted(() => {
+  const saved = localStorage.getItem(SIDEBAR_SHOW_NOTE_ID_KEY)
+  if (saved !== null) {
+    showNoteId.value = saved === 'true'
+  }
+})
 
 interface NavItem {
   link: string
@@ -89,13 +99,11 @@ function extractEmojiAndTitle(text: string): { emoji: string; title: string } {
   if (emojiMatch) {
     const emoji = emojiMatch[1]
     const rest = text.slice(emojiMatch[0].length)
-    // 移除笔记编号（如 "0001. "）
-    const title = rest.replace(/^\d{4}\.\s*/, '')
+    const title = showNoteId.value ? rest : rest.replace(/^\d{4}\.\s*/, '')
     return { emoji, title }
   }
 
-  // 没有 emoji，只移除编号
-  const title = text.replace(/^\d{4}\.\s*/, '')
+  const title = showNoteId.value ? text : text.replace(/^\d{4}\.\s*/, '')
   return { emoji: '', title }
 }
 

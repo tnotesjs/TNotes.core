@@ -72,36 +72,6 @@ export { default } from '@tnotesjs/core/vitepress/theme'
 }
 ```
 
-## 开发工作流
-
-```bash
-# 克隆 core 仓库
-git clone https://github.com/tnotesjs/core.git
-cd core
-pnpm install
-
-# 构建
-pnpm build
-
-# 类型检查
-pnpm build:check
-
-# 本地调试（在宿主仓库中 link）
-pnpm link --global
-cd ../TNotes.xxx
-pnpm link --global @tnotesjs/core
-```
-
-## CI/CD
-
-各仓库的 GitHub Actions 部署工作流（`deploy.yml`）只需标准 checkout，无需额外配置：
-
-```yaml
-- uses: actions/checkout@v4
-  with:
-    fetch-depth: 0
-```
-
 ## 版本管理
 
 - 版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)

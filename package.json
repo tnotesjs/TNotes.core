@@ -1,6 +1,6 @@
 {
   "name": "@tnotesjs/core",
-  "version": "0.1.13",
+  "version": "0.0.1",
   "description": "TNotes 知识库核心框架 —— 基于 VitePress 的笔记管理系统",
   "type": "module",
   "bin": {
@@ -27,7 +27,9 @@
   ],
   "scripts": {
     "build": "tsup",
-    "build:check": "tsc --noEmit"
+    "build:check": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "release": "node scripts/release.mjs"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",

@@ -6,7 +6,7 @@
 import { existsSync, renameSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { BaseCommand } from '../BaseCommand'
-import { ReadmeService, NoteService } from '../../services'
+import { ReadmeService, NoteService, FileWatcherService } from '../../services'
 import { validateNoteTitle } from '../../utils'
 import { NOTES_PATH, REPO_NOTES_URL } from '../../config/constants'
 import { generateNoteTitle } from '../../config/templates'
@@ -72,7 +72,10 @@ export class RenameNoteCommand extends BaseCommand {
     }
 
     // 重命名文件夹
+    // Windows 上 fs.watch 会锁住文件夹句柄，需要先挂起监听
+    const watcher = FileWatcherService.getInstance()
     try {
+      if (watcher) watcher.suspend()
       renameSync(note.path, newPath)
       this.logger.info(`✅ 文件夹已重命名:`)
       this.logger.info(`  原名称: ${note.dirName}`)
@@ -83,6 +86,8 @@ export class RenameNoteCommand extends BaseCommand {
           error instanceof Error ? error.message : String(error)
         }`,
       )
+    } finally {
+      if (watcher) watcher.unsuspend()
     }
 
     // 更新笔记内部的标题（README.md 第一行）

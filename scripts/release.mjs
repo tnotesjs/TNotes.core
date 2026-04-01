@@ -4,7 +4,7 @@
  * @tnotesjs/core 发版脚本
  *
  * 用法: node scripts/release.mjs [版本号]
- * 示例: node scripts/release.mjs 0.1.14
+ * 示例: node scripts/release.mjs 0.0.2
  *       node scripts/release.mjs patch   (自动 bump patch)
  *       node scripts/release.mjs minor   (自动 bump minor)
  *
@@ -89,12 +89,12 @@ info('CHANGELOG.md 已包含变更记录')
 
 // ── 4. 类型检查 ────────────────────────────────────────────
 console.log('\n🔍 类型检查...')
-run('npx tsc --noEmit')
+run('pnpm build:check')
 info('类型检查通过')
 
 // ── 5. 构建 ────────────────────────────────────────────────
 console.log('\n🔨 构建...')
-run('npx tsup')
+run('pnpm build')
 info('构建成功')
 
 // ── 6. 更新 package.json ───────────────────────────────────

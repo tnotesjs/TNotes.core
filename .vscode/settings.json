@@ -1,0 +1,6 @@
+{
+  "explorer.fileNesting.patterns": {
+    "README.md": "README*,CHANGELOG*,LICENSE,CNAME",
+    "package.json": ".gitignore,.npmignore,.gitattributes,tsconfig.json,tsconfig.build.json,pnpm-lock.yaml,pnpm-workspace.yaml",
+  },
+}

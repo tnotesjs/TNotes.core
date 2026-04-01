@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "build:check": "tsc --noEmit",
+    "build:check": "tsc --noEmit -p tsconfig.build.json",
     "dev": "tsup --watch",
     "release": "node scripts/release.mjs"
   },

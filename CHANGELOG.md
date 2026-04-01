@@ -4,7 +4,14 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
+### Added
+
+- 新增 `.github/copilot-instructions.md`，明确 core 的发版流程、版本策略和本地开发约定
+
+### Fixed
+
+- 修复 Windows 下通过笔记关于面板重命名笔记时可能出现的 `EPERM`：重命名前临时关闭文件监听，完成后自动恢复
+- 修复 `build:check` 和发版脚本默认调用 `tsc --noEmit` 时未指定 `tsconfig.build.json` 导致的类型检查失败
 
 ## [0.0.1] - 2026-04-01
 

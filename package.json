@@ -1,6 +1,6 @@
 {
   "name": "@tnotesjs/core",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "TNotes 知识库核心框架 —— 基于 VitePress 的笔记管理系统",
   "type": "module",
   "bin": {

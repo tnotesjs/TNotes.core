@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.0.6] - 2026-04-24
+
 ### Fixed
 
 - 修复年度笔记页注入原始 Markdown 内容时，正文中的 `</script>` 字面量会提前闭合注入脚本块，导致页面解析报 `Invalid end tag`；现在会在注入前安全转义该片段，原文展示与复制行为不受影响
@@ -60,7 +64,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/tnotesjs/core/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/tnotesjs/core/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/tnotesjs/core/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/tnotesjs/core/compare/v0.0.2...v0.0.3

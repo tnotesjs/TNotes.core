@@ -123,7 +123,14 @@ export function defineNotesConfig(overrides: UserConfig = {}) {
       if (/^notes\/\d{4}/.test(pageData.relativePath)) {
         const fullPath = path.resolve(rootPath, pageData.relativePath)
         try {
-          pageData.frontmatter.rawContent = fs.readFileSync(fullPath, 'utf-8')
+          const raw = fs.readFileSync(fullPath, 'utf-8')
+          // 防止 raw 中的 `</script>` 字面量在被 JSON.stringify 后注入到
+          // `<script>…</script>` 块时提前闭合脚本块（导致 Vue SFC 解析报
+          // "Invalid end tag"）。在源串里把 `</` 拆开即可，复制时仍是原文。
+          pageData.frontmatter.rawContent = raw.replace(
+            /<\/(script)/gi,
+            '<\\/$1',
+          )
         } catch {
           pageData.frontmatter.rawContent = null
         }

@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.0.9] - 2026-04-25
+
 ### Added
 
 - 新增 `pnpm typecheck` 脚本（`vue-tsc --noEmit -p tsconfig.build.json`），覆盖 `.ts` 与 `.vue` 全量类型检查。

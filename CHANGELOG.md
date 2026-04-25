@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.0.8] - 2026-04-25
+
 ### Added
 
 - 新增 GitHub Actions CI，按 pnpm 安装依赖后依次运行 lint、TypeScript 检查、Vue 类型检查和构建。

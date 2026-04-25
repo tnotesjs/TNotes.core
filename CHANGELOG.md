@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.1.0] - 2026-04-25
+
 ### Added
 
 - 设置面板改为全局 dialog 形式：新增 `vitepress/components/Settings/composables/useSettingsDialog.ts`（模块级 `reactive` 单例 store）与 `vitepress/components/Settings/SettingsDialog.vue`（`<ClientOnly>` + `<Teleport to="body">` 容器，支持「全屏 / 还原」切换、点击遮罩或按 Esc 关闭），由 `Layout.vue` 全局挂载。

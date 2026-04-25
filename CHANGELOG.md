@@ -4,7 +4,16 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
+### Added
+
+- 新增 GitHub Actions CI，按 pnpm 安装依赖后依次运行 lint、TypeScript 检查、Vue 类型检查和构建。
+- 新增 markdownlint 配置，适配 Keep a Changelog 中跨版本重复的 Added、Changed、Fixed 小标题。
+
+### Changed
+
+- 完善 ESLint flat config：补齐 JavaScript、TypeScript、Vue recommended 规则，并保留符合当前项目源码风格的覆盖规则。
+- 将 `pnpm lint` 调整为 `eslint . --max-warnings=0`，要求 lint 在本地和 CI 中以 0 warning / 0 error 通过。
+- 为 README 目录结构代码块补充语言标识，并折行超长段落以满足 markdownlint 规则。
 
 ## [0.0.7] - 2026-04-25
 

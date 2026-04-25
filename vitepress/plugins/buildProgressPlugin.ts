@@ -7,15 +7,15 @@
  * https://github.com/jeddygong/vite-plugin-progress
  */
 
-import type { Plugin } from 'vite'
 import {
   existsSync,
   readFileSync,
   writeFileSync,
   mkdirSync,
-  readdirSync,
 } from 'fs'
 import { join } from 'path'
+
+import type { Plugin } from 'vite'
 
 /** 缓存目录和文件路径 */
 const CACHE_DIR = join(process.cwd(), 'node_modules', '.tnotes-progress')
@@ -64,37 +64,6 @@ function setCacheData(data: CacheData): void {
   }
 }
 
-/**
- * 扫描源目录文件数量
- */
-function countSourceFiles(srcDir: string): number {
-  let count = 0
-  const extensions = /\.(vue|ts|js|jsx|tsx|css|scss|sass|styl|less|md)$/i
-
-  const scan = (dir: string) => {
-    try {
-      const entries = readdirSync(dir, { withFileTypes: true })
-      for (const entry of entries) {
-        const fullPath = join(dir, entry.name)
-        if (
-          entry.isDirectory() &&
-          !entry.name.startsWith('.') &&
-          entry.name !== 'node_modules'
-        ) {
-          scan(fullPath)
-        } else if (entry.isFile() && extensions.test(entry.name)) {
-          count++
-        }
-      }
-    } catch {
-      // 忽略错误
-    }
-  }
-
-  scan(srcDir)
-  return count
-}
-
 // ============ 全局状态 ============
 let globalStartTime = 0
 let globalTransformCount = 0
@@ -103,7 +72,6 @@ let globalHasError = false
 let globalIsBuilding = false
 let globalOutDir = ''
 let globalLastPercent = 0
-let globalFileCount = 0
 let globalLastLoggedPercent = -1 // 非 TTY 环境下上次输出的百分比区间，初始为 -1 以便第一次输出
 let globalLastOutputTime = 0 // 非 TTY 环境下上次输出时间戳，用于时间节流
 let globalTransformEndTime = 0 // transform 阶段结束时间戳
@@ -272,10 +240,6 @@ export function buildProgressPlugin(
           globalTransformEndTime = 0
           globalLastHookTime = Date.now()
           globalOutDir = config.build?.outDir || 'dist'
-
-          if (!hasCache) {
-            globalFileCount = countSourceFiles(process.cwd())
-          }
 
           interceptOutput()
 

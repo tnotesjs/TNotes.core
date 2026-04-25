@@ -1,5 +1,5 @@
-import { ref, watch } from 'vue'
 import { useRoute, useData } from 'vitepress'
+import { ref, watch } from 'vue'
 
 import type { NoteConfig } from '../../../../types'
 
@@ -32,11 +32,14 @@ export function useRedirect(allNotesConfig: Record<string, NoteConfig & { redire
     )
 
     if (match) {
-      matchedId.value = match[1]
-      const targetNote = allNotesConfig[matchedId.value]
-      redirectPath.value = targetNote ? targetNote.redirect : ''
+      const matchedNoteId = match[1]
+      if (!matchedNoteId) return false
 
-      if (targetNote && targetNote.redirect) {
+      matchedId.value = matchedNoteId
+      const targetNote = allNotesConfig[matchedNoteId]
+      redirectPath.value = targetNote?.redirect ?? ''
+
+      if (targetNote?.redirect) {
         const base = vpData.site.value.base
         // 构建目标路径（包含基础路径）
         const targetPath = `${base}${targetNote.redirect}`

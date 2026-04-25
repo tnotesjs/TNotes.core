@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
-import type { Ref } from 'vue'
-import { useData } from 'vitepress'
+
 import type { NoteConfig } from '../../../../types'
+import type { Ref } from 'vue'
 
 /**
  * 管理笔记配置状态
@@ -13,8 +13,6 @@ export function useNoteConfig(
   currentNoteTitle: Ref<string>,
   timeModalOpen: Ref<boolean>
 ) {
-  const vpData = useData()
-
   // 可编辑的配置项
   const editableNoteStatus = ref(false)
   const editableDiscussionsEnabled = ref(false)

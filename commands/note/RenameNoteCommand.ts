@@ -5,11 +5,12 @@
  */
 import { existsSync, renameSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { BaseCommand } from '../BaseCommand'
-import { ReadmeService, NoteService, FileWatcherService } from '../../services'
-import { validateNoteTitle } from '../../utils'
+
 import { NOTES_PATH, REPO_NOTES_URL } from '../../config/constants'
 import { generateNoteTitle } from '../../config/templates'
+import { ReadmeService, NoteService, FileWatcherService } from '../../services'
+import { validateNoteTitle } from '../../utils'
+import { BaseCommand } from '../BaseCommand'
 
 interface RenameNoteParams {
   noteIndex: string

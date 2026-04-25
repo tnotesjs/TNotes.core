@@ -1,7 +1,8 @@
-import { ref, computed } from 'vue'
-import type { Ref, ComputedRef } from 'vue'
 import { useData } from 'vitepress'
+import { ref, computed } from 'vue'
+
 import type { NoteConfig } from '../../../../types'
+import type { Ref, ComputedRef } from 'vue'
 
 /**
  * 处理笔记配置的保存和重置逻辑

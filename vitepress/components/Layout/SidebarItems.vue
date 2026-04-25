@@ -25,7 +25,7 @@
 
       <div v-show="!item.collapsed" class="group-items">
         <SidebarItems
-          :items="item.items"
+          :items="getChildItems(item)"
           :depth="depth + 1"
           :max-depth="maxDepth"
           :show-note-id="showNoteId"
@@ -56,6 +56,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
 import { icon__sidebar_opened, icon__sidebar_collapsed } from '../../assets/icons'
 
 interface SidebarItem {
@@ -90,6 +91,10 @@ const actualItemDepth = computed(() => props.itemDepth ?? props.depth)
 // 判断项是否有子项
 function hasChildren(item: SidebarItem): boolean {
   return !!(item.items && item.items.length > 0)
+}
+
+function getChildItems(item: SidebarItem): SidebarItem[] {
+  return item.items ?? []
 }
 
 // 获取项的唯一 key

@@ -3,12 +3,13 @@
  *
  * 全局更新协调：应用配置更新、更新 README 列表
  */
-import type { WatchEvent } from './internal'
 import { safeExecute } from './internal'
+
+import type { WatchEvent } from './internal'
 import type { NoteIndexCache } from '../../core/NoteIndexCache'
+import type { Logger } from '../../utils'
 import type { ReadmeService } from '../readme/service'
 
-import type { Logger } from '../../utils'
 
 interface GlobalUpdateCoordinatorConfig {
   /** README 服务实例，用于更新 README 文件和侧边栏 */

@@ -3,8 +3,9 @@
  *
  * VitePress 插件 - 处理笔记配置更新请求
  */
-import type { PluginOption } from 'vite'
 import { UpdateNoteConfigCommand } from '../../commands/note/UpdateNoteConfigCommand'
+
+import type { PluginOption } from 'vite'
 
 export function updateConfigPlugin(): PluginOption {
   let updateCommand: UpdateNoteConfigCommand

@@ -10,7 +10,7 @@
 import fs from 'fs'
 import path from 'path'
 import { defineConfig, type UserConfig } from 'vitepress'
-import type { TNotesConfig } from '../../types'
+
 import {
   getIgnoreList,
   getGithubPageUrl,
@@ -18,10 +18,12 @@ import {
   getMarkdownConfig,
   getThemeConfig,
 } from '../configs'
-import { updateConfigPlugin } from '../plugins/updateConfigPlugin'
-import { renameNotePlugin } from '../plugins/renameNotePlugin'
-import { getNoteByConfigIdPlugin } from '../plugins/getNoteByConfigIdPlugin'
 import { buildProgressPlugin } from '../plugins/buildProgressPlugin'
+import { getNoteByConfigIdPlugin } from '../plugins/getNoteByConfigIdPlugin'
+import { renameNotePlugin } from '../plugins/renameNotePlugin'
+import { updateConfigPlugin } from '../plugins/updateConfigPlugin'
+
+import type { TNotesConfig } from '../../types'
 
 /**
  * 读取 .tnotes.json 配置文件

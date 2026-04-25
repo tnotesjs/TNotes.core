@@ -4,19 +4,19 @@
  * 命令注册表 - 管理命令的注册、实例化和获取
  */
 
-import { DevCommand } from './dev'
 import { BuildCommand, PreviewCommand } from './build'
-import { UpdateCommand } from './update'
-import { UpdateCompletedCountCommand } from './update-completed-count'
+import { DevCommand } from './dev'
 import { PushCommand, PullCommand } from './git'
+import { FixTimestampsCommand } from './maintenance'
+import { HelpCommand } from './misc'
+import { type Command, type CommandName } from './models'
 import {
   CreateNoteCommand,
   UpdateNoteConfigCommand,
   RenameNoteCommand,
 } from './note'
-import { FixTimestampsCommand } from './maintenance'
-import { HelpCommand } from './misc'
-import { type Command, type CommandName } from './models'
+import { UpdateCommand } from './update'
+import { UpdateCompletedCountCommand } from './update-completed-count'
 
 /** 命令注册表（懒加载） */
 const commandFactories: Record<CommandName, () => Command> = {

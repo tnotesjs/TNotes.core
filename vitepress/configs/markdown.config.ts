@@ -3,14 +3,15 @@
  *
  * Markdown 配置
  */
+import fs from 'fs'
 import MarkdownIt from 'markdown-it'
 import markdownItContainer from 'markdown-it-container'
 import mila from 'markdown-it-link-attributes'
 import markdownItTaskLists from 'markdown-it-task-lists'
-import { MarkdownOptions } from 'vitepress'
-import { generateAnchor } from '../../utils'
-import fs from 'fs'
 import path from 'path'
+import { MarkdownOptions } from 'vitepress'
+
+import { generateAnchor } from '../../utils'
 
 /**
  * 辅助函数：HTML 转义
@@ -105,7 +106,7 @@ function configureMarkMapContainer(md: MarkdownIt) {
         const endLine = open.map ? open.map[1] - 1 : null
 
         // 1) 从开头 fence 行解析参数（支持 `{a=1 b="x"}`、`a=1 b="x"`，并支持单个数字 shorthand）
-        let params: { [key: string]: any; initialExpandLevel?: number } = {}
+        const params: { [key: string]: any; initialExpandLevel?: number } = {}
 
         if (open.map && typeof open.map[0] === 'number') {
           const openLine = (lines[open.map[0]] || '').trim()
@@ -179,7 +180,7 @@ function configureMarkMapContainer(md: MarkdownIt) {
         const refMatch = firstNonEmptyLine.trim().match(/^<<<\s*(.+)$/)
         if (refMatch) {
           // 提取引用路径，支持引号包裹
-          let refRaw = refMatch[1].trim().replace(/^['"]|['"]$/g, '')
+          const refRaw = refMatch[1].trim().replace(/^['"]|['"]$/g, '')
 
           // 尝试同步读取文件内容（兼容常见 Node 环境）
           try {

@@ -3,12 +3,13 @@
  *
  * 目录生成器 - 负责生成各种目录（TOC）
  */
+import { EOL } from '../config/constants'
 import {
   generateToc as generateTocUtil,
   createAddNumberToTitle,
 } from '../utils'
+
 import type { NoteConfig } from '../types'
-import { EOL } from '../config/constants'
 
 // URL 常量
 const BILIBILI_VIDEO_BASE_URL = 'https://www.bilibili.com/video/'
@@ -90,7 +91,7 @@ export class TocGenerator {
         lines[i] = numberedTitle // 更新原行内容（添加编号）
       } else if (isUnnumberedHeader) {
         // 移除可能存在的旧编号
-        const match = line.match(/^(\#+)\s*(\d+(\.\d+)*\.\s*)?(.*)/)
+        const match = line.match(/^(#+)\s*(\d+(\.\d+)*\.\s*)?(.*)/)
         if (match) {
           const headerSymbol = match[1]
           const plainTitle = match[4]
@@ -130,7 +131,7 @@ export class TocGenerator {
         })
       }
       if (noteConfig.yuque.length > 0) {
-        noteConfig.yuque.forEach((slug, i) => {
+        noteConfig.yuque.forEach((slug) => {
           yuqueTOCItems.push(
             `  - [TNotes.yuque.${repoName.replace(
               'TNotes.',
@@ -184,12 +185,12 @@ export class TocGenerator {
    * 更新首页目录
    * @param lines - 首页内容行数组
    * @param titles - 标题数组
-   * @param titlesNotesCount - 每个标题下的笔记数量
+  * @param _titlesNotesCount - 每个标题下的笔记数量
    */
   updateHomeToc(
     lines: string[],
     titles: string[],
-    titlesNotesCount: number[],
+    _titlesNotesCount: number[],
   ): void {
     let startLineIdx = -1,
       endLineIdx = -1

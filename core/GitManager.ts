@@ -3,7 +3,6 @@
  *
  * Git 仓库管理器 - 提供统一的 Git 操作接口
  */
-import { resolve } from 'path'
 import { Logger, runCommand, createError, handleError } from '../utils'
 
 /**
@@ -251,8 +250,6 @@ export class GitManager {
     }
 
     try {
-      const status = await this.getStatus()
-
       // 获取远程更新前记录当前提交
       const beforeCommit = await runCommand('git rev-parse HEAD', this.dir)
 

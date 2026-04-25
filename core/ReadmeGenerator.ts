@@ -4,9 +4,10 @@
  * README 生成器 - 负责生成各种 README 内容
  */
 import { readFileSync, writeFileSync, existsSync } from 'fs'
-import type { NoteInfo } from '../types'
+
 import { TocGenerator } from './TocGenerator'
 import { ConfigManager } from '../config/ConfigManager'
+import { EOL } from '../config/constants'
 import {
   logger,
   parseNoteLine,
@@ -14,7 +15,8 @@ import {
   processEmptyLines,
 } from '../utils'
 import { createAddNumberToTitle } from '../utils'
-import { EOL } from '../config/constants'
+
+import type { NoteInfo } from '../types'
 
 /**
  * README 生成器类

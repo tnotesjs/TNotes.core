@@ -1,9 +1,10 @@
 <template>
-  <img @click="toggle" :class="$style.contentToggleBtn" :aria-pressed="full.toString()" :title="full ? '退出全屏内容区' : '全屏显示内容区'" :src="full ? icon__fullscreen_exit : icon__fullscreen" alt=""></img>
+  <img @click="toggle" :class="$style.contentToggleBtn" :aria-pressed="full" :title="full ? '退出全屏内容区' : '全屏显示内容区'" :src="full ? icon__fullscreen_exit : icon__fullscreen" alt="" />
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+
 import { icon__fullscreen, icon__fullscreen_exit } from '../../assets/icons'
 
 const KEY = 'vp:content:fullscreen'

@@ -4,6 +4,7 @@
  * 常量定义（从配置中派生的路径和URL常量）
  */
 import { resolve } from 'path'
+
 import { getConfigManager } from './ConfigManager'
 
 const configManager = getConfigManager()

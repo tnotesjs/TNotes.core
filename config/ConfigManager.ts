@@ -5,8 +5,10 @@
  */
 import fs from 'fs'
 import path from 'path'
-import type { TNotesConfig } from '../types'
+
 import { validateAndCompleteConfig } from './defaultConfig'
+
+import type { TNotesConfig } from '../types'
 
 /**
  * 配置管理器（单例模式）

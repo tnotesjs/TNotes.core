@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { scaleOrdinal, schemePastel2, schemeSet3, schemeTableau10 } from 'd3'
 import { Transformer } from 'markmap-lib'
-import { Markmap, IMarkmapOptions } from 'markmap-view'
 import { Toolbar } from 'markmap-toolbar'
 import 'markmap-toolbar/dist/style.css'
-import { MARKMAP_THEME_KEY, MARKMAP_EXPAND_LEVEL_KEY } from '../constants'
+import { Markmap, IMarkmapOptions } from 'markmap-view'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
 import { icon__fullscreen, icon__fullscreen_exit, icon__confirm } from '../../assets/icons'
+import { MARKMAP_THEME_KEY, MARKMAP_EXPAND_LEVEL_KEY } from '../constants'
 
 // doc: https://github.com/markmap/markmap/blob/205367a24603dc187f67da1658940c6cade20dce/packages/markmap-view/src/constants.ts#L15
-import { scaleOrdinal, schemePastel2, schemeSet3, schemeTableau10 } from 'd3'
 
 const props = defineProps({
   content: { type: String, default: '' },

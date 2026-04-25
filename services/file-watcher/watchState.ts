@@ -4,12 +4,13 @@
  * 监听状态存储：哈希缓存、配置缓存、目录缓存
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import { createHash } from 'crypto'
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import { join } from 'path'
+
 import type { ConfigSnapshot } from './internal'
-import type { Logger } from '../../utils'
 import type { NoteConfig } from '../../types'
+import type { Logger } from '../../utils'
 
 interface WatchStateConfig {
   /** 笔记目录路径 */

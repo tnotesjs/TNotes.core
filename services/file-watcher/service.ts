@@ -7,22 +7,23 @@
  * - 监听笔记配置文件的变化并自动更新笔记的状态
  */
 
-import { WATCH_EVENT_TYPES } from './internal'
-import type { WatchEvent } from './internal'
-import { safeExecute } from './internal'
-import { WatchState } from './watchState'
-import { EventScheduler } from './eventScheduler'
-import { RenameDetector } from './renameDetector'
 import { ConfigChangeHandler } from './configChangeHandler'
-import { ReadmeChangeHandler } from './readmeChangeHandler'
-import { GlobalUpdateCoordinator } from './globalUpdateCoordinator'
+import { EventScheduler } from './eventScheduler'
 import { FolderChangeHandler } from './folderChangeHandler'
 import { FsWatcherAdapter } from './fsWatcherAdapter'
-import { logger } from '../../utils'
-import { ReadmeService } from '../readme/service'
-import { NoteService } from '../note/service'
-import { NoteIndexCache } from '../../core/NoteIndexCache'
+import { GlobalUpdateCoordinator } from './globalUpdateCoordinator'
+import { safeExecute } from './internal'
+import { WATCH_EVENT_TYPES } from './internal'
+import { ReadmeChangeHandler } from './readmeChangeHandler'
+import { RenameDetector } from './renameDetector'
+import { WatchState } from './watchState'
 import { NOTES_DIR_PATH } from '../../config/constants'
+import { NoteIndexCache } from '../../core/NoteIndexCache'
+import { logger } from '../../utils'
+import { NoteService } from '../note/service'
+import { ReadmeService } from '../readme/service'
+
+import type { WatchEvent } from './internal'
 
 const NOTES_DIR_NOT_SET_ERROR = 'NOTES_DIR_PATH 未设置，无法启动文件监听'
 

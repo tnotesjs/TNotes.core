@@ -183,34 +183,31 @@
 </template>
 
 <script setup>
-import Discussions from "../Discussions/Discussions.vue";
-import ImagePreview from "./ImagePreview.vue";
-import Swiper from "./Swiper.vue";
-import ContentCollapse from "./ContentCollapse.vue";
-import AboutModal from "./AboutModal.vue";
-import AboutPanel from "./AboutPanel.vue";
-import DocBeforeControls from "./DocBeforeControls.vue";
-import CustomSidebar from "./CustomSidebar.vue";
-import SidebarNavBefore from "./SidebarNavBefore.vue";
-import DocFooter from "./DocFooter.vue";
-import NoteStatus from "./NoteStatus.vue";
-
 import { useData, useRoute, useRouter } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import { computed, onMounted, ref, watch } from "vue";
 
-import { data as allNotesConfig } from "../notesConfig.data.ts";
-import { data as readmeData } from "./homeReadme.data.ts";
-import { SIDEBAR_SHOW_NOTE_ID_KEY } from "../constants";
-
-// Composables
-import { useRedirect } from "./composables/useRedirect";
-import { useNoteConfig } from "./composables/useNoteConfig";
-import { useNoteValidation } from "./composables/useNoteValidation";
-import { useNoteSave } from "./composables/useNoteSave";
-import { useCollapseControl } from "./composables/useCollapseControl";
-import { useVSCodeIntegration } from "./composables/useVSCodeIntegration";
 import { useCodeBlockFullscreen } from "../CodeBlockFullscreen";
+import { SIDEBAR_SHOW_NOTE_ID_KEY } from "../constants";
+import Discussions from "../Discussions/Discussions.vue";
+import { data as allNotesConfig } from "../notesConfig.data.ts";
+import AboutModal from "./AboutModal.vue";
+import AboutPanel from "./AboutPanel.vue";
+import { useCollapseControl } from "./composables/useCollapseControl";
+import { useNoteConfig } from "./composables/useNoteConfig";
+import { useNoteSave } from "./composables/useNoteSave";
+import { useNoteValidation } from "./composables/useNoteValidation";
+import { useRedirect } from "./composables/useRedirect";
+import { useVSCodeIntegration } from "./composables/useVSCodeIntegration";
+import ContentCollapse from "./ContentCollapse.vue";
+import CustomSidebar from "./CustomSidebar.vue";
+import DocBeforeControls from "./DocBeforeControls.vue";
+import DocFooter from "./DocFooter.vue";
+import { data as readmeData } from "./homeReadme.data.ts";
+import ImagePreview from "./ImagePreview.vue";
+import NoteStatus from "./NoteStatus.vue";
+import SidebarNavBefore from "./SidebarNavBefore.vue";
+import Swiper from "./Swiper.vue";
 
 const { Layout } = DefaultTheme;
 const vpData = useData();

@@ -3,8 +3,8 @@
  *
  * 预览命令 - 使用 VitepressService
  */
-import { BaseCommand } from '../BaseCommand'
 import { VitepressService } from '../../services'
+import { BaseCommand } from '../BaseCommand'
 
 export class PreviewCommand extends BaseCommand {
   private vitepressService: VitepressService

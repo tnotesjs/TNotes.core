@@ -3,6 +3,7 @@
  *
  * 时间戳服务 - 管理笔记的创建时间和更新时间
  */
+import { execSync } from 'child_process'
 import {
   existsSync,
   readFileSync,
@@ -11,14 +12,15 @@ import {
   statSync,
 } from 'fs'
 import { join } from 'path'
-import { execSync } from 'child_process'
-import { logger } from '../../utils'
-import { NoteManager } from '../../core/NoteManager'
+
 import {
   NOTES_DIR_PATH,
   ROOT_DIR_PATH,
   ROOT_CONFIG_PATH,
 } from '../../config/constants'
+import { NoteManager } from '../../core/NoteManager'
+import { logger } from '../../utils'
+
 import type { NoteConfig, TNotesConfig } from '../../types'
 
 /**

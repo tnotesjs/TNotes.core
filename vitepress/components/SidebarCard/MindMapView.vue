@@ -1,21 +1,22 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { withBase, useData } from 'vitepress'
+import { scaleOrdinal, schemePastel2, schemeSet3, schemeTableau10 } from 'd3'
 import { Transformer } from 'markmap-lib'
-import { Markmap } from 'markmap-view'
 import { Toolbar } from 'markmap-toolbar'
 import 'markmap-toolbar/dist/style.css'
-import { scaleOrdinal, schemePastel2, schemeSet3, schemeTableau10 } from 'd3'
-import {
-  MARKMAP_THEME_KEY,
-  MARKMAP_EXPAND_LEVEL_KEY,
-  REPO_NAME,
-} from '../constants'
+import { Markmap } from 'markmap-view'
+import { withBase, useData } from 'vitepress'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
 import {
   icon__fullscreen,
   icon__fullscreen_exit,
   icon__confirm,
 } from '../../assets/icons'
+import {
+  MARKMAP_THEME_KEY,
+  MARKMAP_EXPAND_LEVEL_KEY,
+  REPO_NAME,
+} from '../constants'
 
 const props = defineProps({
   sidebarData: {

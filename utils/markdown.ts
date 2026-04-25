@@ -20,7 +20,7 @@ export function createAddNumberToTitle() {
   return function addNumberToTitle(title: string): [string, string] {
     // 正则匹配提取标题信息
     const match = title.match(
-      /^(\#+)\s*((\d+(\.\d*)?(\.\d*)?(\.\d*)?(\.\d*)?(\.\d*)?)\.\s*)?(.*)/,
+      /^(#+)\s*((\d+(\.\d*)?(\.\d*)?(\.\d*)?(\.\d*)?(\.\d*)?)\.\s*)?(.*)/,
     )
     const plainTitle = match ? match[9].trim() : title.trim()
 

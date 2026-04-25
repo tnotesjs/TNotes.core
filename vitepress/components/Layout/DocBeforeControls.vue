@@ -74,7 +74,7 @@
           :class="$style.aboutIconButton"
           @click="$emit('open-time-modal')"
           aria-haspopup="dialog"
-          :aria-expanded="timeModalOpen.toString()"
+          :aria-expanded="timeModalOpen"
           :title="isHomeReadme ? '关于这个知识库' : '关于这篇笔记'"
           type="button"
         >
@@ -86,11 +86,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useData } from 'vitepress'
-import ToggleSidebar from './ToggleSidebar.vue'
-import ToggleFullContent from './ToggleFullContent.vue'
+import { ref } from 'vue'
 
+import ToggleFullContent from './ToggleFullContent.vue'
+import ToggleSidebar from './ToggleSidebar.vue'
 import {
   icon__github,
   icon__vscode,

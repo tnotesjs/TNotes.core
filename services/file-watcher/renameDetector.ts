@@ -6,7 +6,9 @@
 
 import { existsSync } from 'fs'
 import { join } from 'path'
+
 import { NoteManager } from '../../core/NoteManager'
+
 import type { Logger } from '../../utils'
 
 const FOLDER_RENAME_DETECT_WINDOW_MS = 500

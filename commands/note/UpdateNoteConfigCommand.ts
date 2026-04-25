@@ -3,8 +3,9 @@
  *
  * 更新笔记配置命令 - 用于在开发环境中更新笔记配置
  */
-import { BaseCommand } from '../BaseCommand'
 import { NoteService } from '../../services'
+import { BaseCommand } from '../BaseCommand'
+
 import type { NoteConfig } from '../../types'
 
 interface UpdateConfigParams {

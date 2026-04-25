@@ -153,6 +153,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
 import {
   NOTES_DIR_KEY,
   MARKMAP_THEME_KEY,

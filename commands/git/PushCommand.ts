@@ -7,10 +7,10 @@
  * fix-timestamps 的结果（.tnotes.json 变更）通过 --amend 合并到同一个 commit，
  * 保证 updated_at 精确等于 git commit 时间，且对外只产生 1 个 commit。
  */
-import { BaseCommand } from '../BaseCommand'
+import { ROOT_DIR_PATH } from '../../config/constants'
 import { GitService, TimestampService } from '../../services'
 import { runCommand } from '../../utils'
-import { ROOT_DIR_PATH } from '../../config/constants'
+import { BaseCommand } from '../BaseCommand'
 
 export class PushCommand extends BaseCommand {
   private gitService: GitService

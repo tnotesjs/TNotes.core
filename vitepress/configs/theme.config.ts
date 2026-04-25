@@ -6,8 +6,8 @@
  * doc:
  * https://vitepress.dev/reference/default-theme-config
  */
-import type { DefaultTheme } from 'vitepress'
 import type { TNotesConfig } from '../../types'
+import type { DefaultTheme } from 'vitepress'
 
 export function getThemeConfig(config: TNotesConfig): DefaultTheme.Config {
   const themeConfig: DefaultTheme.Config = {

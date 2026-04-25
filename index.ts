@@ -5,14 +5,17 @@
  */
 
 import { getCommand, COMMAND_NAMES } from './commands'
-import type { CommandArgs } from './commands'
 import { handleError, parseArgs, createLogger } from './utils'
+
+import type { CommandArgs } from './commands'
 import type { UpdateCommand, PushCommand } from './commands'
 
 /**
  * TNotes 内置命令入口函数
  */
-;(async (): Promise<void> => {
+;
+
+(async (): Promise<void> => {
   try {
     // 解析命令行参数
     const args = parseArgs(process.argv.slice(2)) as CommandArgs

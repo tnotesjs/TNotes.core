@@ -12,8 +12,8 @@
  * v2 - https://vitepress.dev/zh/guide/custom-theme
  */
 
-import type { Theme, EnhanceAppContext } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
+
 import BilibiliOutsidePlayer from '../components/BilibiliOutsidePlayer/BilibiliOutsidePlayer.vue'
 import Discussions from '../components/Discussions/Discussions.vue'
 import EnWordList from '../components/EnWordList/EnWordList.vue'
@@ -26,6 +26,8 @@ import NotesTable from '../components/NotesTable/NotesTable.vue'
 import Settings from '../components/Settings/Settings.vue'
 import SidebarCard from '../components/SidebarCard/SidebarCard.vue'
 import Tooltip from '../components/Tooltip/Tooltip.vue'
+
+import type { Theme, EnhanceAppContext } from 'vitepress'
 import './styles/index.scss'
 
 /**

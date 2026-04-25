@@ -12,8 +12,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
 import { useData } from 'vitepress'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps<{
   targetUrl?: string

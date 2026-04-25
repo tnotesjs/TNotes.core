@@ -3,8 +3,8 @@
  *
  * Git Pull 命令 - 使用 GitService
  */
-import { BaseCommand } from '../BaseCommand'
 import { GitService } from '../../services'
+import { BaseCommand } from '../BaseCommand'
 
 export class PullCommand extends BaseCommand {
   private gitService: GitService

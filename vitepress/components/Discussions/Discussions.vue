@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useData } from 'vitepress/client'
 import { onMounted, onUnmounted, watch, computed } from 'vue'
+
+import { icon__github } from '../../assets/icons'
 import { REPO_NAME, AUTHOR } from '../constants'
 import Tooltip from '../Tooltip/Tooltip.vue'
-import { icon__github } from '../../assets/icons'
 
 const props = defineProps({
   /**

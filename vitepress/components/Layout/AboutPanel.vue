@@ -110,7 +110,7 @@
     <div :class="$style.timeLine" title="首次提交时间">
       <div :class="$style.timeLabel"><strong>⌛️ 首次提交</strong></div>
       <div :class="$style.timeValue">
-        {{ formatDate(modalCreatedAt) }}
+        {{ formatOptionalDate(modalCreatedAt) }}
       </div>
     </div>
 
@@ -118,7 +118,7 @@
     <div :class="$style.timeLine" title="最近提交时间">
       <div :class="$style.timeLabel"><strong>⌛️ 最近提交</strong></div>
       <div :class="$style.timeValue">
-        {{ formatDate(modalUpdatedAt) }}
+        {{ formatOptionalDate(modalUpdatedAt) }}
       </div>
     </div>
 
@@ -194,6 +194,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
 import { formatDate } from '../utils'
 
 const props = defineProps<{
@@ -260,6 +261,10 @@ function onDescriptionInput() {
 
 function onConfigChange() {
   emit('configChange')
+}
+
+function formatOptionalDate(timestamp: number | undefined) {
+  return timestamp === undefined ? '-' : formatDate(timestamp)
 }
 </script>
 

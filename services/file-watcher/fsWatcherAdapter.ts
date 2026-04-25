@@ -4,14 +4,15 @@
  *  fs.watch 适配器：仅负责监听和事件分发
  */
 
-import type { FSWatcher } from 'fs'
 import { watch } from 'fs'
 import { basename, dirname, join, sep } from 'path'
-import type { WatchEvent, WatchEventType } from './internal'
+
 import { WATCH_EVENT_TYPES } from './internal'
 import { NoteManager } from '../../core/NoteManager'
 
+import type { WatchEvent, WatchEventType } from './internal'
 import type { Logger } from '../../utils'
+import type { FSWatcher } from 'fs'
 
 interface FsWatcherAdapterConfig {
   /** 笔记目录路径 */

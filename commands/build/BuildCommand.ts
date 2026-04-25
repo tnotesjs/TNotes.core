@@ -3,8 +3,8 @@
  *
  * 构建命令 - 使用 VitepressService
  */
-import { BaseCommand } from '../BaseCommand'
 import { VitepressService } from '../../services'
+import { BaseCommand } from '../BaseCommand'
 
 export class BuildCommand extends BaseCommand {
   private vitepressService: VitepressService

@@ -4,12 +4,16 @@
  * 更新完成笔记数量历史记录命令
  * 基于 Git 历史统计最近 12 个月（近 1 年）的每月完成笔记数量
  */
-import { BaseCommand } from '../BaseCommand'
-import { readFileSync, writeFileSync } from 'fs'
-import { ROOT_DIR_PATH, ROOT_CONFIG_PATH } from '../../config'
-import type { TNotesConfig } from '../../types'
 import { execSync } from 'child_process'
+import { readFileSync, writeFileSync } from 'fs'
+
+import { ROOT_DIR_PATH, ROOT_CONFIG_PATH } from '../../config'
 import { parseReadmeCompletedNotes } from '../../utils'
+import { BaseCommand } from '../BaseCommand'
+
+import type { TNotesConfig } from '../../types'
+
+
 
 export class UpdateCompletedCountCommand extends BaseCommand {
   constructor() {

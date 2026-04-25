@@ -76,7 +76,7 @@ watch(
     if (open) {
       // small timeout to ensure element exists
       setTimeout(() => {
-        if (modalRef.value) modalRef.value.focus && modalRef.value.focus()
+        modalRef.value?.focus?.()
       }, 0)
       document.addEventListener('keydown', onKeyDown)
       // prevent body scroll

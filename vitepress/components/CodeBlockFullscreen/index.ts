@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted } from 'vue'
 import { createApp } from 'vue'
+
 import CodeBlockFullscreen from './CodeBlockFullscreen.vue'
 
 export function useCodeBlockFullscreen() {

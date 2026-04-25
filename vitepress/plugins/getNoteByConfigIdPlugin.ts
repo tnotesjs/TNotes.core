@@ -3,9 +3,10 @@
  *
  * VitePress 插件 - 根据 configId 查询笔记信息
  */
-import type { PluginOption } from 'vite'
 import { NoteIndexCache } from '../../core'
 import { logger } from '../../utils'
+
+import type { PluginOption } from 'vite'
 
 export function getNoteByConfigIdPlugin(): PluginOption {
   return {

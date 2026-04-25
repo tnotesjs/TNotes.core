@@ -1,5 +1,5 @@
-import { ref, watch } from 'vue'
 import { useRoute } from 'vitepress'
+import { ref, watch } from 'vue'
 
 /**
  * 全局折叠/展开功能

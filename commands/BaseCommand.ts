@@ -4,10 +4,12 @@
  * 命令基类
  */
 
-import type { Command, CommandName, CommandOptions } from './models'
 import { COMMAND_DESCRIPTIONS } from './models'
-import type { Logger } from '../utils'
 import { handleError, logger } from '../utils'
+
+import type { Command, CommandName, CommandOptions } from './models'
+import type { Logger } from '../utils'
+
 
 /**
  * 命令基类

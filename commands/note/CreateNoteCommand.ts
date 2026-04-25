@@ -4,10 +4,11 @@
  * 新建笔记命令 - 使用 NoteService（支持批量创建，生成全局唯一 ID）
  */
 
-import { BaseCommand } from '../BaseCommand'
-import { NoteService, ReadmeService } from '../../services'
 import { createInterface } from 'readline'
 import { v4 as uuidv4 } from 'uuid'
+
+import { NoteService, ReadmeService } from '../../services'
+import { BaseCommand } from '../BaseCommand'
 
 export class CreateNoteCommand extends BaseCommand {
   private noteService: NoteService

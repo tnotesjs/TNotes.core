@@ -6,9 +6,11 @@
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import type { NoteInfo, NoteConfig } from '../types'
+
 import { NOTES_PATH } from '../config/constants'
 import { logger } from '../utils'
+
+import type { NoteInfo, NoteConfig } from '../types'
 
 /**
  * 笔记管理器类（单例）

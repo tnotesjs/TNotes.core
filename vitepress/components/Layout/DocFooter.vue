@@ -25,8 +25,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
 import { useRoute, useData } from 'vitepress'
+import { computed, ref, onMounted } from 'vue'
+
 import { SIDEBAR_SHOW_NOTE_ID_KEY } from '../constants'
 // @ts-expect-error - VitePress Data Loader
 import { data as sidebarConfig } from '../sidebar.data'

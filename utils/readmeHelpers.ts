@@ -3,8 +3,9 @@
  *
  * README 更新的公共辅助函数
  */
-import type { NoteInfo } from '../types'
 import { NoteManager } from '../core/NoteManager'
+
+import type { NoteInfo } from '../types'
 
 /**
  * 笔记行匹配正则表达式
@@ -81,7 +82,7 @@ function updateNoteStatus(note: NoteInfo): {
   deprecatedMark: string
 } {
   let status = ' ' // 默认未完成
-  let deprecatedMark = '' // 弃用标记（已废弃，保留返回值结构以免破坏 API）
+  const deprecatedMark = '' // 弃用标记（已废弃，保留返回值结构以免破坏 API）
 
   if (note.config) {
     if (note.config.done) {

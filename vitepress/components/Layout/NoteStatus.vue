@@ -16,8 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs, ref, onMounted, nextTick } from 'vue'
 import { useData } from 'vitepress'
+import { computed, toRefs, ref, onMounted, nextTick } from 'vue'
+
 import Tooltip from '../Tooltip/Tooltip.vue'
 
 const props = defineProps({

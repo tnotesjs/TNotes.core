@@ -1,10 +1,11 @@
 <!-- .vitepress\components\Layout\ToggleSidebar.vue -->
 <template>
-    <img @click="toggle" :class="$style.sidebarToggleBtn" :aria-pressed="hidden.toString()" :title="hidden ? '显示侧边栏' : '隐藏侧边栏'" :src="hidden ? icon__next : icon__prev" alt=""></img>
+    <img @click="toggle" :class="$style.sidebarToggleBtn" :aria-pressed="hidden" :title="hidden ? '显示侧边栏' : '隐藏侧边栏'" :src="hidden ? icon__next : icon__prev" alt="" />
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+
 import { icon__next, icon__prev } from '../../assets/icons'
 
 const KEY = 'vp:sidebar:hidden'

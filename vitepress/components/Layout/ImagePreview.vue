@@ -56,6 +56,8 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+
 import {
   icon__close,
   icon__next,
@@ -65,7 +67,6 @@ import {
   icon__zoom_out,
 } from '../../assets/icons'
 
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const preview = ref({
   visible: false,

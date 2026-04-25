@@ -89,6 +89,7 @@
 <script setup lang="ts">
 import mermaid from 'mermaid'
 import { nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue'
+
 import {
   icon__zoom_in,
   icon__zoom_out,
@@ -293,7 +294,8 @@ const renderDiagram = async () => {
       bindFunctions(diagramRef.value)
     }
   } catch (err) {
-    error.value = `Failed to render diagram: ${err.message}`
+    const message = err instanceof Error ? err.message : String(err)
+    error.value = `Failed to render diagram: ${message}`
     console.error('Mermaid render error:', err)
   } finally {
     loading.value = false

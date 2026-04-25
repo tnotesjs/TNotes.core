@@ -6,13 +6,15 @@
 import { writeFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import type { NoteInfo, NoteConfig } from '../../types'
-import { NoteManager } from '../../core/NoteManager'
-import { NoteIndexCache } from '../../core/NoteIndexCache'
-import { generateNoteTitle } from '../../config/templates'
+
 import { NOTES_PATH, CONSTANTS, REPO_NOTES_URL } from '../../config/constants'
-import { ReadmeService } from '../readme/service'
+import { generateNoteTitle } from '../../config/templates'
+import { NoteIndexCache } from '../../core/NoteIndexCache'
+import { NoteManager } from '../../core/NoteManager'
 import { ensureDirectory, logger } from '../../utils'
+import { ReadmeService } from '../readme/service'
+
+import type { NoteInfo, NoteConfig } from '../../types'
 
 /**
  * 新增笔记 README.md 模板

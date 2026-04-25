@@ -3,9 +3,9 @@
  *
  * Git 服务 - 封装 Git 操作相关的业务逻辑
  */
+import { ROOT_DIR_PATH } from '../../config/constants'
 import { GitManager } from '../../core'
 import { logger } from '../../utils'
-import { ROOT_DIR_PATH } from '../../config/constants'
 
 /**
  * Git 推送选项

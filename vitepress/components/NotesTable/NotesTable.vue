@@ -35,8 +35,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useData } from 'vitepress'
+import { computed } from 'vue'
+
 // @ts-expect-error - VitePress data loader exports data at runtime
 import { data as allNotesConfig } from '../notesConfig.data.ts'
 

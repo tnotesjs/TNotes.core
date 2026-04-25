@@ -1,14 +1,17 @@
 # @tnotesjs/core
 
-TNotes 知识库系统的核心框架，以 NPM 包形式发布，被所有 [TNotes.xxx](https://github.com/orgs/tnotesjs/repositories) 知识库引用。
+TNotes 知识库系统的核心框架，以 NPM 包形式发布，被所有
+[TNotes.xxx](https://github.com/orgs/tnotesjs/repositories) 知识库引用。
 
 ## 简介
 
-`@tnotesjs/core` 包含了 TNotes 知识库系统的 CLI 命令、VitePress 配置/主题、服务层、工具函数等核心代码。各 TNotes.xxx 仓库通过 `npm install @tnotesjs/core` 安装即可使用。
+`@tnotesjs/core` 包含了 TNotes 知识库系统的 CLI 命令、VitePress
+配置/主题、服务层、工具函数等核心代码。各 TNotes.xxx 仓库通过
+`npm install @tnotesjs/core` 安装即可使用。
 
 ## 目录结构
 
-```
+```text
 @tnotesjs/core
 ├── commands/           # CLI 命令（dev、build、push、update 等）
 ├── config/             # 配置管理（ConfigManager、默认配置、模板）

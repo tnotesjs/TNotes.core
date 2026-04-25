@@ -6,13 +6,15 @@
 
 import { existsSync, promises as fsPromises } from 'fs'
 import { join } from 'path'
+
 import { safeExecute } from './internal'
-import type { WatchState } from './watchState'
+
 import type { EventScheduler } from './eventScheduler'
-import type { NoteService } from '../note/service'
-import type { ReadmeService } from '../readme/service'
+import type { WatchState } from './watchState'
 import type { NoteIndexCache } from '../../core/NoteIndexCache'
 import type { Logger } from '../../utils'
+import type { NoteService } from '../note/service'
+import type { ReadmeService } from '../readme/service'
 
 const RENAME_REVERT_DELAY_MS = 2000
 

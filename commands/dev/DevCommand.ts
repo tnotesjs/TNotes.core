@@ -4,10 +4,10 @@
  * 开发服务器命令 - 使用 VitepressService 和 FileWatcherService
  */
 
-import { BaseCommand } from '../BaseCommand'
+import { ConfigManager } from '../../config/ConfigManager'
 import { NoteManager, NoteIndexCache } from '../../core'
 import { VitepressService, FileWatcherService } from '../../services'
-import { ConfigManager } from '../../config/ConfigManager'
+import { BaseCommand } from '../BaseCommand'
 
 export class DevCommand extends BaseCommand {
   private fileWatcherService: FileWatcherService

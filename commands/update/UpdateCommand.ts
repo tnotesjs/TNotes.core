@@ -3,12 +3,14 @@
  *
  * 更新命令 - 使用 ReadmeService
  */
-import { BaseCommand } from '../BaseCommand'
-import { ReadmeService, NoteService } from '../../services'
-import { logger, LogLevel, parseReadmeCompletedNotes } from '../../utils'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
+
 import { ROOT_DIR_PATH, ROOT_CONFIG_PATH } from '../../config'
+import { ReadmeService, NoteService } from '../../services'
+import { logger, LogLevel, parseReadmeCompletedNotes } from '../../utils'
+import { BaseCommand } from '../BaseCommand'
+
 import type { TNotesConfig } from '../../types'
 
 export class UpdateCommand extends BaseCommand {

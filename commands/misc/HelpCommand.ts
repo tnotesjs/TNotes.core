@@ -3,6 +3,7 @@
  *
  * 帮助命令
  */
+import { createLogger, LogLevel } from '../../utils'
 import { BaseCommand } from '../BaseCommand'
 import {
   COMMAND_NAMES,
@@ -10,7 +11,6 @@ import {
   COMMAND_DESCRIPTIONS,
   type CommandOption,
 } from '../models'
-import { createLogger, LogLevel } from '../../utils'
 
 /**
  * 命令分组（用于帮助信息展示）

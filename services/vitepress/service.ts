@@ -4,10 +4,11 @@
  * VitePress 服务 - 封装 VitePress 开发服务器相关的业务逻辑
  */
 import { spawn } from 'child_process'
-import { ProcessManager } from '../../core'
+
 import { ConfigManager } from '../../config/ConfigManager'
-import { logger, isPortInUse, killPortProcess, waitForPort } from '../../utils'
 import { ROOT_DIR_PATH } from '../../config/constants'
+import { ProcessManager } from '../../core'
+import { logger, isPortInUse, killPortProcess, waitForPort } from '../../utils'
 
 /** VitePress 服务启动结果 */
 export interface VitepressStartResult {

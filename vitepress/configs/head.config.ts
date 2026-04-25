@@ -4,6 +4,7 @@
  * HTML head 标签配置
  */
 import { HeadConfig } from 'vitepress'
+
 import type { TNotesConfig } from '../../types'
 
 export function getHeadConfig(config: TNotesConfig, githubPageUrl: string): HeadConfig[] {

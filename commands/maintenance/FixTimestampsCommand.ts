@@ -3,8 +3,8 @@
  *
  * 修复时间戳命令 - 修复所有笔记的时间戳（基于 git 历史）
  */
-import { BaseCommand } from '../BaseCommand'
 import { TimestampService } from '../../services'
+import { BaseCommand } from '../BaseCommand'
 
 export class FixTimestampsCommand extends BaseCommand {
   private timestampService: TimestampService

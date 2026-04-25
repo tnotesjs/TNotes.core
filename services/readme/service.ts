@@ -3,11 +3,18 @@
  *
  * README 服务 - 封装 README 更新相关的业务逻辑
  */
-import type { NoteInfo, NoteConfig } from '../../types'
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  promises as fsPromises,
+} from 'fs'
+
+import { ConfigManager } from '../../config/ConfigManager'
+import { ROOT_README_PATH, VP_SIDEBAR_PATH } from '../../config/constants'
+import { NoteIndexCache } from '../../core/NoteIndexCache'
 import { NoteManager } from '../../core/NoteManager'
 import { ReadmeGenerator } from '../../core/ReadmeGenerator'
-import { ConfigManager } from '../../config/ConfigManager'
-import { NoteIndexCache } from '../../core/NoteIndexCache'
 import {
   parseNoteLine,
   buildNoteLineMarkdown,
@@ -15,13 +22,9 @@ import {
   getChangedIds,
   genHierarchicalSidebar,
 } from '../../utils'
-import { ROOT_README_PATH, VP_SIDEBAR_PATH } from '../../config/constants'
-import {
-  existsSync,
-  readFileSync,
-  writeFileSync,
-  promises as fsPromises,
-} from 'fs'
+
+import type { NoteInfo, NoteConfig } from '../../types'
+
 
 /**
  * README 更新选项

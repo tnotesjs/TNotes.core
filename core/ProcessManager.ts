@@ -4,8 +4,10 @@
  * 进程管理器 - 管理子进程的生命周期（单例模式）
  */
 import { spawn, ChildProcess } from 'child_process'
-import type { SpawnOptions } from 'child_process'
+
 import { Logger } from '../utils'
+
+import type { SpawnOptions } from 'child_process'
 
 /** 进程信息接口 */
 interface ProcessInfo {

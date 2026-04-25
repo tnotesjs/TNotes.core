@@ -1,8 +1,11 @@
-import { ref } from 'vue'
-import type { Ref, ComputedRef } from 'vue'
 import { useData } from 'vitepress'
-import type { Router } from 'vitepress'
+import { ref } from 'vue'
+
 import { NOTES_DIR_KEY } from '../../constants'
+
+import type { Router } from 'vitepress'
+import type { Ref, ComputedRef } from 'vue'
+
 
 /**
  * VSCode 集成和 GitHub 链接拦截

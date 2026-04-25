@@ -15,14 +15,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useData } from 'vitepress'
+import { ref, onMounted, watch, computed } from 'vue'
+
 import SidebarItems from './SidebarItems.vue'
+import { SIDEBAR_SHOW_NOTE_ID_KEY, SIDEBAR_MAX_DEPTH_KEY } from '../constants'
 // @ts-expect-error - VitePress Data Loader
 import { data as sidebarConfig } from '../sidebar.data'
 // @ts-expect-error - VitePress Data Loader
 import { data as tnotesConfig } from '../tnotes-config.data'
-import { SIDEBAR_SHOW_NOTE_ID_KEY, SIDEBAR_MAX_DEPTH_KEY } from '../constants'
 
 // 支持递归的侧边栏项类型
 interface SidebarItem {
@@ -192,7 +193,8 @@ function expandParentGroup(element: HTMLElement) {
 
   // 向上遍历，收集所有父级 group 的标题文本
   while (currentElement) {
-    const groupElement = currentElement.closest('.group')
+    const groupElement: HTMLElement | null =
+      currentElement.closest<HTMLElement>('.group')
     if (!groupElement) break
 
     const groupTitle = groupElement.querySelector('.group-title span')
@@ -205,7 +207,8 @@ function expandParentGroup(element: HTMLElement) {
     }
 
     // 继续向上查找
-    currentElement = groupElement.parentElement?.closest('.group') || null
+    currentElement =
+      groupElement.parentElement?.closest<HTMLElement>('.group') || null
   }
 
   console.log(

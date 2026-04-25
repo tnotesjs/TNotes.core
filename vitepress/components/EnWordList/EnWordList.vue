@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { marked } from 'marked'
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
+
 import {
   EN_WORDS_REPO_BASE_URL,
   EN_WORDS_REPO_BASE_RAW_URL,

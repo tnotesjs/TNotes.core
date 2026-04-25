@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.0.7] - 2026-04-25
+
 ### Changed
 
 - 一键复制功能注入 `frontmatter.rawContent` 时改为 base64(UTF-8) 编码，前端 `atob` + `TextDecoder` 解码后再写入剪贴板。彻底规避 VitePress 在生成 vueSrc 时多重正则（HTML 解析 `</script>`、`scriptClientRE` 等）对原文中 `<script>` 字面量的误匹配，对 VitePress 内部实现细节零依赖。前端消费点：`vitepress/components/Layout/DocBeforeControls.vue`

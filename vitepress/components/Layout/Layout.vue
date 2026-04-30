@@ -187,6 +187,8 @@
     <!-- <template #nav-screen-content-after>nav-screen-content-after</template> -->
   </Layout>
 
+  <SidebarResizeHandle />
+
   <!-- 全局重命名遮罩：关于面板保存或文件系统重命名时由 useRenameOverlay 控制 -->
   <LoadingPage
     :visible="renameOverlayState.visible"
@@ -226,6 +228,7 @@ import ImagePreview from "./ImagePreview.vue";
 import NavBarSettingsTrigger from "./NavBarSettingsTrigger.vue";
 import NoteStatus from "./NoteStatus.vue";
 import SidebarNavBefore from "./SidebarNavBefore.vue";
+import SidebarResizeHandle from "./SidebarResizeHandle.vue";
 import Swiper from "./Swiper.vue";
 import SettingsDialog from "../Settings/SettingsDialog.vue";
 

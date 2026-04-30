@@ -426,37 +426,23 @@ function toggleExpandCollapse() {
 
 // 获取当前笔记的所有出现位置
 function getCurrentNotePositions(): HTMLElement[] {
-  const currentPath = route.path
   const elements: HTMLElement[] = []
 
   if (!navRef.value) {
-    console.log('❌ [getCurrentNotePositions] navRef is null')
     return elements
   }
 
-  console.log('🔍 [getCurrentNotePositions] Current route path:', currentPath)
-
-  // 查找所有激活的笔记项
   const activeItems = navRef.value.querySelectorAll('.nav-item.active')
-  console.log(
-    '🔍 [getCurrentNotePositions] Active nav-items:',
-    activeItems.length
-  )
 
-  activeItems.forEach((item, index) => {
-    const href = item.getAttribute('href')
-    console.log(`🔍 [${index}] Active item href:`, href)
+  activeItems.forEach((item) => {
     elements.push(item as HTMLElement)
   })
 
-  console.log('🎯 [getCurrentNotePositions] Found positions:', elements.length)
   return elements
 }
 
 // 展开指定元素的父级分组
 function expandParentGroup(element: HTMLElement) {
-  console.log('📂 [expandParentGroup] Starting to expand parent groups')
-
   // 查找所有父级 group 元素（从最近的开始）
   let currentElement: HTMLElement | null = element
   const groupsToExpand: string[] = []
@@ -467,11 +453,10 @@ function expandParentGroup(element: HTMLElement) {
       currentElement.closest<HTMLElement>('.group')
     if (!groupElement) break
 
-    const groupTitle = groupElement.querySelector('.group-title span')
-    if (groupTitle) {
-      const groupText = groupTitle.textContent?.trim()
+    const groupTitleText = groupElement.querySelector('.group-title-text')
+    if (groupTitleText) {
+      const groupText = groupTitleText.textContent?.trim()
       if (groupText) {
-        console.log('📌 [expandParentGroup] Found parent group:', groupText)
         groupsToExpand.push(groupText)
       }
     }
@@ -481,57 +466,37 @@ function expandParentGroup(element: HTMLElement) {
       groupElement.parentElement?.closest<HTMLElement>('.group') || null
   }
 
-  console.log(
-    '📋 [expandParentGroup] Groups to expand (inner to outer):',
-    groupsToExpand
-  )
-
   // 从最外层开始展开，逐层向内
   // 但是搜索时要确保在正确的上下文中搜索
   if (groupsToExpand.length === 0) return
 
   // 反转数组，从最外层开始处理
   const outerToInner = [...groupsToExpand].reverse()
-  console.log(
-    '📋 [expandParentGroup] Processing order (outer to inner):',
-    outerToInner
-  )
 
   // 第一层必须从根开始搜索
   let currentContext: SidebarItem[] | null = null
 
   for (let i = 0; i < outerToInner.length; i++) {
     const groupText = outerToInner[i]
-    console.log(`🔄 [expandParentGroup] [${i}] Expanding: "${groupText}"`)
 
     if (i === 0) {
       // 第一层从根搜索
-      console.log(`  🌳 Searching from root`)
       const found = expandGroupRecursive(sidebarGroups.value, groupText)
       if (found) {
         // 找到后，获取这个分组的 items 作为下一层的搜索上下文
         const foundGroup = findGroupByText(sidebarGroups.value, groupText)
         if (foundGroup?.items) {
           currentContext = foundGroup.items
-          console.log(
-            `  ✅ Found and set context for next level (${foundGroup.items.length} items)`
-          )
         }
       }
     } else {
       // 后续层从上一层的上下文中搜索
       if (currentContext) {
-        console.log(
-          `  🔍 Searching in context (${currentContext.length} items)`
-        )
         const found = expandGroupRecursive(currentContext, groupText)
         if (found) {
           const foundGroup = findGroupByText(currentContext, groupText)
           if (foundGroup?.items) {
             currentContext = foundGroup.items
-            console.log(
-              `  ✅ Found and set context for next level (${foundGroup.items.length} items)`
-            )
           }
         }
       }
@@ -560,31 +525,16 @@ function findGroupByText(
 function expandGroupRecursive(
   items: SidebarItem[],
   targetText: string,
-  depth: number = 0
 ): boolean {
-  const indent = '  '.repeat(depth)
-  console.log(
-    `${indent}🔍 [expandGroupRecursive] Searching for "${targetText}" at depth ${depth}`
-  )
-
   for (const item of items) {
-    console.log(`${indent}  📝 Checking item: "${item.text}"`)
-
     if (item.text === targetText) {
-      console.log(`${indent}  ✅ Found target! Setting collapsed = false`)
       item.collapsed = false
       return true
     }
 
     if (item.items) {
-      console.log(
-        `${indent}  📂 Item has ${item.items.length} children, searching...`
-      )
-      const found = expandGroupRecursive(item.items, targetText, depth + 1)
+      const found = expandGroupRecursive(item.items, targetText)
       if (found) {
-        console.log(
-          `${indent}  ✅ Target found in children, expanding current item "${item.text}"`
-        )
         // 如果在子项中找到了，也展开当前项
         item.collapsed = false
         return true
@@ -592,9 +542,6 @@ function expandGroupRecursive(
     }
   }
 
-  console.log(
-    `${indent}❌ [expandGroupRecursive] Target "${targetText}" not found at depth ${depth}`
-  )
   return false
 }
 
@@ -639,23 +586,15 @@ function scrollToElement(element: HTMLElement) {
 
 // 聚焦到当前笔记（支持多个位置切换）
 function focusCurrentNote() {
-  console.log('🎯 [focusCurrentNote] Called')
   const positions = getCurrentNotePositions()
 
   if (positions.length === 0) {
-    console.log('❌ [focusCurrentNote] No positions found')
     return
   }
 
   // 循环切换聚焦位置
   currentFocusIndex.value = (currentFocusIndex.value + 1) % positions.length
   const targetElement = positions[currentFocusIndex.value]
-
-  console.log(
-    `🎯 [focusCurrentNote] Focusing position ${currentFocusIndex.value + 1}/${
-      positions.length
-    }`
-  )
 
   // 展开该笔记所在的分组
   expandParentGroup(targetElement)

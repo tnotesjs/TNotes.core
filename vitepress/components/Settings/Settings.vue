@@ -37,26 +37,6 @@
       <div :class="$style.settingItem">
         <div :class="$style.settingMeta">
           <div :class="$style.labelLine">
-            <span :class="$style.itemName">内容区宽度</span>
-            <span :class="$style.infoWrap">
-              <span :class="$style.infoIcon">?</span>
-              <span :class="$style.tooltip">
-                调整文章内容区域的最大宽度。全屏模式下不会限制宽度。
-              </span>
-            </span>
-          </div>
-          <span :class="$style.statusText">{{ contentWidth }}</span>
-        </div>
-
-        <select v-model="contentWidth" :class="$style.select">
-          <option value="688px">标准</option>
-          <option value="755px">较大</option>
-        </select>
-      </div>
-
-      <div :class="$style.settingItem">
-        <div :class="$style.settingMeta">
-          <div :class="$style.labelLine">
             <span :class="$style.itemName">侧边栏目录</span>
             <span :class="$style.infoWrap">
               <span :class="$style.infoIcon">?</span>
@@ -200,7 +180,6 @@ import { data as tnotesConfig } from '../tnotes-config.data'
 
 type SidebarDensity = 'compact' | 'default' | 'loose'
 
-const CONTENT_WIDTH_KEY = 'tnotes-content-width'
 const DEFAULT_SIDEBAR_DENSITY: SidebarDensity = 'default'
 const DEFAULT_DONE_PREFIX = '✅'
 const DEFAULT_UNDONE_PREFIX = '⏰'
@@ -219,8 +198,6 @@ const markmapTheme = ref('default')
 const originalMarkmapTheme = ref('default')
 const markmapExpandLevel = ref(5)
 const originalMarkmapExpandLevel = ref(5)
-const contentWidth = ref('688px')
-const originalContentWidth = ref('688px')
 const showNoteId = ref(false)
 const originalShowNoteId = ref(false)
 const sidebarDensity = ref<SidebarDensity>(DEFAULT_SIDEBAR_DENSITY)
@@ -236,7 +213,6 @@ const hasChanges = computed(
     path.value !== originalPath.value ||
     markmapTheme.value !== originalMarkmapTheme.value ||
     markmapExpandLevel.value !== originalMarkmapExpandLevel.value ||
-    contentWidth.value !== originalContentWidth.value ||
     showNoteId.value !== originalShowNoteId.value ||
     sidebarDensity.value !== originalSidebarDensity.value ||
     donePrefix.value !== originalDonePrefix.value ||
@@ -262,11 +238,6 @@ onMounted(() => {
   const savedLevel = localStorage.getItem(MARKMAP_EXPAND_LEVEL_KEY) || '5'
   markmapExpandLevel.value = parseInt(savedLevel, 10)
   originalMarkmapExpandLevel.value = markmapExpandLevel.value
-
-  const savedWidth = localStorage.getItem(CONTENT_WIDTH_KEY) || '688px'
-  contentWidth.value = savedWidth
-  originalContentWidth.value = savedWidth
-  applyContentWidth()
 
   const savedShowNoteId = localStorage.getItem(SIDEBAR_SHOW_NOTE_ID_KEY)
   showNoteId.value =
@@ -320,17 +291,14 @@ function save() {
       MARKMAP_EXPAND_LEVEL_KEY,
       markmapExpandLevel.value.toString(),
     )
-    localStorage.setItem(CONTENT_WIDTH_KEY, contentWidth.value)
     localStorage.setItem(SIDEBAR_SHOW_NOTE_ID_KEY, showNoteId.value.toString())
     localStorage.setItem(SIDEBAR_DENSITY_KEY, sidebarDensity.value)
     localStorage.setItem(SIDEBAR_DONE_PREFIX_KEY, donePrefix.value)
     localStorage.setItem(SIDEBAR_UNDONE_PREFIX_KEY, undonePrefix.value)
-    applyContentWidth()
 
     originalPath.value = path.value
     originalMarkmapTheme.value = markmapTheme.value
     originalMarkmapExpandLevel.value = markmapExpandLevel.value
-    originalContentWidth.value = contentWidth.value
     originalShowNoteId.value = showNoteId.value
     originalSidebarDensity.value = sidebarDensity.value
     originalDonePrefix.value = donePrefix.value
@@ -356,21 +324,10 @@ function reset() {
   path.value = originalPath.value
   markmapTheme.value = originalMarkmapTheme.value
   markmapExpandLevel.value = originalMarkmapExpandLevel.value
-  contentWidth.value = originalContentWidth.value
   showNoteId.value = originalShowNoteId.value
   sidebarDensity.value = originalSidebarDensity.value
   donePrefix.value = originalDonePrefix.value
   undonePrefix.value = originalUndonePrefix.value
-  applyContentWidth()
-}
-
-function applyContentWidth() {
-  if (typeof document === 'undefined') return
-
-  document.documentElement.style.setProperty(
-    '--tn-content-width',
-    contentWidth.value,
-  )
 }
 </script>
 

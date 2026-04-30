@@ -5,8 +5,15 @@
  * - 特殊布局模式（侧边栏隐藏、全屏等）
  */
 
+:root {
+  --tn-sidebar-width: 260px;
+  --tn-sidebar-layout-width: var(--tn-sidebar-width);
+  --vp-sidebar-width: var(--tn-sidebar-width);
+}
+
 //  侧边栏样式重写
 .VPSidebar {
+  width: var(--tn-sidebar-layout-width, var(--tn-sidebar-width)) !important;
   padding-top: var(--vp-nav-height) !important;
   padding-left: 1rem !important;
   padding-right: 1rem !important;
@@ -18,9 +25,16 @@
 /* ===================================== */
 
 .hide-sidebar .VPSidebar {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow: hidden;
   transform: translateX(-100%);
   pointer-events: none;
   transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.hide-sidebar .VPNavBarTitle {
+  display: none !important;
 }
 
 .hide-sidebar .VPNavBar {
@@ -33,13 +47,6 @@
   padding-left: calc((100vw - var(--vp-layout-max-width)) / 2) !important;
 }
 
-.hide-sidebar .VPDoc .content-container {
-  max-width: calc(
-    var(--vp-sidebar-width) + var(--tn-content-width, 688px) +
-      var(--vp-sidebar-width)
-  ) !important;
-}
-
 /* #endregion */
 
 /* ===================================== */
@@ -48,6 +55,7 @@
 
 .content-fullscreen .VPSidebar,
 .content-fullscreen .VPNav,
+.content-fullscreen .VPLocalNav,
 .content-fullscreen .VPDocFooter,
 .content-fullscreen .VPNavBar {
   display: none !important;

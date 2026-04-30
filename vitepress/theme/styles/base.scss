@@ -13,9 +13,6 @@
   /* 品牌色 */
   --vp-c-brand-1: #646cff;
   --vp-c-brand-2: #747bff;
-
-  /* TNotes 自定义变量 */
-  --tn-content-width: 688px;
 }
 
 /* #endregion */
@@ -41,10 +38,14 @@ ul > li.task-list-item > ul {
 }
 
 .vp-doc h2 {
-  // 默认值：
+  // margin 默认值：
   // margin: 48px 0 16px;
   // 缩小上边距
-  // margin: 32px 0 16px;
+  margin: 1rem 0 1rem;
+  // border-top 默认值：
+  // border-top: 1px solid var(--vp-c-divider);
+  // 移除上横线：
+  border-top: none;
 }
 
 /* #endregion */

@@ -33,7 +33,7 @@
   height: 16px;
   transition: transform 0.25s ease;
   transform: rotate(90deg); /* 默认向下（展开状态）*/
-  opacity: 0.3;
+  opacity: 0;
 }
 
 /* #endregion */
@@ -100,7 +100,7 @@
 h2.collapsible-h2 {
   position: relative !important;
   cursor: pointer !important;
-  padding: 8px 40px 8px 12px !important; /* 右侧预留按钮空间 */
+  padding: 8px 40px 8px 0px !important; /* 右侧预留按钮空间 */
   border-radius: 6px !important;
   transition: all 0.2s ease !important;
 
@@ -111,12 +111,18 @@ h2.collapsible-h2 {
       opacity: 1 !important;
     }
   }
+  .collapse-icon {
+    opacity: 0.3;
+  }
 
   &.collapsed {
     background: var(--vp-c-bg-soft) !important;
-    border: 1px solid var(--vp-c-divider) !important;
+    border: .1px solid var(--vp-c-divider) !important;
+    .collapse-icon {
+      opacity: 0.5;
+    }
     // margin-top: 1rem !important;
-    margin: 12px 0 0 0 !important;
+    // margin: 12px 0 0 0 !important;
 
     .collapse-icon {
       transform: rotate(0deg) !important; /* 折叠时向右 */
@@ -130,7 +136,8 @@ h2.collapsible-h2 {
 
   /* 修复 anchor 位置 */
   .header-anchor {
-    top: 10px !important;
+    // top: 10px !important;
+    display: none !important;
   }
 }
 
@@ -152,7 +159,10 @@ h2.collapsible-h2 {
   overflow: hidden;
   max-height: 10000px;
   opacity: 1;
-  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    margin 0.3s ease;
 
   &.collapsed {
     max-height: 0 !important;

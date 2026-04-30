@@ -48,4 +48,12 @@ ul > li.task-list-item > ul {
   border-top: none;
 }
 
+// 代码块外层 div
+.vp-doc div[class*=language-] {
+  // 默认值：
+  // margin: 16px 24px;
+  // 移除外层 margin：
+  margin: 0px !important;
+}
+
 /* #endregion */

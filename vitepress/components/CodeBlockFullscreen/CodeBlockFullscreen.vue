@@ -29,7 +29,7 @@
                 @click="copyCode"
                 :title="copied ? '已复制' : '复制代码'"
               >
-                <img v-if="!copied" :src="icon__copy" alt="复制" />
+                <img v-if="!copied" :src="icon__clipboard" alt="复制" />
                 <img v-else :src="icon__check" alt="已复制" />
               </button>
               <!-- 关闭按钮 -->
@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
-import { icon__copy, icon__check, icon__close, icon__rotate } from '../../assets/icons'
+import { icon__clipboard, icon__check, icon__close, icon__rotate } from '../../assets/icons'
 
 const ORIENTATION_KEY = 'code-fullscreen-orientation'
 
@@ -365,10 +365,5 @@ onUnmounted(() => {
 
 .fullscreen-fade-leave-to .code-fullscreen-container {
   transform: scale(0.95);
-}
-
-/* 暗色模式图标适配 */
-.dark .action-btn img {
-  filter: invert(1);
 }
 </style>

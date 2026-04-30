@@ -1,38 +1,131 @@
-import { onMounted, onUnmounted } from 'vue'
-import { createApp } from 'vue'
+import { createApp, onMounted, onUnmounted } from 'vue'
 
 import CodeBlockFullscreen from './CodeBlockFullscreen.vue'
+import { icon__check, icon__clipboard, icon__fullscreen } from '../../assets/icons'
+
+type CopyState = 'idle' | 'copied' | 'failed'
+
+const CODE_BLOCK_SELECTOR = 'div[class*="language-"]'
+const CODE_ACTIONS_CLASS = 'tn-code-actions'
+const COPY_RESET_DELAY = 2000
 
 export function useCodeBlockFullscreen() {
   let fullscreenApp: any = null
   let fullscreenContainer: HTMLElement | null = null
+  const copyResetTimers = new WeakMap<HTMLElement, number>()
 
-  function addFullscreenButtons() {
+  function addCodeActions() {
     // 找到所有代码块
-    const codeBlocks = document.querySelectorAll('div[class*="language-"]')
+    const codeBlocks = document.querySelectorAll(CODE_BLOCK_SELECTOR)
 
     codeBlocks.forEach((block) => {
-      // 避免重复添加按钮
-      if (block.querySelector('.fullscreen-btn')) return
+      if (!(block instanceof HTMLElement)) return
+      if (!block.querySelector('pre code')) return
+      block.querySelectorAll('.fullscreen-btn').forEach((button) => {
+        button.remove()
+      })
+      if (block.querySelector(`.${CODE_ACTIONS_CLASS}`)) return
 
-      // 创建全屏按钮
-      const button = document.createElement('button')
-      button.className = 'fullscreen-btn'
-      button.title = '全屏查看代码'
-      button.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-        </svg>
-      `
+      const actions = document.createElement('div')
+      actions.className = CODE_ACTIONS_CLASS
+      actions.setAttribute('aria-label', '代码块操作')
 
-      // 点击事件
-      button.addEventListener('click', () => {
-        openFullscreen(block as HTMLElement)
+      const fullscreenButton = createActionButton({
+        className: 'tn-code-action-fullscreen',
+        title: '全屏查看代码',
+        icon: icon__fullscreen,
+        alt: '全屏',
+      })
+      fullscreenButton.addEventListener('click', () => {
+        openFullscreen(block)
       })
 
-      // 添加按钮到代码块
-      block.appendChild(button)
+      const copyButton = createActionButton({
+        className: 'tn-code-action-copy',
+        title: '复制代码',
+        icon: icon__clipboard,
+        alt: '复制',
+      })
+      copyButton.addEventListener('click', () => {
+        void copyCode(block, copyButton)
+      })
+
+      actions.append(fullscreenButton, copyButton)
+      block.appendChild(actions)
     })
+  }
+
+  function createActionButton(options: {
+    className: string
+    title: string
+    icon: string
+    alt: string
+  }) {
+    const button = document.createElement('button')
+    button.className = `tn-code-action ${options.className}`
+    button.type = 'button'
+    button.title = options.title
+    button.setAttribute('aria-label', options.title)
+    button.innerHTML = `<img src="${options.icon}" alt="${options.alt}" />`
+
+    return button
+  }
+
+  async function copyCode(codeBlock: HTMLElement, button: HTMLElement) {
+    const codeElement = codeBlock.querySelector('pre code')
+    const text = codeElement?.textContent ?? ''
+    if (!text) {
+      setCopyState(button, 'failed')
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopyState(button, 'copied')
+    } catch {
+      setCopyState(button, 'failed')
+    }
+  }
+
+  function setCopyState(button: HTMLElement, state: CopyState) {
+    const currentTimer = copyResetTimers.get(button)
+    if (currentTimer) {
+      window.clearTimeout(currentTimer)
+    }
+
+    button.dataset.copyState = state
+    if (button.parentElement) {
+      button.parentElement.dataset.copyState = state
+    }
+    button.title = getCopyTitle(state)
+    button.setAttribute('aria-label', getCopyTitle(state))
+
+    const icon = button.querySelector('img')
+    if (icon) {
+      icon.setAttribute('src', state === 'copied' ? icon__check : icon__clipboard)
+      icon.setAttribute('alt', state === 'copied' ? '已复制' : '复制')
+    }
+
+    const timer = window.setTimeout(() => {
+      button.dataset.copyState = 'idle'
+      if (button.parentElement) {
+        button.parentElement.dataset.copyState = 'idle'
+      }
+      button.title = getCopyTitle('idle')
+      button.setAttribute('aria-label', getCopyTitle('idle'))
+      icon?.setAttribute('src', icon__clipboard)
+      icon?.setAttribute('alt', '复制')
+      copyResetTimers.delete(button)
+    }, COPY_RESET_DELAY)
+
+    copyResetTimers.set(button, timer)
+  }
+
+  function getCopyTitle(state: CopyState): string {
+    if (state === 'copied') return '已复制'
+    if (state === 'failed') return '复制失败'
+
+    return '复制代码'
   }
 
   function openFullscreen(codeBlock: HTMLElement) {
@@ -88,19 +181,23 @@ export function useCodeBlockFullscreen() {
 
   function cleanup() {
     closeFullscreen()
-    // 移除所有全屏按钮
-    document.querySelectorAll('.fullscreen-btn').forEach((btn) => btn.remove())
+    document.querySelectorAll(`.${CODE_ACTIONS_CLASS}`).forEach((actions) => {
+      actions.remove()
+    })
+    document.querySelectorAll('.fullscreen-btn').forEach((button) => {
+      button.remove()
+    })
   }
 
   onMounted(() => {
     // 初始化
     setTimeout(() => {
-      addFullscreenButtons()
+      addCodeActions()
     }, 100)
 
     // 监听路由变化
     const observer = new MutationObserver(() => {
-      addFullscreenButtons()
+      addCodeActions()
     })
 
     observer.observe(document.body, {

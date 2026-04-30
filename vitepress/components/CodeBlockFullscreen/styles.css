@@ -1,9 +1,13 @@
-/* 代码块全屏按钮样式 */
+/* 代码块操作按钮样式 */
 div[class*='language-'] {
   position: relative;
 }
 
-.fullscreen-btn {
+div[class*='language-'] button.copy {
+  display: none !important;
+}
+
+.tn-code-actions {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -11,54 +15,112 @@ div[class*='language-'] {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  padding: 2px;
+  background-color: color-mix(in srgb, var(--vp-code-block-bg) 92%, transparent);
+  border: .1px solid var(--vp-c-divider);
+  border-radius: 7px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tn-code-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 32px;
   height: 32px;
   padding: 0;
   border: none;
-  background-color: var(--vp-code-block-bg);
+  background-color: transparent;
   color: var(--vp-c-text-2);
   border-radius: 6px;
   cursor: pointer;
-  opacity: 0;
   transition: all 0.2s;
 }
 
-div[class*='language-']:hover .fullscreen-btn {
+.tn-code-action img {
+  width: 16px;
+  height: 16px;
+  filter: var(--vp-icon-filter, none);
+}
+
+div[class*='language-']:hover .tn-code-actions,
+.tn-code-actions:focus-within,
+.tn-code-actions[data-copy-state='copied'],
+.tn-code-actions[data-copy-state='failed'] {
   opacity: 1;
 }
 
-.fullscreen-btn:hover {
+.tn-code-action:hover {
   background-color: var(--vp-c-default-soft);
   color: var(--vp-c-brand-1);
   transform: scale(1.05);
 }
 
-.fullscreen-btn:active {
+.tn-code-action:active {
   transform: scale(0.95);
 }
 
-.fullscreen-btn svg {
-  width: 16px;
-  height: 16px;
+.tn-code-action-copy {
+  position: relative;
 }
+
+.tn-code-action-copy[data-copy-state='copied'] {
+  background-color: var(--vp-c-green-soft);
+}
+
+.tn-code-action-copy[data-copy-state='failed'] {
+  background-color: var(--vp-c-danger-soft);
+}
+
+.tn-code-action-copy::after {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  padding: 4px 7px;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-elv);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  box-shadow: var(--vp-shadow-2);
+  content: attr(title);
+  font-size: 12px;
+  line-height: 18px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+  white-space: nowrap;
+}
+
+.tn-code-action-copy[data-copy-state='copied']::after,
+.tn-code-action-copy[data-copy-state='failed']::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* .dark .tn-code-action-copy img {
+  filter: invert(1);
+} */
 
 /* 移动端始终显示按钮 */
 @media (max-width: 768px) {
-  .fullscreen-btn {
-    opacity: 0.8;
+  .tn-code-actions {
+    /* opacity: 0.8; */
     top: 6px;
     right: 6px;
+  }
+
+  .tn-code-action {
     width: 28px;
     height: 28px;
   }
 
-  .fullscreen-btn svg {
+  .tn-code-action img {
     width: 14px;
     height: 14px;
   }
-}
-
-div[class*='language-']:has(.copy) .fullscreen-btn {
-  /* 代码块已经有复制按钮，需要微调位置 */
-  right: 54px;
 }

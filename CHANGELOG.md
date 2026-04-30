@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.1.17] - 2026-04-30
+
 ### Added
 
 - 新增侧边栏边缘拖拽控件，支持在 260px 至 480px 范围内调整宽度并本地持久化。
@@ -184,7 +188,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.1.16...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.1.17...HEAD
+[0.1.17]: https://github.com/tnotesjs/core/compare/v0.1.16...v0.1.17
 [0.1.16]: https://github.com/tnotesjs/core/compare/v0.1.15...v0.1.16
 [0.0.6]: https://github.com/tnotesjs/core/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/tnotesjs/core/compare/v0.0.4...v0.0.5

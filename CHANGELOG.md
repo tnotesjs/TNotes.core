@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.1.18] - 2026-04-30
+
 ### Changed
 
 - 代码块右上角操作区改为统一自定义按钮组，复制和全屏入口使用一致的图标、间距与反馈样式，并兼容普通代码块和 code-group 代码块。
@@ -194,7 +198,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.1.17...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.1.18...HEAD
+[0.1.18]: https://github.com/tnotesjs/core/compare/v0.1.17...v0.1.18
 [0.1.17]: https://github.com/tnotesjs/core/compare/v0.1.16...v0.1.17
 [0.1.16]: https://github.com/tnotesjs/core/compare/v0.1.15...v0.1.16
 [0.0.6]: https://github.com/tnotesjs/core/compare/v0.0.5...v0.0.6

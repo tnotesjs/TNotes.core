@@ -13,8 +13,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 
-import { icon__next, icon__prev } from '../../assets/icons'
 import { useSidebarLayout } from './composables/useSidebarLayout'
+import { icon__next, icon__prev } from '../../assets/icons'
 
 const { hidden, initSidebarLayout, toggleSidebar } = useSidebarLayout()
 

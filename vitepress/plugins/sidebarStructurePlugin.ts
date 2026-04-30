@@ -5,9 +5,9 @@
  */
 import { FileWatcherService, NoteService, ReadmeService } from '../../services'
 
-import type { PluginOption } from 'vite'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { NoteInfo } from '../../types'
+import type { PluginOption } from 'vite'
 
 interface JsonResponse {
   success: boolean

@@ -70,6 +70,24 @@ export const SIDEBAR_MAX_DEPTH_KEY: string =
   'SIDEBAR_MAX_DEPTH_KEY__' + REPO_NAME
 
 /**
+ * 侧边栏目录风格配置
+ */
+export const SIDEBAR_DENSITY_KEY: string =
+  'SIDEBAR_DENSITY_KEY__' + REPO_NAME
+
+/**
+ * 侧边栏已完成笔记前缀配置
+ */
+export const SIDEBAR_DONE_PREFIX_KEY: string =
+  'SIDEBAR_DONE_PREFIX_KEY__' + REPO_NAME
+
+/**
+ * 侧边栏未完成笔记前缀配置
+ */
+export const SIDEBAR_UNDONE_PREFIX_KEY: string =
+  'SIDEBAR_UNDONE_PREFIX_KEY__' + REPO_NAME
+
+/**
  * VitePress HOME README 文件名
  * 该文件内容基于 HOME README 而生成，作为 github pages 中的 README 文件，主要用于展示笔记的目录结构。
  */

@@ -5,6 +5,14 @@
  * - 特殊布局模式（侧边栏隐藏、全屏等）
  */
 
+//  侧边栏样式重写
+.VPSidebar {
+  padding-top: var(--vp-nav-height) !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
 /* ===================================== */
 /* #region 侧边栏隐藏模式                */
 /* ===================================== */

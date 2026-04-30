@@ -21,10 +21,10 @@ import {
   logger,
   getChangedIds,
   genHierarchicalSidebar,
+  processEmptyLines,
 } from '../../utils'
 
 import type { NoteInfo, NoteConfig } from '../../types'
-
 
 /**
  * README 更新选项
@@ -33,6 +33,20 @@ interface UpdateReadmeOptions {
   updateSidebar?: boolean
   updateHome?: boolean
   notes?: NoteInfo[]
+}
+
+interface GroupBlock {
+  headingIndex: number
+  endIndex: number
+  level: number
+}
+
+type NoteInsertPlacement = 'before' | 'after'
+
+interface MoveNoteOptions {
+  targetGroupPath?: string[]
+  targetNoteIndex?: string
+  placement?: NoteInsertPlacement
 }
 
 /**
@@ -433,6 +447,184 @@ export class ReadmeService {
   }
 
   /**
+   * 重命名根 README 中的目录标题
+   */
+  async renameGroupInReadme(
+    groupPath: string[],
+    newTitle: string,
+  ): Promise<void> {
+    this.assertGroupPath(groupPath)
+    const cleanTitle = this.cleanHeadingTitle(newTitle)
+
+    const lines = await this.readHomeReadmeLines()
+    const block = this.findGroupBlock(lines, groupPath)
+    const headingMark = '#'.repeat(block.level)
+    lines[block.headingIndex] = `${headingMark} ${cleanTitle}`
+
+    await this.writeHomeReadmeLines(lines)
+    logger.info(`重命名目录: ${groupPath.join(' / ')} -> ${cleanTitle}`)
+  }
+
+  /**
+   * 删除根 README 中的目录块，返回块内所有笔记编号
+   */
+  async deleteGroupFromReadme(groupPath: string[]): Promise<string[]> {
+    this.assertGroupPath(groupPath)
+
+    const lines = await this.readHomeReadmeLines()
+    const block = this.findGroupBlock(lines, groupPath)
+    const noteIndexes = this.collectNoteIndexes(
+      lines,
+      block.headingIndex,
+      block.endIndex,
+    )
+
+    lines.splice(block.headingIndex, block.endIndex - block.headingIndex)
+    await this.writeHomeReadmeLines(lines)
+
+    logger.info(
+      `删除目录: ${groupPath.join(' / ')} (${noteIndexes.length} 篇笔记)`,
+    )
+
+    return noteIndexes
+  }
+
+  /**
+   * 在目录开头插入笔记链接
+   */
+  async insertNotesAtGroupStart(
+    groupPath: string[],
+    notes: NoteInfo[],
+  ): Promise<void> {
+    this.assertGroupPath(groupPath)
+    if (notes.length === 0) return
+
+    const lines = await this.readHomeReadmeLines()
+    const block = this.findGroupBlock(lines, groupPath)
+    const noteLines = this.buildNoteLines(notes)
+    let insertIndex = block.headingIndex + 1
+
+    while (insertIndex < block.endIndex && lines[insertIndex].trim() === '') {
+      insertIndex++
+    }
+
+    lines.splice(insertIndex, 0, ...noteLines)
+    await this.writeHomeReadmeLines(lines)
+
+    logger.info(
+      `在目录开头插入笔记: ${groupPath.join(' / ')} (${notes.length} 篇)`,
+    )
+  }
+
+  /**
+   * 在指定笔记上方或下方插入笔记链接
+   */
+  async insertNotesAroundNote(
+    targetNoteIndex: string,
+    notes: NoteInfo[],
+    placement: NoteInsertPlacement,
+  ): Promise<void> {
+    if (notes.length === 0) return
+
+    const lines = await this.readHomeReadmeLines()
+    const noteLineIndex = this.findNoteLineIndex(lines, targetNoteIndex)
+    const insertIndex =
+      placement === 'before' ? noteLineIndex : noteLineIndex + 1
+    const noteLines = this.buildNoteLines(notes)
+
+    lines.splice(insertIndex, 0, ...noteLines)
+    await this.writeHomeReadmeLines(lines)
+
+    logger.info(
+      `在笔记 ${targetNoteIndex} ${placement === 'before' ? '上方' : '下方'}插入 ${notes.length} 篇笔记`,
+    )
+  }
+
+  /**
+   * 移动笔记引用到目录开头，或移动到另一篇笔记前后
+   */
+  async moveNoteInReadme(
+    noteIndex: string,
+    options: MoveNoteOptions,
+  ): Promise<void> {
+    const lines = await this.readHomeReadmeLines()
+    const sourceIndex = this.findNoteLineIndex(lines, noteIndex)
+    const [noteLine] = lines.splice(sourceIndex, 1)
+
+    if (options.targetGroupPath) {
+      const block = this.findGroupBlock(lines, options.targetGroupPath)
+      let insertIndex = block.headingIndex + 1
+
+      while (insertIndex < block.endIndex && lines[insertIndex].trim() === '') {
+        insertIndex++
+      }
+
+      lines.splice(insertIndex, 0, noteLine)
+      await this.writeHomeReadmeLines(lines)
+      return
+    }
+
+    if (!options.targetNoteIndex) {
+      throw new Error('缺少目标笔记或目标目录')
+    }
+    if (options.targetNoteIndex === noteIndex) {
+      throw new Error('不能把笔记移动到自身附近')
+    }
+
+    const targetIndex = this.findNoteLineIndex(lines, options.targetNoteIndex)
+    const insertIndex =
+      options.placement === 'after' ? targetIndex + 1 : targetIndex
+    lines.splice(insertIndex, 0, noteLine)
+    await this.writeHomeReadmeLines(lines)
+  }
+
+  /**
+   * 移动目录块到同级目录前后
+   */
+  async moveGroupInReadme(
+    groupPath: string[],
+    targetGroupPath: string[],
+    placement: NoteInsertPlacement = 'before',
+  ): Promise<void> {
+    this.assertGroupPath(groupPath)
+    this.assertGroupPath(targetGroupPath)
+
+    if (this.isSamePath(groupPath, targetGroupPath)) {
+      throw new Error('不能把目录移动到自身附近')
+    }
+    if (groupPath.length !== targetGroupPath.length) {
+      throw new Error('第一版拖拽仅支持同级目录排序')
+    }
+
+    const lines = await this.readHomeReadmeLines()
+    const sourceBlock = this.findGroupBlock(lines, groupPath)
+    const movingLines = lines.splice(
+      sourceBlock.headingIndex,
+      sourceBlock.endIndex - sourceBlock.headingIndex,
+    )
+    const targetBlock = this.findGroupBlock(lines, targetGroupPath)
+    const insertIndex =
+      placement === 'after' ? targetBlock.endIndex : targetBlock.headingIndex
+
+    lines.splice(insertIndex, 0, ...movingLines)
+    await this.writeHomeReadmeLines(lines)
+  }
+
+  /**
+   * 更新根 README 和 sidebar，不重写每篇笔记 README
+   */
+  async refreshHomeReadmeAndSidebar(notes?: NoteInfo[]): Promise<void> {
+    const allNotes =
+      notes ??
+      (this.noteIndexCache.isInitialized()
+        ? this.noteIndexCache.toNoteInfoList()
+        : this.noteManager.scanNotes())
+
+    await this.updateHomeReadme(allNotes)
+    await this.updateSidebar(allNotes)
+  }
+
+  /**
    * 重新生成 sidebar.json（基于当前 README.md）
    * @param notes - 可选的笔记列表，不传则内部扫描
    */
@@ -444,5 +636,126 @@ export class ReadmeService {
         : this.noteManager.scanNotes())
     await this.updateSidebar(allNotes)
     logger.info('重新生成 sidebar.json')
+  }
+
+  private async readHomeReadmeLines(): Promise<string[]> {
+    const content = await fsPromises.readFile(ROOT_README_PATH, 'utf-8')
+    return content.split('\n')
+  }
+
+  private async writeHomeReadmeLines(lines: string[]): Promise<void> {
+    const content = processEmptyLines(lines).join('\n')
+    await fsPromises.writeFile(ROOT_README_PATH, content, 'utf-8')
+  }
+
+  private assertGroupPath(groupPath: string[]): void {
+    if (!Array.isArray(groupPath) || groupPath.length === 0) {
+      throw new Error('目录路径不能为空')
+    }
+  }
+
+  private cleanHeadingTitle(title: string): string {
+    const cleanTitle = title.trim().replace(/^#+\s*/, '')
+    if (!cleanTitle) {
+      throw new Error('目录名称不能为空')
+    }
+    if (/\r|\n/.test(cleanTitle)) {
+      throw new Error('目录名称不能包含换行')
+    }
+    return cleanTitle
+  }
+
+  private getHeadingInfo(line: string): { level: number; text: string } | null {
+    const match = line.match(/^(#{2,})\s+(.+)$/)
+    if (!match) return null
+
+    return {
+      level: match[1].length,
+      text: match[2].trim(),
+    }
+  }
+
+  private findGroupBlock(lines: string[], groupPath: string[]): GroupBlock {
+    const stack: Array<{ level: number; text: string }> = []
+
+    for (let i = 0; i < lines.length; i++) {
+      const heading = this.getHeadingInfo(lines[i])
+      if (!heading) continue
+
+      while (
+        stack.length > 0 &&
+        stack[stack.length - 1].level >= heading.level
+      ) {
+        stack.pop()
+      }
+
+      stack.push(heading)
+
+      const currentPath = stack.map((item) => item.text)
+      if (this.isSamePath(currentPath, groupPath)) {
+        return {
+          headingIndex: i,
+          endIndex: this.findGroupEndIndex(lines, i, heading.level),
+          level: heading.level,
+        }
+      }
+    }
+
+    throw new Error(`未找到目录: ${groupPath.join(' / ')}`)
+  }
+
+  private findGroupEndIndex(
+    lines: string[],
+    headingIndex: number,
+    level: number,
+  ): number {
+    for (let i = headingIndex + 1; i < lines.length; i++) {
+      const heading = this.getHeadingInfo(lines[i])
+      if (heading && heading.level <= level) {
+        return i
+      }
+    }
+
+    return lines.length
+  }
+
+  private isSamePath(left: string[], right: string[]): boolean {
+    if (left.length !== right.length) return false
+
+    return left.every((item, index) => item === right[index])
+  }
+
+  private collectNoteIndexes(
+    lines: string[],
+    startIndex: number,
+    endIndex: number,
+  ): string[] {
+    const noteIndexes: string[] = []
+
+    for (let i = startIndex; i < endIndex; i++) {
+      const parsed = parseNoteLine(lines[i])
+      if (parsed.noteIndex) {
+        noteIndexes.push(parsed.noteIndex)
+      }
+    }
+
+    return [...new Set(noteIndexes)]
+  }
+
+  private findNoteLineIndex(lines: string[], noteIndex: string): number {
+    for (let i = 0; i < lines.length; i++) {
+      const parsed = parseNoteLine(lines[i])
+      if (parsed.noteIndex === noteIndex) {
+        return i
+      }
+    }
+
+    throw new Error(`README.md 中未找到笔记: ${noteIndex}`)
+  }
+
+  private buildNoteLines(notes: NoteInfo[]): string[] {
+    const repoOwner = this.configManager.get('author')
+    const repoName = this.configManager.get('repoName')
+    return notes.map((note) => buildNoteLineMarkdown(note, repoOwner, repoName))
   }
 }

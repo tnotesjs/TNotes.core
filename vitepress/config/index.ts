@@ -22,6 +22,7 @@ import { buildProgressPlugin } from '../plugins/buildProgressPlugin'
 import { fileWatcherBridgePlugin } from '../plugins/fileWatcherBridgePlugin'
 import { getNoteByConfigIdPlugin } from '../plugins/getNoteByConfigIdPlugin'
 import { renameNotePlugin } from '../plugins/renameNotePlugin'
+import { sidebarStructurePlugin } from '../plugins/sidebarStructurePlugin'
 import { updateConfigPlugin } from '../plugins/updateConfigPlugin'
 
 import type { TNotesConfig } from '../../types'
@@ -77,6 +78,7 @@ export function defineNotesConfig(overrides: UserConfig = {}) {
         buildProgressPlugin() as any,
         updateConfigPlugin() as any,
         renameNotePlugin() as any,
+        sidebarStructurePlugin() as any,
         getNoteByConfigIdPlugin() as any,
         fileWatcherBridgePlugin() as any,
         ...(overrideVite?.plugins || []),

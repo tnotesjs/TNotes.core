@@ -94,11 +94,11 @@ export function getThemeConfig(config: TNotesConfig): DefaultTheme.Config {
         },
       },
     },
-    // sidebar: [...sidebar],
+    // VitePress 只有 sidebar 非空才会渲染 sidebar 插槽，自定义侧边栏依赖这个外壳。
     sidebar: [
       {
-        text: '👀 README',
-        link: '/README',
+        text: '',
+        items: [],
       },
     ],
     socialLinks: config.socialLinks as DefaultTheme.SocialLink[],

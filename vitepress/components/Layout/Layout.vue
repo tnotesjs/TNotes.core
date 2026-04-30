@@ -53,8 +53,8 @@
         </template>
 
         <AboutPanel
-          :is-home-readme="isHomeReadme"
-          :current-note-id="currentNoteId"
+          :is-home-readme="modalIsHomeReadme"
+          :current-note-id="modalNoteId"
           :is-dev="isDev"
           v-model:editable-note-title="editableNoteTitle"
           v-model:editable-description="editableDescription"
@@ -75,7 +75,7 @@
         />
 
         <!-- 操作按钮（仅开发环境且非首页显示） -->
-        <template #footer v-if="isDev && !isHomeReadme">
+        <template #footer v-if="isDev && !modalIsHomeReadme">
           <div :class="$style.actionBar">
             <button
               :class="[
@@ -161,7 +161,10 @@
 
     <!-- 使用 sidebar-nav-after 插槽插入自定义 Sidebar -->
     <template #sidebar-nav-after>
-      <CustomSidebar ref="customSidebarRef" />
+      <CustomSidebar
+        ref="customSidebarRef"
+        @open-note-about="openSidebarNoteAbout"
+      />
     </template>
     <!-- <template #sidebar-nav-after>sidebar-nav-after</template> -->
 
@@ -313,6 +316,14 @@ const currentNoteConfig = computed(() => {
       };
 });
 
+function getEmptyNoteConfig() {
+  return {
+    bilibili: [],
+    done: false,
+    enableDiscussions: false,
+  };
+}
+
 const isDiscussionsVisible = computed(
   () => currentNoteConfig.value.enableDiscussions,
 );
@@ -334,23 +345,6 @@ const completionPercentage = computed(() => {
 const homeReadmeCreatedAt = computed(() => readmeData?.created_at);
 const homeReadmeUpdatedAt = computed(() => readmeData?.updated_at);
 
-// 计算当前笔记的 GitHub URL
-const currentNoteGithubUrl = computed(() => {
-  if (!currentNoteId.value) return "";
-
-  // 从 relativePath 提取笔记路径
-  // 格式如: notes/0001. xxx/README.md
-  const relativePath = vpData.page.value.relativePath;
-  const match = relativePath.match(/notes\/(\d{4}\.[^/]+)/);
-
-  if (!match) return "";
-
-  const notePath = match[0]; // notes/0001. xxx
-  const repoName = vpData.site.value.title.toLowerCase(); // TNotes.introduction
-
-  return `https://github.com/tnotesjs/${repoName}/tree/main/${notePath}`;
-});
-
 // #region - Composables
 // 404 重定向
 const { showNotFound, decodedCurrentPath, initRedirectCheck } =
@@ -358,6 +352,51 @@ const { showNotFound, decodedCurrentPath, initRedirectCheck } =
 
 // modal 控制
 const timeModalOpen = ref(false);
+const sidebarAboutNoteId = ref(null);
+
+const modalIsHomeReadme = computed(
+  () => !sidebarAboutNoteId.value && isHomeReadme.value,
+);
+
+const modalNoteId = computed(() => sidebarAboutNoteId.value || currentNoteId.value);
+
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function getNoteFolderSegment(noteId) {
+  if (!noteId) return "";
+
+  const source =
+    noteId === currentNoteId.value
+      ? vpData.page.value.relativePath
+      : allNotesConfig[noteId]?.redirect || "";
+  const match = source.match(/notes\/([^/]+)\/README/);
+
+  return match ? match[1] : "";
+}
+
+function getNoteTitleById(noteId) {
+  const folderSegment = getNoteFolderSegment(noteId);
+  const match = folderSegment.match(/^\d{4}\.\s+(.+)$/);
+
+  return match ? safeDecode(match[1]) : "";
+}
+
+const modalNoteTitle = computed(() => {
+  if (!sidebarAboutNoteId.value) return currentNoteTitle.value;
+  return getNoteTitleById(sidebarAboutNoteId.value);
+});
+
+const modalNoteConfig = computed(() => {
+  return modalNoteId.value && allNotesConfig[modalNoteId.value]
+    ? allNotesConfig[modalNoteId.value]
+    : getEmptyNoteConfig();
+});
 
 // 笔记配置管理
 const {
@@ -370,9 +409,9 @@ const {
   resetNoteConfig,
   updateOriginalValues,
 } = useNoteConfig(
-  currentNoteId,
-  currentNoteConfig,
-  currentNoteTitle,
+  modalNoteId,
+  modalNoteConfig,
+  modalNoteTitle,
   timeModalOpen,
 );
 
@@ -388,7 +427,7 @@ const {
   saveButtonText,
   saveNoteConfig,
 } = useNoteSave(
-  currentNoteId,
+  modalNoteId,
   computed(() => {
     if (typeof window === "undefined") return false;
     return (
@@ -399,13 +438,13 @@ const {
   hasConfigChanges,
   titleError,
   editableNoteTitle,
-  computed(() => currentNoteTitle.value),
+  computed(() => modalNoteTitle.value),
   editableNoteStatus,
-  computed(() => currentNoteConfig.value.done || false),
+  computed(() => modalNoteConfig.value.done || false),
   editableDiscussionsEnabled,
-  computed(() => currentNoteConfig.value.enableDiscussions || false),
+  computed(() => modalNoteConfig.value.enableDiscussions || false),
   editableDescription,
-  computed(() => currentNoteConfig.value.description || ""),
+  computed(() => modalNoteConfig.value.description || ""),
   allNotesConfig,
   updateOriginalValues,
 );
@@ -430,49 +469,65 @@ const isDev = computed(() => {
 
 // modal 标题
 const modalTitle = computed(() => {
-  return isHomeReadme.value ? "关于这个知识库" : "关于这篇笔记";
+  return modalIsHomeReadme.value ? "关于这个知识库" : "关于这篇笔记";
 });
 
 // modal 中显示的 GitHub 链接
 const modalGithubUrl = computed(() => {
-  if (isHomeReadme.value) {
+  if (modalIsHomeReadme.value) {
     const repoName = vpData.site.value.title.toLowerCase();
     return `https://github.com/tnotesjs/${repoName}`;
   }
-  return currentNoteGithubUrl.value;
+
+  const folderSegment = getNoteFolderSegment(modalNoteId.value);
+  if (!folderSegment) return "";
+
+  const repoName = vpData.site.value.title.toLowerCase();
+  return `https://github.com/tnotesjs/${repoName}/tree/main/notes/${encodeURIComponent(folderSegment)}`;
 });
 
 // modal 中显示的 GitHub Page 链接
 const modalGithubPageUrl = computed(() => {
-  if (isHomeReadme.value) {
+  if (modalIsHomeReadme.value) {
     const repoName = vpData.site.value.title; // 保持原始大小写
     return `https://tnotesjs.github.io/${repoName}/`;
   }
   // 笔记页面的 GitHub Page 链接
-  if (currentNoteId.value && currentNoteTitle.value) {
+  const folderSegment = getNoteFolderSegment(modalNoteId.value);
+  if (modalNoteId.value && folderSegment) {
     const repoName = vpData.site.value.title; // 保持原始大小写
-    const encodedTitle = encodeURIComponent(currentNoteTitle.value);
-    return `https://tnotesjs.github.io/${repoName}/notes/${currentNoteId.value}.%20${encodedTitle}/README`;
+    return `https://tnotesjs.github.io/${repoName}/notes/${encodeURIComponent(folderSegment)}/README`;
   }
   return "";
 });
 
 // modal 中显示的创建时间
 const modalCreatedAt = computed(() => {
-  return isHomeReadme.value ? homeReadmeCreatedAt.value : created_at.value;
+  return modalIsHomeReadme.value
+    ? homeReadmeCreatedAt.value
+    : modalNoteConfig.value.created_at;
 });
 
 // modal 中显示的更新时间
 const modalUpdatedAt = computed(() => {
-  return isHomeReadme.value ? homeReadmeUpdatedAt.value : updated_at.value;
+  return modalIsHomeReadme.value
+    ? homeReadmeUpdatedAt.value
+    : modalNoteConfig.value.updated_at;
 });
 
 function openTimeModal() {
+  sidebarAboutNoteId.value = null;
   timeModalOpen.value = true;
 }
 
 function onTimeModalClose() {
   timeModalOpen.value = false;
+  sidebarAboutNoteId.value = null;
+}
+
+function openSidebarNoteAbout(noteIndex) {
+  sidebarAboutNoteId.value = noteIndex;
+  timeModalOpen.value = true;
 }
 
 // 配置变更时的回调
@@ -554,6 +609,10 @@ watch(
 
 <style>
 @import "../CodeBlockFullscreen/styles.css";
+
+#VPSidebarNav > .group {
+  display: none;
+}
 </style>
 
 <style module src="./Layout.module.scss" scoped></style>

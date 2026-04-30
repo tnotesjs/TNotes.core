@@ -3,7 +3,7 @@
  *
  * 笔记服务 - 封装笔记相关的业务逻辑
  */
-import { writeFileSync, readFileSync } from 'fs'
+import { writeFileSync, readFileSync, promises as fsPromises } from 'fs'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -155,9 +155,7 @@ export class NoteService {
     }
     this.noteManager.writeNoteConfig(configPath, config)
 
-    logger.info(`Created new note: ${dirName}`)
-
-    return {
+    const noteInfo: NoteInfo = {
       index: noteIndex, // 返回的 id 是笔记索引（目录前缀）
       path: notePath,
       dirName,
@@ -165,6 +163,36 @@ export class NoteService {
       configPath,
       config,
     }
+
+    if (this.noteIndexCache.isInitialized()) {
+      this.noteIndexCache.add(noteInfo)
+    }
+
+    logger.info(`Created new note: ${dirName}`)
+
+    return noteInfo
+  }
+
+  /**
+   * 删除笔记文件夹
+   * @param noteIndex - 笔记索引
+   * @returns 被删除的笔记信息
+   */
+  async deleteNote(noteIndex: string): Promise<NoteInfo> {
+    const note = this.getNoteByIndex(noteIndex)
+    if (!note) {
+      throw new Error(`笔记未找到: ${noteIndex}`)
+    }
+
+    await fsPromises.rm(note.path, { recursive: true, force: true })
+
+    if (this.noteIndexCache.isInitialized()) {
+      this.noteIndexCache.delete(noteIndex)
+    }
+
+    logger.info(`Deleted note: ${note.dirName}`)
+
+    return note
   }
 
   /**

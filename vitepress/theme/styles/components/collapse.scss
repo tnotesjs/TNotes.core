@@ -156,21 +156,8 @@ h2.collapsible-h2 {
 /* ===================================== */
 
 .collapse-content {
-  overflow: hidden;
-  max-height: 10000px;
-  opacity: 1;
-  transition:
-    max-height 0.3s ease,
-    opacity 0.3s ease,
-    margin 0.3s ease;
-
   &.collapsed {
-    max-height: 0 !important;
-    opacity: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    display: none !important;
   }
 
   > :first-child {

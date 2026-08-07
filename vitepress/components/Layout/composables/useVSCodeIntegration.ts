@@ -1,39 +1,48 @@
 /**
  * vitepress/components/Layout/composables/useVSCodeIntegration.ts
  *
- * VSCode 集成和 GitHub 链接拦截
+ * 本地 IDE 集成和 GitHub 链接拦截
  */
 
 import { useData } from 'vitepress'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
+import { useLocalIde } from '../../composables/useLocalIde'
 import { NOTES_DIR_KEY } from '../../constants'
-import {
-  resolveNoteReadmePath,
-  toVscodeFileUrl,
-} from '../../utils/vscodePaths'
+import { resolveNoteReadmePath, toIdeFileUrl } from '../../utils/vscodePaths'
 
 import type { Router } from 'vitepress'
 import type { Ref, ComputedRef } from 'vue'
 
-
 /**
- * VSCode 集成和 GitHub 链接拦截
+ * 本地 IDE 集成和 GitHub 链接拦截
  */
 export function useVSCodeIntegration() {
   const vpData = useData()
-  const vscodeNotesDir = ref('')
+  const { ide } = useLocalIde()
+  const noteLocalPath = ref('')
 
-  // 更新 VSCode 笔记目录
+  const vscodeNotesDir = computed(() => {
+    if (!noteLocalPath.value) return ''
+    // 显式依赖 ide，确保切换 IDE 后 href 更新
+    return toIdeFileUrl(noteLocalPath.value, ide.value)
+  })
+
+  // 更新当前页面对应的本地笔记路径
   const updateVscodeNoteDir = () => {
     if (typeof window !== 'undefined') {
       const notesDir = localStorage.getItem(NOTES_DIR_KEY)
       const notePath = notesDir
         ? resolveNoteReadmePath(notesDir, vpData.page.value.relativePath)
         : null
-      vscodeNotesDir.value = notePath ? toVscodeFileUrl(notePath) : ''
+      noteLocalPath.value = notePath || ''
     }
   }
+
+  watch(ide, () => {
+    // IDE 切换后重新解析路径（无需刷新页面）
+    updateVscodeNoteDir()
+  })
 
   // 拦截 home README 中的笔记链接，将 GitHub 链接转换为站点内跳转
   const interceptHomeReadmeLinks = (

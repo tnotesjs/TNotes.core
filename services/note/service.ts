@@ -133,7 +133,6 @@ export class NoteService {
       done: false,
       category,
       enableDiscussions,
-      // created_at / updated_at 由 tn:push 时 fix-timestamps 自动写入
     }
     this.noteManager.writeNoteConfig(configPath, config)
 

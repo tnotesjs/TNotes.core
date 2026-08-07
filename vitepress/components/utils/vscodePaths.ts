@@ -1,9 +1,18 @@
 /**
  * vitepress/components/utils/vscodePaths.ts
  *
- * 将站点内路径解析为本地 VS Code 可打开的文件路径。
+ * 将站点内路径解析为本地 IDE 可打开的文件路径与 URL。
  * NOTES_DIR 通常配置为仓库下的 notes 目录（如 .../TNotes.introduction/notes）。
  */
+
+export type LocalIdeId = 'vscode' | 'cursor'
+
+export const DEFAULT_LOCAL_IDE: LocalIdeId = 'vscode'
+
+const IDE_SCHEMES: Record<LocalIdeId, string> = {
+  vscode: 'vscode',
+  cursor: 'cursor',
+}
 
 export function getRepoRootPath(notesDir: string): string {
   const normalized = notesDir.replace(/[/\\]+$/, '')
@@ -47,6 +56,19 @@ export function resolveNoteReadmePath(
   return `${base}${sep}${folderPath}${sep}README.md`
 }
 
+export function normalizeLocalIde(value: string | null | undefined): LocalIdeId {
+  return value === 'cursor' ? 'cursor' : DEFAULT_LOCAL_IDE
+}
+
+export function toIdeFileUrl(
+  filePath: string,
+  ide: LocalIdeId = DEFAULT_LOCAL_IDE,
+): string {
+  const scheme = IDE_SCHEMES[normalizeLocalIde(ide)]
+  return `${scheme}://file/${encodeURI(filePath)}`
+}
+
+/** @deprecated 使用 toIdeFileUrl(filePath, 'vscode') */
 export function toVscodeFileUrl(filePath: string): string {
-  return `vscode://file/${encodeURI(filePath)}`
+  return toIdeFileUrl(filePath, 'vscode')
 }

@@ -32,9 +32,9 @@
 - TOC 生成：根据内容结构生成目录信息的能力（单篇笔记 README 内 region:toc；与根目录 TOC.md 不同）。
 - Note：notes/ 下的一篇笔记，表现为一个以 4 位编号开头的目录，至少包含 README.md，并通常带有 .tnotes.json。
 - NoteIndex：笔记目录名前 4 位数字构成的本地编号，用于排序、目录定位与 README 链接同步。
-- NoteConfig：单篇笔记的 .tnotes.json 配置，描述该笔记的稳定元数据，例如 id、done、category、外部资源链接等。
+- NoteConfig：单篇笔记的 .tnotes.json 配置，描述该笔记的稳定元数据，例如 id、done、category、外部资源链接等（不再包含创建/更新时间）。
 - Config ID：NoteConfig.id，对应跨知识库唯一的 UUID，用于稳定标识一篇笔记，不等于 NoteIndex。
-- TNotesConfig：仓库根目录 .tnotes.json 的配置对象，描述整个知识库站点与发布层的配置，而不是单篇笔记配置。
+- TNotesConfig：仓库根目录 .tnotes.json 的配置对象，描述整个知识库站点与发布层的配置，而不是单篇笔记配置（root_item 不再包含创建/更新时间与 days_since_birth）。
 - NotesConfig 不是当前仓库的稳定类型名：若讨论单篇笔记配置，应使用 NoteConfig；若讨论根配置，应使用 TNotesConfig；若讨论前端聚合后的笔记配置数据，应明确写 notesConfig.data。
 - NoteManager：面向文件系统扫描与校验的低层笔记管理抽象，负责发现、验证、读取和修复笔记数据。
 - NoteIndexCache：面向 dev/watch 场景的内存索引，维护 noteIndex 与 configId 到笔记配置的快速映射。
@@ -61,7 +61,7 @@
 - commands/：CLI 命令定义与高层流程入口。
 - config/：配置管理、默认值、模板与常量。
 - core/：NoteManager、ReadmeGenerator、TocGenerator 等核心能力。
-- services/：文件监听、Git、note、readme、toc、timestamp、vitepress 等服务实现。
+- services/：文件监听、Git、note、readme、toc、vitepress 等服务实现。
 - utils/：日志、文件、Markdown、参数解析、校验等通用工具。
 - vitepress/：发布给消费端的前端能力与运行时源码。
 - src/index.ts：公共 API 导出入口。
@@ -84,6 +84,5 @@
 ## 当前待补充的词汇空缺
 
 - ConfigManager 与 defineNotesConfig 在“配置读取”职责上的边界。
-- NoteManager、ReadmeService 与 timestamp service 在时间戳写回链路中的分工。
 - Git service、GitManager、Push/Pull 命令之间的职责边界。
 - VitePress data loader（如 notesConfig.data、tnotes-config.data）与运行时组件之间的稳定契约。

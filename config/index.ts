@@ -9,6 +9,12 @@ export {
   getConfigManager,
 } from './ConfigManager'
 export {
+  getDefaultConfig,
+  mergeConfig,
+  validateAndCompleteConfig,
+  stripDeprecatedRootItemFields,
+} from './defaultConfig'
+export {
   ROOT_DIR_PATH,
   ROOT_README_PATH,
   ROOT_TOC_PATH,

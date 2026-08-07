@@ -6,8 +6,8 @@ vitepress/components/SidebarCard/FolderTreeItems.vue
 import {
   icon__sidebar_collapsed,
   icon__sidebar_opened,
-  icon__vscode,
 } from '../../assets/icons'
+import { useLocalIde } from '../composables/useLocalIde'
 
 const props = defineProps({
   nodes: {
@@ -29,6 +29,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['toggle-node', 'open-vscode'])
+
+const { icon: localIdeIcon, openNoteTitle } = useLocalIde()
 
 function hasChildren(node) {
   return node.children?.length > 0
@@ -109,21 +111,24 @@ function onOpenVscode(node, event) {
         <span class="tree-title">{{ getDisplayTitle(node) }}</span>
       </a>
 
-      <span
+      <button
         v-else-if="hasChildren(node)"
+        type="button"
         class="tree-link tree-link-folder"
+        :title="isExpanded(node) ? '折叠分组' : '展开分组'"
+        @click="onToggle(node)"
       >
         <span class="tree-title">{{ getDisplayTitle(node) }}</span>
-      </span>
+      </button>
 
       <button
         v-if="node.relativePath"
         class="vscode-article"
         type="button"
-        title="在 VS Code 中打开笔记目录"
+        :title="openNoteTitle"
         @click="onOpenVscode(node, $event)"
       >
-        <img :src="icon__vscode" alt="打开笔记目录" />
+        <img :src="localIdeIcon" :alt="openNoteTitle" />
       </button>
     </div>
 
@@ -225,9 +230,14 @@ export default {
 }
 
 .tree-link-folder {
-  cursor: default;
+  cursor: pointer;
   font-weight: 600;
   color: var(--vp-c-text-1);
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: left;
+  font: inherit;
 }
 
 .tree-status {

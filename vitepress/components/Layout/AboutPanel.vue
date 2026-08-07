@@ -107,22 +107,6 @@ vitepress/components/Layout/AboutPanel.vue
       </div>
     </div>
 
-    <!-- 首次提交时间 -->
-    <div class="timeLine" title="首次提交时间">
-      <div class="timeLabel"><strong>⌛️ 首次提交</strong></div>
-      <div class="timeValue">
-        {{ formatOptionalDate(modalCreatedAt) }}
-      </div>
-    </div>
-
-    <!-- 最近提交时间 -->
-    <div class="timeLine" title="最近提交时间">
-      <div class="timeLabel"><strong>⌛️ 最近提交</strong></div>
-      <div class="timeValue">
-        {{ formatOptionalDate(modalUpdatedAt) }}
-      </div>
-    </div>
-
     <!-- GitHub -->
     <div
       class="timeLine"
@@ -196,8 +180,6 @@ vitepress/components/Layout/AboutPanel.vue
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { formatDate } from '../utils'
-
 const props = defineProps<{
   isHomeReadme: boolean
   currentNoteId: string | null
@@ -207,8 +189,6 @@ const props = defineProps<{
   editableNoteStatus: boolean
   editableDiscussionsEnabled: boolean
   titleError: string
-  modalCreatedAt: number | undefined
-  modalUpdatedAt: number | undefined
   modalGithubUrl: string
   modalGithubPageUrl: string
   completionPercentage: number | null
@@ -262,10 +242,6 @@ function onDescriptionInput() {
 
 function onConfigChange() {
   emit('configChange')
-}
-
-function formatOptionalDate(timestamp: number | undefined) {
-  return timestamp === undefined ? '-' : formatDate(timestamp)
 }
 </script>
 

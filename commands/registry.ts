@@ -9,7 +9,6 @@ import { DevCommand } from './dev'
 import { PushCommand, PullCommand } from './git'
 import { InitSubRepoCommand } from './init-sub-repo'
 import { InitTocCommand } from './init-toc'
-import { FixTimestampsCommand } from './maintenance'
 import { HelpCommand } from './misc'
 import { type Command, type CommandName } from './models'
 import {
@@ -25,7 +24,6 @@ const commandFactories: Record<CommandName, () => Command> = {
   'build': () => new BuildCommand(),
   'create-notes': () => new CreateNoteCommand(),
   'dev': () => new DevCommand(),
-  'fix-timestamps': () => new FixTimestampsCommand(),
   'init-sub-repo': () => new InitSubRepoCommand(),
   'init-toc': () => new InitTocCommand(),
   'help': () => new HelpCommand(),

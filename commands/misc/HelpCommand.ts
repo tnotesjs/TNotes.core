@@ -30,7 +30,7 @@ const COMMAND_CATEGORIES = {
   'Git 操作': [COMMAND_NAMES.PUSH, COMMAND_NAMES.PULL],
   '迁移（v0.2.x 过渡）': [COMMAND_NAMES.INIT_TOC],
   初始化: [COMMAND_NAMES.INIT_SUB_REPO],
-  其他: [COMMAND_NAMES.FIX_TIMESTAMPS, COMMAND_NAMES.HELP],
+  其他: [COMMAND_NAMES.HELP],
 } as const
 
 /** 命令选项描述（用于帮助信息展示） */

@@ -8,7 +8,7 @@
 import { execSync } from 'child_process'
 import { readFileSync, writeFileSync } from 'fs'
 
-import { ROOT_DIR_PATH, ROOT_CONFIG_PATH } from '../../config'
+import { ROOT_DIR_PATH, ROOT_CONFIG_PATH, stripDeprecatedRootItemFields } from '../../config'
 import { parseReadmeCompletedNotes, parseTocCompletedNotes } from '../../utils'
 import { BaseCommand } from '../BaseCommand'
 
@@ -40,15 +40,16 @@ export class UpdateCompletedCountCommand extends BaseCommand {
 
       // 计算所有月份的完成笔记数量
       const completedNotesCountHistory =
-        await this.getCompletedNotesCountHistory(
-          config.root_item.created_at ?? Date.now(),
-        )
+        await this.getCompletedNotesCountHistory()
 
-      // 更新配置（不更新时间戳，由 tn:push 时 fix-timestamps 统一管理）
+      // 更新配置
       config.root_item = {
         ...config.root_item,
         completed_notes_count: completedNotesCountHistory,
       }
+      stripDeprecatedRootItemFields(
+        config.root_item as unknown as Record<string, unknown>,
+      )
 
       // 写入配置文件
       writeFileSync(ROOT_CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8')
@@ -76,12 +77,11 @@ export class UpdateCompletedCountCommand extends BaseCommand {
    * 1. 计算最近12个月的范围（当前月份往前推11个月）
    * 2. 遍历这12个月，从 Git 历史中读取 TOC.md（回退 README.md）
    * 3. 解析获取完成笔记数量
-   * 4. 如果知识库创建时间在这12个月内，之前的月份补0
-   * 5. 返回对象 { '25.01': 0, '25.02': 1, ..., '25.12': 15 }
+   * 4. 返回对象 { '25.01': 0, '25.02': 1, ..., '25.12': 15 }
    */
-  private async getCompletedNotesCountHistory(
-    createdAt: number,
-  ): Promise<Record<string, number>> {
+  private async getCompletedNotesCountHistory(): Promise<
+    Record<string, number>
+  > {
     try {
       // 1. 计算最近12个月的范围
       const now = new Date()
@@ -99,10 +99,6 @@ export class UpdateCompletedCountCommand extends BaseCommand {
         firstMonth = 12 + firstMonth
       }
 
-      const createdDate = new Date(createdAt)
-      const createdYear = createdDate.getFullYear()
-      const createdMonth = createdDate.getMonth() // 0-11
-
       const result: Record<string, number> = {}
       let prevCount = 0
 
@@ -116,32 +112,20 @@ export class UpdateCompletedCountCommand extends BaseCommand {
         const monthStr = String(targetMonth + 1).padStart(2, '0')
         const key = `${yearShort}.${monthStr}`
 
-        // 3. 检查是否早于知识库创建时间
-        const isBeforeCreation =
-          targetYear < createdYear ||
-          (targetYear === createdYear && targetMonth < createdMonth)
-
-        if (isBeforeCreation) {
-          // 早于创建时间，直接设为 0
-          result[key] = 0
-          prevCount = 0
-          this.logger.info(`✓ ${key}: 0 篇（早于创建时间）`)
-        } else {
-          // 尝试从 Git 历史获取
-          try {
-            const count = await this.getMonthCompletedCount(
-              targetYear,
-              targetMonth,
-              prevCount,
-            )
-            result[key] = count
-            prevCount = count
-            this.logger.info(`✓ ${key}: ${count} 篇`)
-          } catch (error) {
-            // 该月没有提交或解析失败，使用上一个月的值
-            result[key] = prevCount
-            this.logger.warn(`${key}: 无数据，使用 ${prevCount}（上月值）`)
-          }
+        // 尝试从 Git 历史获取
+        try {
+          const count = await this.getMonthCompletedCount(
+            targetYear,
+            targetMonth,
+            prevCount,
+          )
+          result[key] = count
+          prevCount = count
+          this.logger.info(`✓ ${key}: ${count} 篇`)
+        } catch (error) {
+          // 该月没有提交或解析失败，使用上一个月的值
+          result[key] = prevCount
+          this.logger.warn(`${key}: 无数据，使用 ${prevCount}（上月值）`)
         }
       }
 

@@ -100,8 +100,8 @@
     width: 100% !important;
   }
 
-  /* aside 已 fixed，container 不再为右栏预留 flex 列 */
-  .VPDoc.has-aside .container {
+  /* aside 已 fixed，仅改 VPDoc 直接子级 container，避免误伤 DocFooter 等内部 .container */
+  .VPDoc.has-aside > .container {
     display: block !important;
     max-width: none !important;
   }
@@ -188,8 +188,8 @@ html.content-fullscreen {
     padding-right: 0 !important;
   }
 
-  .VPDoc.has-aside .container,
-  .VPDoc .container {
+  .VPDoc.has-aside > .container,
+  .VPDoc > .container {
     max-width: none !important;
     width: 100% !important;
   }

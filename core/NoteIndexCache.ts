@@ -136,7 +136,13 @@ export class NoteIndexCache {
     }
 
     Object.assign(item.noteConfig, configUpdates)
-    item.noteConfig.updated_at = Date.now()
+    // 剥离内存中残留的废弃时间戳字段，避免后续写回时恢复
+    const noteConfigRecord = item.noteConfig as unknown as Record<
+      string,
+      unknown
+    >
+    delete noteConfigRecord.created_at
+    delete noteConfigRecord.updated_at
 
     logger.debug(`更新笔记配置: ${noteIndex}`, configUpdates)
   }

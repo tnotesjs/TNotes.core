@@ -10,33 +10,60 @@ vitepress/components/Settings/Settings.vue
       <div class="settingItem">
         <div class="settingMeta">
           <div class="labelLine">
-            <span class="itemName">本地知识库路径</span>
+            <span class="itemName">本地 IDE 打开</span>
             <span class="infoWrap">
               <span class="infoIcon">?</span>
               <span class="tooltip">
-                适用于 PC 桌面环境，需要本地安装 VS Code。配置后可从页面快速打开本地笔记目录。
+                适用于 PC 桌面环境。配置本地知识库 notes 目录路径，并选择 VS Code 或 Cursor，即可从页面快速打开知识库或笔记。
               </span>
             </span>
           </div>
           <span v-if="path" class="statusText">已配置</span>
         </div>
 
-        <div class="inputGroup">
-          <input
-            v-model="path"
-            type="text"
-            placeholder="/Users/username/notes"
-            class="input"
-          />
-          <button
-            v-if="path"
-            @click="clearPath"
-            class="clearBtn"
-            title="清空"
-            type="button"
-          >
-            ×
-          </button>
+        <div class="fieldStack">
+          <div class="controlRow">
+            <span class="controlLabel">IDE</span>
+            <div class="segmented segmented-two">
+              <label
+                v-for="option in localIdeOptions"
+                :key="option.value"
+                :class="[
+                  'segment',
+                  { activeSegment: localIde === option.value },
+                ]"
+              >
+                <input
+                  v-model="localIde"
+                  type="radio"
+                  name="local-ide"
+                  :value="option.value"
+                />
+                <span>{{ option.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="field">
+            <span class="controlLabel">知识库路径</span>
+            <div class="inputGroup">
+              <input
+                v-model="path"
+                type="text"
+                placeholder="/Users/username/notes"
+                class="input pathInput"
+              />
+              <button
+                v-if="path"
+                @click="clearPath"
+                class="clearBtn"
+                title="清空"
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+          </label>
         </div>
       </div>
 
@@ -128,36 +155,6 @@ vitepress/components/Settings/Settings.vue
           </div>
         </div>
       </div>
-
-      <div class="settingItem">
-        <div class="settingMeta">
-          <div class="labelLine">
-            <span class="itemName">笔记内 MarkMap</span>
-            <span class="infoWrap">
-              <span class="infoIcon">?</span>
-              <span class="tooltip">
-                配置笔记中 markmap 代码块的初始展开层级。
-              </span>
-            </span>
-          </div>
-        </div>
-
-        <div class="inlineGrid">
-          <label class="field">
-            <span class="controlLabel">展开层级</span>
-            <div class="inputWithUnit">
-              <input
-                v-model.number="markmapExpandLevel"
-                type="number"
-                min="1"
-                max="100"
-                class="input"
-              />
-              <span class="unit">层</span>
-            </div>
-          </label>
-        </div>
-      </div>
     </section>
 
     <div class="actionBar">
@@ -185,12 +182,18 @@ import { ref, computed, onMounted } from 'vue'
 
 import {
   NOTES_DIR_KEY,
-  MARKMAP_EXPAND_LEVEL_KEY,
+  LOCAL_IDE_KEY,
   SIDEBAR_SHOW_NOTE_ID_KEY,
   SIDEBAR_DONE_PREFIX_KEY,
   SIDEBAR_UNDONE_PREFIX_KEY,
   CONTENT_WIDTH_MODE_KEY,
 } from '../constants'
+import { useLocalIde } from '../composables/useLocalIde'
+import {
+  DEFAULT_LOCAL_IDE,
+  normalizeLocalIde,
+  type LocalIdeId,
+} from '../utils/vscodePaths'
 // @ts-expect-error - VitePress Data Loader
 import { data as tnotesConfig } from '../tnotes-config.data'
 
@@ -200,6 +203,8 @@ const DEFAULT_CONTENT_WIDTH_MODE: ContentWidthMode = 'wide'
 const DEFAULT_DONE_PREFIX = '✅'
 const DEFAULT_UNDONE_PREFIX = '⏰'
 
+const { setLocalIde } = useLocalIde()
+
 const contentWidthModeOptions: Array<{
   label: string
   value: ContentWidthMode
@@ -208,10 +213,15 @@ const contentWidthModeOptions: Array<{
   { label: '标准页宽', value: 'standard' },
 ]
 
+const localIdeOptions: Array<{ label: string; value: LocalIdeId }> = [
+  { label: 'VS Code', value: 'vscode' },
+  { label: 'Cursor', value: 'cursor' },
+]
+
 const path = ref('')
 const originalPath = ref('')
-const markmapExpandLevel = ref(5)
-const originalMarkmapExpandLevel = ref(5)
+const localIde = ref<LocalIdeId>(DEFAULT_LOCAL_IDE)
+const originalLocalIde = ref<LocalIdeId>(DEFAULT_LOCAL_IDE)
 const showNoteId = ref(false)
 const originalShowNoteId = ref(false)
 const donePrefix = ref(DEFAULT_DONE_PREFIX)
@@ -227,7 +237,7 @@ const showSuccessToast = ref(false)
 const hasChanges = computed(
   () =>
     path.value !== originalPath.value ||
-    markmapExpandLevel.value !== originalMarkmapExpandLevel.value ||
+    localIde.value !== originalLocalIde.value ||
     showNoteId.value !== originalShowNoteId.value ||
     donePrefix.value !== originalDonePrefix.value ||
     undonePrefix.value !== originalUndonePrefix.value ||
@@ -246,9 +256,9 @@ onMounted(() => {
   path.value = savedPath
   originalPath.value = savedPath
 
-  const savedLevel = localStorage.getItem(MARKMAP_EXPAND_LEVEL_KEY) || '5'
-  markmapExpandLevel.value = parseInt(savedLevel, 10)
-  originalMarkmapExpandLevel.value = markmapExpandLevel.value
+  const savedLocalIde = normalizeLocalIde(localStorage.getItem(LOCAL_IDE_KEY))
+  localIde.value = savedLocalIde
+  originalLocalIde.value = savedLocalIde
 
   const savedShowNoteId = localStorage.getItem(SIDEBAR_SHOW_NOTE_ID_KEY)
   showNoteId.value =
@@ -293,17 +303,14 @@ function save() {
       contentWidthMode.value !== originalContentWidthMode.value
 
     localStorage.setItem(NOTES_DIR_KEY, path.value)
-    localStorage.setItem(
-      MARKMAP_EXPAND_LEVEL_KEY,
-      markmapExpandLevel.value.toString(),
-    )
+    setLocalIde(localIde.value)
     localStorage.setItem(SIDEBAR_SHOW_NOTE_ID_KEY, showNoteId.value.toString())
     localStorage.setItem(SIDEBAR_DONE_PREFIX_KEY, donePrefix.value)
     localStorage.setItem(SIDEBAR_UNDONE_PREFIX_KEY, undonePrefix.value)
     localStorage.setItem(CONTENT_WIDTH_MODE_KEY, contentWidthMode.value)
 
     originalPath.value = path.value
-    originalMarkmapExpandLevel.value = markmapExpandLevel.value
+    originalLocalIde.value = localIde.value
     originalShowNoteId.value = showNoteId.value
     originalDonePrefix.value = donePrefix.value
     originalUndonePrefix.value = undonePrefix.value
@@ -327,7 +334,7 @@ function save() {
 
 function reset() {
   path.value = originalPath.value
-  markmapExpandLevel.value = originalMarkmapExpandLevel.value
+  localIde.value = originalLocalIde.value
   showNoteId.value = originalShowNoteId.value
   donePrefix.value = originalDonePrefix.value
   undonePrefix.value = originalUndonePrefix.value
@@ -400,10 +407,12 @@ function reset() {
 
 .tooltip {
   position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  z-index: 10;
+  left: 0;
+  top: calc(100% + 8px);
+  bottom: auto;
+  z-index: 20;
   width: 240px;
+  max-width: min(240px, calc(100vw - 48px));
   padding: 8px 10px;
   color: var(--vp-c-text-1);
   background: var(--vp-c-bg-elv);
@@ -414,7 +423,7 @@ function reset() {
   line-height: 18px;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, 4px);
+  transform: translateY(-4px);
   transition:
     opacity 0.15s ease,
     transform 0.15s ease;
@@ -423,7 +432,7 @@ function reset() {
 .infoWrap:hover .tooltip,
 .infoWrap:focus-within .tooltip {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 .inputGroup {
@@ -699,14 +708,8 @@ function reset() {
   }
 
   .tooltip {
-    left: 0;
     width: min(260px, calc(100vw - 48px));
-    transform: translate(0, 4px);
-  }
-
-  .infoWrap:hover .tooltip,
-  .infoWrap:focus-within .tooltip {
-    transform: translate(0, 0);
+    max-width: min(260px, calc(100vw - 48px));
   }
 
   .actionBar {

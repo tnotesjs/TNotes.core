@@ -32,10 +32,6 @@ vitepress/components/Layout/Layout.vue
         :vscode-notes-dir="vscodeNotesDir"
         :is-home-readme="isHomeReadme"
         :current-note-id="currentNoteId"
-        :created_at="created_at"
-        :updated_at="updated_at"
-        :home-readme-created-at="homeReadmeCreatedAt"
-        :home-readme-updated-at="homeReadmeUpdatedAt"
         :time-modal-open="timeModalOpen"
         :all-collapsed="allCollapsed"
         @open-time-modal="openTimeModal"
@@ -65,8 +61,6 @@ vitepress/components/Layout/Layout.vue
           v-model:editable-note-status="editableNoteStatus"
           v-model:editable-discussions-enabled="editableDiscussionsEnabled"
           v-model:title-error="titleError"
-          :modal-created-at="modalCreatedAt"
-          :modal-updated-at="modalUpdatedAt"
           :modal-github-url="modalGithubUrl"
           :modal-github-page-url="modalGithubPageUrl"
           :completion-percentage="completionPercentage"
@@ -116,10 +110,6 @@ vitepress/components/Layout/Layout.vue
       </AboutModal>
     </template>
     <template #doc-footer-before>
-      <!-- <div class="footer-time-info">
-        <p title="首次提交时间">首次提交时间：{{ formatDate(created_at) }}</p>
-        <p title="最近提交时间">最近提交时间：{{ formatDate(updated_at) }}</p>
-      </div> -->
     </template>
     <template #doc-after>
       <!-- 自定义 DocFooter -->
@@ -335,8 +325,6 @@ function getEmptyNoteConfig() {
 const isDiscussionsVisible = computed(
   () => currentNoteConfig.value.enableDiscussions,
 );
-const updated_at = computed(() => currentNoteConfig.value.updated_at);
-const created_at = computed(() => currentNoteConfig.value.created_at);
 
 // 判断是否为首页 README.md
 const isHomeReadme = computed(() => vpData.page.value.filePath === "README.md");
@@ -348,10 +336,6 @@ const completionPercentage = computed(() => {
   if (!totalNotesLen.value || totalNotesLen.value === 0) return null;
   return Math.round((doneNotesLen.value / totalNotesLen.value) * 100);
 });
-
-// 首页 README.md 的时间戳
-const homeReadmeCreatedAt = computed(() => readmeData?.created_at);
-const homeReadmeUpdatedAt = computed(() => readmeData?.updated_at);
 
 // #region - Composables
 // 404 重定向
@@ -507,20 +491,6 @@ const modalGithubPageUrl = computed(() => {
     return `https://tnotesjs.github.io/${repoName}/notes/${encodeURIComponent(folderSegment)}/README`;
   }
   return "";
-});
-
-// modal 中显示的创建时间
-const modalCreatedAt = computed(() => {
-  return modalIsHomeReadme.value
-    ? homeReadmeCreatedAt.value
-    : modalNoteConfig.value.created_at;
-});
-
-// modal 中显示的更新时间
-const modalUpdatedAt = computed(() => {
-  return modalIsHomeReadme.value
-    ? homeReadmeUpdatedAt.value
-    : modalNoteConfig.value.updated_at;
 });
 
 function openTimeModal() {

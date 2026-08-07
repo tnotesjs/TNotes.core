@@ -189,7 +189,6 @@ export function buildPackageJsonTemplate(
       'tn:build': 'tnotes --build',
       'tn:create-notes': 'tnotes --create-notes',
       'tn:dev': 'tnotes --dev',
-      'tn:fix-timestamps': 'tnotes --fix-timestamps',
       'tn:help': 'tnotes --help',
       'tn:init-sub-repo': 'tnotes --init-sub-repo',
       'tn:preview': 'tnotes --preview',

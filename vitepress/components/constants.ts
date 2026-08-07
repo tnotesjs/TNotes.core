@@ -38,6 +38,11 @@ export const ROOT_ITEM = __TNOTES_ROOT_ITEM__
 export const NOTES_DIR_KEY: string = 'NOTES_DIR_KEY__' + REPO_NAME
 
 /**
+ * 本地打开所用 IDE（vscode | cursor）
+ */
+export const LOCAL_IDE_KEY: string = 'LOCAL_IDE_KEY__' + REPO_NAME
+
+/**
  * 用户选择的视图
  */
 export const NOTES_VIEW_KEY: string = 'NOTES_VIEW_KEY__' + REPO_NAME
@@ -52,12 +57,6 @@ export const EN_WORD_LIST_COMP_IS_AUTO_SHOW_CARD: string =
  * MarkMap 默认主题配置
  */
 export const MARKMAP_THEME_KEY: string = 'MARKMAP_THEME_KEY__' + REPO_NAME
-
-/**
- * MarkMap 默认展开层级配置
- */
-export const MARKMAP_EXPAND_LEVEL_KEY: string =
-  'MARKMAP_EXPAND_LEVEL_KEY__' + REPO_NAME
 
 /**
  * 侧边栏是否显示笔记编号配置

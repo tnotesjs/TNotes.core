@@ -4,7 +4,23 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
+### Changed
+
+#### Breaking — 配置时间戳移除
+
+- `NoteConfig` 与 `root_item` 不再包含 `created_at` / `updated_at`；`root_item.days_since_birth` 同步移除。写入笔记配置时仅保留白名单字段，并在校验/写回时主动剥离废弃时间戳；根配置写回同样剥离。
+- 移除 `TimestampService` 与 CLI 命令 `tn:fix-timestamps`；`tn:push` 简化为 `git add → commit → push`，不再 fix/amend 时间戳。
+- 前端不再展示创建/最近更新时间（About 弹窗、SidebarCard、首页 git 时间戳 loader）。
+- `tn:update-completed-count` 仍按近 12 个月从 TOC/README Git 历史回填，但不再依赖 `root_item.created_at`。
+
+#### Changed — MarkMap
+
+- 设置面板移除「笔记内 MarkMap」展开层级配置；默认初始展开层级固定为 **3**。仍可在代码块上指定层级（如 ` ```markmap 2 `），或在组件工具栏临时调整。
+
+#### Added — 本地 IDE 打开
+
+- 设置「本地 IDE 打开」支持选择 **VS Code** / **Cursor**（默认 VS Code）；分别使用 `vscode://file/...` 与 `cursor://file/...`。
+- 首页 / 侧栏 / 文档工具栏的打开按钮图标与文案随所选 IDE 切换。
 
 ## [0.2.2] - 2026-06-28
 

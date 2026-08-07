@@ -1,7 +1,6 @@
 /**
  * vitepress/components/Layout/homeReadme.data.ts
  */
-import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -12,8 +11,6 @@ interface ReadmeData {
   doneNotesID: string[]
   doneNotesLen: number
   totalNotesLen: number
-  created_at?: number
-  updated_at?: number
 }
 
 export default {
@@ -28,14 +25,9 @@ export default {
 
     watchedFiles.forEach((file) => {
       if (file.endsWith('README.md')) {
-        // console.log('file:', file) // => file: README.md
-
         const fileContent = fs.readFileSync(file, 'utf-8')
         const doneNotesID = getDoneNotesID(fileContent)
         const doneNotesLen = doneNotesID.length
-
-        // 获取 git 仓库的时间戳
-        const timestamps = getGitTimestamps()
 
         // 计算总笔记数
         const notesDir = path.join(path.dirname(file), 'notes')
@@ -46,7 +38,6 @@ export default {
           doneNotesID,
           doneNotesLen,
           totalNotesLen,
-          ...timestamps,
         }
       }
     })
@@ -71,45 +62,6 @@ function getTotalNotesCount(notesDir: string): number {
   } catch (error) {
     console.error(`获取笔记总数失败:`, error)
     return 0
-  }
-}
-
-/**
- * 获取 git 仓库的时间戳
- * @returns 包含 created_at 和 updated_at 的对象
- */
-function getGitTimestamps(): {
-  created_at?: number
-  updated_at?: number
-} {
-  const now = Date.now()
-  let created_at = now
-  let updated_at = now
-
-  try {
-    // 仓库的首次提交时间（最早的提交）
-    // 先获取所有提交，然后取第一行
-    const createdStdout = execSync(`git log --reverse --format=%ct`, {
-      encoding: 'utf-8',
-    })
-    const createdTs = createdStdout.toString().trim().split('\n')[0]
-    if (createdTs) {
-      created_at = parseInt(createdTs, 10) * 1000
-    }
-
-    // 仓库的最近一次提交时间
-    const updatedStdout = execSync(`git log -1 --format=%ct`, {
-      encoding: 'utf-8',
-    })
-    const updatedTs = updatedStdout.toString().trim()
-    if (updatedTs) {
-      updated_at = parseInt(updatedTs, 10) * 1000
-    }
-
-    return { created_at, updated_at }
-  } catch (error) {
-    console.error(`获取 git 仓库时间戳失败:`, error)
-    return { created_at, updated_at }
   }
 }
 

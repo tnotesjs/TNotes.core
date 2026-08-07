@@ -12,9 +12,11 @@ import { onContentUpdated } from 'vitepress'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { icon__fullscreen, icon__fullscreen_exit, icon__confirm } from '../../assets/icons'
-import { MARKMAP_THEME_KEY, MARKMAP_EXPAND_LEVEL_KEY } from '../constants'
+import { MARKMAP_THEME_KEY } from '../constants'
 
 // doc: https://github.com/markmap/markmap/blob/205367a24603dc187f67da1658940c6cade20dce/packages/markmap-view/src/constants.ts#L15
+
+const DEFAULT_EXPAND_LEVEL = 3
 
 const props = defineProps({
   content: { type: String, default: '' },
@@ -22,7 +24,7 @@ const props = defineProps({
   spacingVertical: { type: Number, default: 10 },
   spacingHorizontal: { type: Number, default: 20 },
   nodeMinHeight: { type: Number, default: 24 },
-  initialExpandLevel: { type: Number, default: 5 },
+  initialExpandLevel: { type: Number, default: DEFAULT_EXPAND_LEVEL },
 })
 
 const svgRef = ref<SVGSVGElement | null>(null)
@@ -35,15 +37,6 @@ let toolbarReinitTimer: ReturnType<typeof setTimeout> | null = null
 let darkClassObserver: MutationObserver | null = null
 
 const isMarkmapDark = ref(false)
-
-// 从 localStorage 读取配置，如果没有则使用 props 或默认值
-const getInitialExpandLevel = () => {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem(MARKMAP_EXPAND_LEVEL_KEY)
-    if (saved) return parseInt(saved)
-  }
-  return props.initialExpandLevel
-}
 
 const getThemeColorFn = () => {
   if (typeof window !== 'undefined') {
@@ -63,8 +56,8 @@ const getThemeColorFn = () => {
   return scaleOrdinal(schemePastel2)
 }
 
-// 可由配置/props 初始化，也可以通过工具栏改动
-const expandLevel = ref(getInitialExpandLevel())
+// 可由 props 初始化，也可以通过工具栏改动
+const expandLevel = ref(props.initialExpandLevel)
 const transformer = new Transformer()
 const isFullscreen = ref(false)
 

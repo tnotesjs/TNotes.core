@@ -210,8 +210,6 @@ export class NoteManager {
     'enableDiscussions',
     'description',
     'id',
-    'created_at',
-    'updated_at',
   ]
 
   /** 默认配置字段 */
@@ -223,6 +221,12 @@ export class NoteManager {
     enableDiscussions: false,
     description: '',
   } as const
+
+  /** 已废弃、写回时需剥离的笔记配置字段 */
+  private static readonly DEPRECATED_CONFIG_FIELDS = [
+    'created_at',
+    'updated_at',
+  ] as const
 
   /** 必需字段（不能缺失） */
   private static readonly REQUIRED_FIELDS = ['id'] as const
@@ -244,6 +248,7 @@ export class NoteManager {
     }
 
     let needsUpdate = false
+    const configRecord = config as Record<string, unknown>
 
     // 1. 检查必需字段 —— 缺失时直接返回 null，由 validateNotes() 统一报告
     for (const field of NoteManager.REQUIRED_FIELDS) {
@@ -257,32 +262,22 @@ export class NoteManager {
       NoteManager.DEFAULT_CONFIG_FIELDS,
     )) {
       if (!(key in config)) {
-        ;(config as Record<string, unknown>)[key] = defaultValue
+        configRecord[key] = defaultValue
         needsUpdate = true
         logger.info(`补充缺失字段 "${key}": ${configPath}`)
       }
     }
 
-    // 3. 确保时间戳字段存在
-    // 这里仅用 Date.now() 占位，确保字段不缺失。
-    // 真实的 git 时间戳由 tn:fix-timestamps 命令统一校准。
-    const now = Date.now()
-    if (!config.created_at) {
-      config.created_at = now
-      needsUpdate = true
-      logger.info(
-        `检测到 ${configPath} 缺失  created_at 字段，请执行 tn:fix-timestamps 校准为笔记首次 git commit 的时间）`,
-      )
-    }
-    if (!config.updated_at) {
-      config.updated_at = now
-      needsUpdate = true
-      logger.info(
-        `检测到 ${configPath} 缺失  updated_at 字段，请执行 tn:fix-timestamps 校准为笔记最后一次 git commit 的时间）`,
-      )
+    // 3. 剥离已废弃字段（created_at / updated_at）
+    for (const key of NoteManager.DEPRECATED_CONFIG_FIELDS) {
+      if (key in configRecord) {
+        delete configRecord[key]
+        needsUpdate = true
+        logger.info(`移除废弃字段 "${key}": ${configPath}`)
+      }
     }
 
-    // 4. 按字段顺序排序
+    // 4. 按字段顺序排序（仅保留白名单字段）
     const sortedConfig = this.sortConfigKeys(config as NoteConfig)
 
     // 5. 写回文件（如果有变更）
@@ -295,20 +290,14 @@ export class NoteManager {
   }
 
   /**
-   * 按指定顺序排序配置对象的键
+   * 按指定顺序排序配置对象的键（仅保留已知字段，丢弃废弃/未知字段）
    */
   private sortConfigKeys(config: NoteConfig): NoteConfig {
     const configRecord = config as unknown as Record<string, unknown>
     const sorted: Record<string, unknown> = {}
 
     for (const key of NoteManager.FIELD_ORDER) {
-      if (key in config) {
-        sorted[key] = configRecord[key]
-      }
-    }
-
-    for (const key of Object.keys(config)) {
-      if (!(key in sorted)) {
+      if (key in configRecord) {
         sorted[key] = configRecord[key]
       }
     }
@@ -383,7 +372,6 @@ export class NoteManager {
       throw new Error(`Invalid config for note: ${noteInfo.dirName}`)
     }
 
-    config.updated_at = Date.now()
     this.writeNoteConfig(noteInfo.configPath, config)
     logger.info(`Updated config for note: ${noteInfo.dirName}`)
   }

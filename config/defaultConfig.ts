@@ -44,9 +44,6 @@ export function getDefaultConfig(repoName?: string): TNotesConfig {
       completed_notes_count: {},
       details: `${name} 知识库`,
       link: `https://tnotesjs.github.io/${name}/`,
-      created_at: Date.now(),
-      updated_at: Date.now(),
-      days_since_birth: 0,
     },
 
     // 端口配置（根据仓库名生成）
@@ -121,6 +118,32 @@ export function mergeConfig(
 }
 
 /**
+ * 根配置 root_item 中已废弃的字段
+ */
+const DEPRECATED_ROOT_ITEM_FIELDS = [
+  'created_at',
+  'updated_at',
+  'days_since_birth',
+] as const
+
+/**
+ * 剥离 root_item 中的废弃时间戳字段
+ * @returns 是否删除了字段
+ */
+export function stripDeprecatedRootItemFields(
+  rootItem: Record<string, unknown>,
+): boolean {
+  let stripped = false
+  for (const key of DEPRECATED_ROOT_ITEM_FIELDS) {
+    if (key in rootItem) {
+      delete rootItem[key]
+      stripped = true
+    }
+  }
+  return stripped
+}
+
+/**
  * 验证并补全配置
  * @param config - 现有配置
  * @returns 补全后的配置和是否进行了修改
@@ -135,8 +158,14 @@ export function validateAndCompleteConfig(config: Record<string, any>): {
   // 深度合并配置
   const mergedConfig = mergeConfig(config, defaultConfig as any)
 
+  // 剥离 root_item 废弃字段
+  const rootItem = (mergedConfig.root_item || {}) as Record<string, unknown>
+  const stripped = stripDeprecatedRootItemFields(rootItem)
+  mergedConfig.root_item = rootItem
+
   // 检查是否有修改
-  const modified = JSON.stringify(config) !== JSON.stringify(mergedConfig)
+  const modified =
+    stripped || JSON.stringify(config) !== JSON.stringify(mergedConfig)
 
   return {
     config: mergedConfig as TNotesConfig,

@@ -4,7 +4,7 @@ vitepress/components/Layout/DocFooter.vue
 
 <template>
   <nav class="custom-doc-footer" v-if="prev || next">
-    <div class="container">
+    <div class="pager-container">
       <div class="prev">
         <a v-if="prev" :href="prev.link" class="pager-link prev-link">
           <span class="desc">上一篇</span>
@@ -147,7 +147,7 @@ const next = computed(() => {
   padding-top: 32px;
 }
 
-.container {
+.pager-container {
   display: flex;
   gap: 16px;
 }
@@ -219,7 +219,7 @@ const next = computed(() => {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-  .container {
+  .pager-container {
     flex-direction: column;
     gap: 12px;
   }

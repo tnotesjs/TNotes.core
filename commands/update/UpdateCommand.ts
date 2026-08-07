@@ -6,7 +6,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 
-import { ROOT_CONFIG_PATH, ROOT_TOC_PATH } from '../../config'
+import { ROOT_CONFIG_PATH, ROOT_TOC_PATH, stripDeprecatedRootItemFields } from '../../config'
 import { ReadmeService, NoteService } from '../../services'
 import { logger, LogLevel, parseTocCompletedNotes } from '../../utils'
 import { BaseCommand } from '../BaseCommand'
@@ -111,7 +111,6 @@ export class UpdateCommand extends BaseCommand {
       const fixed = fillMissingMonthGaps(existing, currentKey)
 
       // 5. 更新 root_item
-      // 更新 root_item（不更新时间戳，由 tn:push 时 fix-timestamps 统一管理）
       config.root_item = {
         ...config.root_item,
         completed_notes_count: fixed,
@@ -119,6 +118,9 @@ export class UpdateCommand extends BaseCommand {
 
       // 删除旧字段（向后兼容）
       delete (config.root_item as any).completed_notes_count_last_month
+      stripDeprecatedRootItemFields(
+        config.root_item as unknown as Record<string, unknown>,
+      )
 
       // 写入配置文件
       writeFileSync(ROOT_CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8')

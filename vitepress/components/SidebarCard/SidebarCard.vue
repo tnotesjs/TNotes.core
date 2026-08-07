@@ -9,13 +9,13 @@ import { ref, computed, watch } from 'vue'
 import {
   icon__fold,
   icon__github,
-  icon__vscode,
   icon__folder,
   icon__search,
   icon__number_gray,
   icon__number_purple,
 } from '../../assets/icons'
 import { NOTES_DIR_KEY, REPO_NAME, AUTHOR, ROOT_ITEM } from '../constants.ts'
+import { useLocalIde } from '../composables/useLocalIde'
 import FolderTreeItems from './FolderTreeItems.vue'
 import NotesTrendChart from './NotesTrendChart.vue'
 import { useSettingsDialog } from '../Settings/composables/useSettingsDialog'
@@ -29,9 +29,7 @@ import {
 import {
   getRepoRootPath,
   resolveNoteReadmePath,
-  toVscodeFileUrl,
 } from '../utils/vscodePaths'
-import { formatDate } from '../utils.ts'
 
 // #region props
 const props = defineProps({
@@ -45,6 +43,14 @@ const props = defineProps({
   },
 })
 // #endregion
+
+const {
+  icon: localIdeIcon,
+  openNoteTitle,
+  openRepoTitle,
+  openReadmeTitle,
+  toFileUrl,
+} = useLocalIde()
 
 // #region data
 const viewMode = ref('folder')
@@ -217,7 +223,7 @@ function openGithubRepo() {
   window.open(`https://github.com/${AUTHOR}/${REPO_NAME}`, '_blank')
 }
 
-// 打开 VS Code 知识库
+// 打开本地 IDE 知识库
 function openVSCodeRepo() {
   const notesDir = localStorage.getItem(NOTES_DIR_KEY)
 
@@ -231,10 +237,10 @@ function openVSCodeRepo() {
     return
   }
 
-  window.open('vscode://file/' + notesDir, '_blank')
+  window.open(toFileUrl(notesDir), '_blank')
 }
 
-// 打开 VS Code 中的笔记 README.md
+// 在本地 IDE 中打开笔记 README.md
 function openVSCodeArticle(article) {
   const notesDir = localStorage.getItem(NOTES_DIR_KEY)
 
@@ -251,7 +257,7 @@ function openVSCodeArticle(article) {
   const notePath = resolveNoteReadmePath(notesDir, article.relativePath)
   if (!notePath) return
 
-  window.open(toVscodeFileUrl(notePath), '_blank')
+  window.open(toFileUrl(notePath), '_blank')
 }
 
 function openVSCodeReadme() {
@@ -268,7 +274,7 @@ function openVSCodeReadme() {
   }
 
   const readmePath = `${getRepoRootPath(notesDir)}/README.md`
-  window.open(toVscodeFileUrl(readmePath), '_blank')
+  window.open(toFileUrl(readmePath), '_blank')
 }
 </script>
 
@@ -318,9 +324,9 @@ function openVSCodeReadme() {
           <img :src="icon__github" alt="GitHub仓库" />
         </button>
 
-        <!-- VS Code 按钮 -->
-        <button class="vscode-open" @click="openVSCodeRepo">
-          <img :src="icon__vscode" alt="使用 VS Code 打开本地知识库" />
+        <!-- 本地 IDE 按钮 -->
+        <button class="vscode-open" @click="openVSCodeRepo" :title="openRepoTitle">
+          <img :src="localIdeIcon" :alt="openRepoTitle" />
         </button>
 
         <!-- 关于按钮 -->
@@ -345,18 +351,6 @@ function openVSCodeReadme() {
             >
               {{ AUTHOR }}/{{ REPO_NAME }}
             </a>
-          </div>
-          <div class="about-item">
-            <span class="about-label">📅 创建时间</span>
-            <span class="about-value">{{
-              formatDate(ROOT_ITEM.created_at)
-            }}</span>
-          </div>
-          <div class="about-item">
-            <span class="about-label">♻️ 最近更新</span>
-            <span class="about-value">{{
-              formatDate(ROOT_ITEM.updated_at)
-            }}</span>
           </div>
         </div>
       </div>
@@ -395,9 +389,9 @@ function openVSCodeReadme() {
           <button
             class="vscode-article"
             @click.stop="openVSCodeArticle(article)"
-            title="在 VS Code 中打开笔记目录"
+            :title="openNoteTitle"
           >
-            <img :src="icon__vscode" alt="打开笔记目录" />
+            <img :src="localIdeIcon" :alt="openNoteTitle" />
           </button>
         </div>
       </div>
@@ -415,10 +409,10 @@ function openVSCodeReadme() {
           <button
             class="vscode-article"
             type="button"
-            title="在 VS Code 中打开 README.md"
+            :title="openReadmeTitle"
             @click="openVSCodeReadme"
           >
-            <img :src="icon__vscode" alt="打开 README.md" />
+            <img :src="localIdeIcon" :alt="openReadmeTitle" />
           </button>
         </div>
         <FolderTreeItems

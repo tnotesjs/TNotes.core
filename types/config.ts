@@ -54,7 +54,4 @@ export interface RootItem {
   completed_notes_count: Record<string, number>
   details: string
   link: string
-  created_at?: number
-  updated_at?: number
-  days_since_birth?: number
 }

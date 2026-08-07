@@ -14,10 +14,10 @@ vitepress/components/Layout/DocBeforeControls.vue
       <div class="vscodeBox pcOnly" v-show="vscodeNotesDir">
         <a
           :href="vscodeNotesDir"
-          title="open in vscode"
+          :title="openCurrentTitle"
           target="_blank"
         >
-          <img :src="icon__vscode" alt="open in vscode" />
+          <img :src="localIdeIcon" :alt="openCurrentTitle" />
         </a>
       </div>
       <div class="contentToggleBox pcOnly">
@@ -65,13 +65,7 @@ vitepress/components/Layout/DocBeforeControls.vue
         </button>
       </div>
       <!-- 单个图标，点击打开 modal，只在有笔记数据的页面显示 -->
-      <div
-        class="aboutBtn"
-        v-show="
-          (currentNoteId && created_at && updated_at) ||
-          (isHomeReadme && homeReadmeCreatedAt && homeReadmeUpdatedAt)
-        "
-      >
+      <div class="aboutBtn" v-show="currentNoteId || isHomeReadme">
         <button
           class="aboutIconButton"
           @click="$emit('open-time-modal')"
@@ -93,23 +87,21 @@ import ToggleFullContent from './ToggleFullContent.vue'
 import ToggleSidebar from './ToggleSidebar.vue'
 import {
   icon__github,
-  icon__vscode,
   icon__fold,
   icon__clipboard,
 } from '../../assets/icons'
+import { useLocalIde } from '../composables/useLocalIde'
 
 const props = defineProps<{
   isFullContentMode: boolean
   vscodeNotesDir: string
   isHomeReadme: boolean
   currentNoteId: string | null
-  created_at: string | undefined
-  updated_at: string | undefined
-  homeReadmeCreatedAt: string | undefined
-  homeReadmeUpdatedAt: string | undefined
   timeModalOpen: boolean
   allCollapsed: boolean
 }>()
+
+const { icon: localIdeIcon, openCurrentTitle } = useLocalIde()
 
 const showCopyToast = ref(false)
 let copyToastTimer: ReturnType<typeof setTimeout> | null = null

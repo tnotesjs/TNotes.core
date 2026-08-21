@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.4.0] - 2026-08-21
+
 ### Added
 
 - 新增基于 `@tnotesjs/mindmap-core` 的只读 Mindmap 预览，默认脑图视图，并提供大纲、规范化源码视图。
@@ -466,7 +470,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/tnotesjs/core/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/tnotesjs/core/compare/v0.2.2...v0.3.0
 [0.1.28]: https://github.com/tnotesjs/core/compare/v0.1.27...v0.1.28
 [0.1.27]: https://github.com/tnotesjs/core/compare/v0.1.26...v0.1.27

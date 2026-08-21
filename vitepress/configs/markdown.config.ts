@@ -11,6 +11,11 @@ import markdownItTaskLists from 'markdown-it-task-lists'
 import path from 'path'
 
 import { generateAnchor } from '../../utils'
+import {
+  normalizeMindmapMarkdown,
+  parseMarkmapFence,
+  parseMindmapReference,
+} from '../components/MindmapPreview/compat'
 
 import type MarkdownIt from 'markdown-it'
 import type { MarkdownOptions } from 'vitepress'
@@ -66,17 +71,13 @@ const simpleMermaidMarkdown = (md: MarkdownIt) => {
 }
 
 /**
- * MarkMap 容器配置
+ * Mindmap 容器配置（兼容旧的 markmap 围栏名）
  */
-function configureMarkMapContainer(md: MarkdownIt) {
-  // 先保留 container 的解析（负责把 ```markmap ``` 识别成 container tokens）
-  // 但让它本身不输出任何 HTML（render 返回空）
+function configureMindmapContainer(md: MarkdownIt) {
   md.use(markdownItContainer, 'markmap', {
     marker: '`',
     validate(params: string) {
-      // 接受 "markmap", "markmap{...}" 或 "markmap key=val ..." 等写法
-      const p = (params || '').trim()
-      return p.startsWith('markmap')
+      return (params || '').trim().startsWith('markmap')
     },
     render() {
       return ''
@@ -93,11 +94,13 @@ function configureMarkMapContainer(md: MarkdownIt) {
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i]
       if (t.type === 'container_markmap_open') {
+        const containerName = 'markmap'
+        const closeType = 'container_markmap_close'
         // 找到对应的 close token
         let j = i + 1
         while (
           j < tokens.length &&
-          tokens[j].type !== 'container_markmap_close'
+          tokens[j].type !== closeType
         )
           j++
         if (j >= tokens.length) continue // safety
@@ -109,9 +112,12 @@ function configureMarkMapContainer(md: MarkdownIt) {
 
         // 1) 从开头 fence 行解析参数（支持 `{a=1 b="x"}`、`a=1 b="x"`，并支持单个数字 shorthand）
         const params: { [key: string]: any; initialExpandLevel?: number } = {}
+        let explicitTitle: string | undefined
 
         if (open.map && typeof open.map[0] === 'number') {
           const openLine = (lines[open.map[0]] || '').trim()
+          const fenceOptions = parseMarkmapFence(openLine)
+          explicitTitle = fenceOptions.title
           let paramPart = ''
 
           // 优先匹配大括号形式 ```markmap{...}
@@ -121,9 +127,12 @@ function configureMarkMapContainer(md: MarkdownIt) {
           } else {
             // 否则尝试去掉前缀 ``` 和 markmap，剩下的作为参数部分
             const after = openLine.replace(/^`+\s*/, '')
-            if (after.startsWith('markmap')) {
-              paramPart = after.slice('markmap'.length).trim()
+            if (after.startsWith(containerName)) {
+              paramPart = after.slice(containerName.length).trim()
             }
+          }
+          if (fenceOptions.initialExpandLevel !== undefined) {
+            params.initialExpandLevel = fenceOptions.initialExpandLevel
           }
 
           if (paramPart) {
@@ -179,10 +188,11 @@ function configureMarkMapContainer(md: MarkdownIt) {
         // --- 检查第一非空行是否为引用语法 ---
         const firstNonEmptyLine =
           (content || '').split('\n').find((ln) => ln.trim() !== '') || ''
-        const refMatch = firstNonEmptyLine.trim().match(/^<<<\s*(.+)$/)
-        if (refMatch) {
-          // 提取引用路径，支持引号包裹
-          const refRaw = refMatch[1].trim().replace(/^['"]|['"]$/g, '')
+        const reference = parseMindmapReference(firstNonEmptyLine)
+        let referencedTitle: string | undefined
+        if (reference) {
+          const refRaw = reference.path
+          referencedTitle = reference.title
 
           // 尝试同步读取文件内容（兼容常见 Node 环境）
           try {
@@ -213,11 +223,13 @@ function configureMarkMapContainer(md: MarkdownIt) {
           } catch (err) {
             // 读取失败：将错误写入 content 以便排查（不会让流程直接崩溃）
             const errorMsg = err instanceof Error ? err.message : String(err)
-            content = `Failed to load referenced file: ${esc(
-              String(refRaw)
-            )}\n\nError: ${esc(errorMsg)}`
+            content = `- Failed to load referenced file: ${esc(String(refRaw))}\n  - Error: ${esc(errorMsg)}`
           }
         }
+
+        content = normalizeMindmapMarkdown(content, {
+          title: explicitTitle || referencedTitle,
+        })
 
         // 3) 构造组件标签并把参数注入为 props
         const encodedContent = encodeURIComponent(content.trim())
@@ -232,7 +244,7 @@ function configureMarkMapContainer(md: MarkdownIt) {
           }
         }
 
-        const html = `<MarkMap ${propsStr}></MarkMap>\n`
+        const html = `<MindmapPreview ${propsStr}></MindmapPreview>\n`
 
         // 创建 html_block token
         const htmlToken = new state.Token('html_block', '', 0)
@@ -245,6 +257,50 @@ function configureMarkMapContainer(md: MarkdownIt) {
 
     return true
   })
+}
+
+/** Canonical `mindmap` fence. Legacy `markmap` stays on its historical container path. */
+function configureMindmapFence(md: MarkdownIt) {
+  const fence = md.renderer.rules.fence
+    ? md.renderer.rules.fence.bind(md.renderer.rules)
+    : () => ''
+
+  md.renderer.rules.fence = (tokens, index, options, env, slf) => {
+    const token = tokens[index]
+    const info = token.info.trim()
+    if (!/^mindmap(?=\s|\{|\[|$)/.test(info)) {
+      return fence(tokens, index, options, env, slf)
+    }
+
+    const fenceOptions = parseMarkmapFence(info)
+    let content = token.content
+    const firstNonEmptyLine = content.split('\n').find((line) => line.trim()) ?? ''
+    const reference = parseMindmapReference(firstNonEmptyLine)
+
+    if (reference) {
+      const possibleRel = env?.relativePath || env?.path || env?.filePath || env?.file || ''
+      const refFullPath = path.isAbsolute(reference.path)
+        ? reference.path
+        : path.resolve(process.cwd(), possibleRel ? path.dirname(possibleRel) : '', reference.path)
+      try {
+        content = fs.readFileSync(refFullPath, 'utf8')
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        content = `- Failed to load referenced file: ${reference.path}\n  - Error: ${message}`
+      }
+    }
+
+    content = normalizeMindmapMarkdown(content, {
+      title: fenceOptions.title || reference?.title,
+    })
+    const props = [
+      `content="${encodeURIComponent(content.trim())}"`,
+      fenceOptions.initialExpandLevel === undefined
+        ? ''
+        : `:initialExpandLevel="${fenceOptions.initialExpandLevel}"`,
+    ].filter(Boolean).join(' ')
+    return `<MindmapPreview ${props}></MindmapPreview>\n`
+  }
 }
 
 /**
@@ -340,8 +396,9 @@ export function getMarkdownConfig(): MarkdownOptions {
       // 添加 Mermaid 支持
       simpleMermaidMarkdown(md)
 
-      // 添加 MarkMap 支持
-      configureMarkMapContainer(md)
+      // 添加 Mindmap 支持，并继续兼容旧 MarkMap 围栏
+      configureMindmapContainer(md)
+      configureMindmapFence(md)
 
       // 添加任务列表支持
       md.use(markdownItTaskLists)

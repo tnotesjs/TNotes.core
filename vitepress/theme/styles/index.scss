@@ -17,7 +17,6 @@
 
 /* 4. 组件全局层：跨组件共享的样式 */
 @use './components/swiper';
-@use './components/markmap';
 @use './components/collapse';
 /**
  * !404 不是一个有效的 Sass 标识符（不能以数字开头），需要为它添加一个别名

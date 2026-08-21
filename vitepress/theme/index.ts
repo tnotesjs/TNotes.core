@@ -22,8 +22,8 @@ import Footprints from '../components/Footprints/Footprints.vue'
 import { useRenameOverlay } from '../components/Layout/composables/useRenameOverlay'
 import { redirectAfterRename } from '../components/Layout/composables/useRenameRedirect'
 import Layout from '../components/Layout/Layout.vue'
-import MarkMap from '../components/MarkMap/MarkMap.vue'
 import Mermaid from '../components/Mermaid/Mermaid.vue'
+import MindmapPreview from '../components/MindmapPreview/MindmapPreview.vue'
 import NotesTable from '../components/NotesTable/NotesTable.vue'
 import SidebarCard from '../components/SidebarCard/SidebarCard.vue'
 import Tooltip from '../components/Tooltip/Tooltip.vue'
@@ -45,7 +45,9 @@ function registerCoreComponents(ctx: EnhanceAppContext) {
   app.component('Footprints', Footprints)
   app.component('F', Footprints)
   app.component('SidebarCard', SidebarCard)
-  app.component('MarkMap', MarkMap)
+  // Keep the historical component name so existing note fences need no migration.
+  app.component('MarkMap', MindmapPreview)
+  app.component('MindmapPreview', MindmapPreview)
   app.component('Mermaid', Mermaid)
   app.component('NotesTable', NotesTable)
   app.component('N', NotesTable)

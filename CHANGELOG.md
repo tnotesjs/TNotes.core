@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.4.2] - 2026-08-21
+
 ### Fixed
 
 - 同时预构建 Mermaid 使用的 `fastdom-promised` 扩展，避免主入口修复后扩展入口继续触发 ESM 默认导入错误。
@@ -478,7 +482,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/tnotesjs/core/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/tnotesjs/core/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/tnotesjs/core/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/tnotesjs/core/compare/v0.2.2...v0.3.0

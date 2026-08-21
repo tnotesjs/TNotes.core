@@ -4,7 +4,9 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
+### Fixed
+
+- 修复 pnpm 严格依赖布局下 Mermaid 的 CommonJS `fastdom` 未被 Vite 预构建，导致 `tn:dev` 页面白屏的问题。
 
 ## [0.4.0] - 2026-08-21
 

@@ -12,6 +12,7 @@ import fs from 'fs'
 import path from 'path'
 import { defineConfig, type UserConfig } from 'vitepress'
 
+import { DEFAULT_OPTIMIZE_DEPS_INCLUDE } from './dependencyOptimization'
 import { ConfigManager } from '../../config/ConfigManager'
 import {
   getIgnoreList,
@@ -110,14 +111,7 @@ export function defineNotesConfig(overrides: UserConfig = {}) {
         ...overrideVite?.resolve,
       },
       optimizeDeps: {
-        include: [
-          // VitePress 内部 CJS 依赖 —— 需要 Vite 预构建为 ESM
-          'vitepress > @vscode/markdown-it-katex',
-          'vitepress > @braintree/sanitize-url',
-          'vitepress > dayjs',
-          'vitepress > dayjs/plugin/utc',
-          'vitepress > dayjs/plugin/localizedFormat',
-        ],
+        include: [...DEFAULT_OPTIMIZE_DEPS_INCLUDE],
         ...overrideVite?.optimizeDeps,
       },
     },

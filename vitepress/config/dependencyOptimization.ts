@@ -9,4 +9,5 @@ export const DEFAULT_OPTIMIZE_DEPS_INCLUDE = [
   // 依赖布局下 Vite 无法从知识库根目录自动发现这条嵌套依赖，开发
   // 模式会直接把 fastdom.js 当作 ESM 加载并导致整页白屏。
   '@tnotesjs/core > mermaid > fastdom',
+  '@tnotesjs/core > mermaid > fastdom/extensions/fastdom-promised.js',
 ] as const

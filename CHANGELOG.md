@@ -4,7 +4,9 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
+### Fixed
+
+- 同时预构建 Mermaid 使用的 `fastdom-promised` 扩展，避免主入口修复后扩展入口继续触发 ESM 默认导入错误。
 
 ## [0.4.1] - 2026-08-21
 

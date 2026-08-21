@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.4.1] - 2026-08-21
+
 ### Fixed
 
 - 修复 pnpm 严格依赖布局下 Mermaid 的 CommonJS `fastdom` 未被 Vite 预构建，导致 `tn:dev` 页面白屏的问题。
@@ -472,7 +476,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/tnotesjs/core/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/tnotesjs/core/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/tnotesjs/core/compare/v0.2.2...v0.3.0
 [0.1.28]: https://github.com/tnotesjs/core/compare/v0.1.27...v0.1.28

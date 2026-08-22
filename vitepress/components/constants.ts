@@ -54,11 +54,6 @@ export const EN_WORD_LIST_COMP_IS_AUTO_SHOW_CARD: string =
   'EN_WORD_LIST_COMP_IS_AUTO_SHOW_CARD__' + REPO_NAME
 
 /**
- * MarkMap 默认主题配置
- */
-export const MARKMAP_THEME_KEY: string = 'MARKMAP_THEME_KEY__' + REPO_NAME
-
-/**
  * 侧边栏是否显示笔记编号配置
  */
 export const SIDEBAR_SHOW_NOTE_ID_KEY: string =

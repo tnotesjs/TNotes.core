@@ -3,9 +3,12 @@ import { CanvasViewer, MindmapSession } from '@tnotesjs/mindmap-core'
 import { onContentUpdated, useData } from 'vitepress'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 
-import { normalizeMindmapMarkdown } from './compat'
 import { applyInitialExpandLevel } from './expandLevel'
+import { normalizeMindmapMarkdown } from './markdown'
 import MindmapOutlineNode from './MindmapOutlineNode.vue'
+import MindmapViewIcon from './MindmapViewIcon.vue'
+import { gateMindmapWheel } from './wheelInteraction'
+import { icon__fullscreen, icon__fullscreen_exit, icon__zoom_fit } from '../../assets/icons'
 
 type PreviewView = 'mindmap' | 'outline' | 'source'
 
@@ -19,11 +22,20 @@ const props = withDefaults(defineProps<{
 
 const { isDark } = useData()
 const activeView = ref<PreviewView>('mindmap')
+const previewRoot = ref<HTMLElement | null>(null)
 const canvasHost = ref<HTMLElement | null>(null)
 const session = shallowRef<MindmapSession | null>(null)
 const renderVersion = ref(0)
+const isFullscreen = ref(false)
+const isCanvasActive = ref(false)
 let viewer: CanvasViewer | null = null
 let mounted = false
+
+const viewOptions = [
+  { value: 'mindmap', label: '脑图' },
+  { value: 'outline', label: '大纲' },
+  { value: 'source', label: '源码' },
+] as const
 
 function decodeContent(value: string): string {
   try {
@@ -61,6 +73,7 @@ function rebuildSession(): void {
 
 function setView(view: PreviewView): void {
   activeView.value = view
+  if (view !== 'mindmap') isCanvasActive.value = false
   if (view === 'mindmap') void nextTick(() => viewer?.zoomToFit())
 }
 
@@ -72,11 +85,51 @@ function exitFocusTo(index: number): void {
   session.value?.exitFocusTo(index)
 }
 
+async function toggleFullscreen(): Promise<void> {
+  const root = previewRoot.value
+  if (!root) return
+
+  try {
+    if (document.fullscreenElement === root) await document.exitFullscreen()
+    else await root.requestFullscreen()
+  } catch {
+    // Fullscreen can be rejected by the browser or an embedded document policy.
+  }
+}
+
+function handleFullscreenChange(): void {
+  isFullscreen.value = document.fullscreenElement === previewRoot.value
+  if (activeView.value === 'mindmap') void nextTick(() => viewer?.zoomToFit())
+}
+
+function activateCanvas(): void {
+  isCanvasActive.value = true
+}
+
+function handleCanvasWheelCapture(event: WheelEvent): void {
+  gateMindmapWheel(event, isCanvasActive.value)
+}
+
+function handleDocumentPointerDown(event: PointerEvent): void {
+  if (event.target instanceof Node && !previewRoot.value?.contains(event.target)) {
+    isCanvasActive.value = false
+  }
+}
+
+function handleDocumentKeydown(event: KeyboardEvent): void {
+  if (event.key !== 'Escape' || !isCanvasActive.value) return
+  isCanvasActive.value = false
+  canvasHost.value?.blur()
+}
+
 watch([normalizedContent, () => props.initialExpandLevel], rebuildSession, { immediate: true })
 watch(isDark, (dark) => viewer?.setTheme(dark ? 'dark' : 'light'))
 
 onMounted(() => {
   mounted = true
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  document.addEventListener('pointerdown', handleDocumentPointerDown, true)
+  document.addEventListener('keydown', handleDocumentKeydown, true)
   createViewer()
 })
 
@@ -86,29 +139,58 @@ onContentUpdated(() => {
 
 onBeforeUnmount(() => {
   mounted = false
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  document.removeEventListener('pointerdown', handleDocumentPointerDown, true)
+  document.removeEventListener('keydown', handleDocumentKeydown, true)
   viewer?.destroy()
   viewer = null
 })
 </script>
 
 <template>
-  <section class="mindmap-preview" :class="{ 'is-dark': isDark }">
-    <header class="mindmap-preview-header">
+  <section
+    ref="previewRoot"
+    class="mindmap-preview"
+    :class="{ 'is-dark': isDark, 'is-fullscreen': isFullscreen }"
+    :data-version="renderVersion"
+  >
+    <div class="mindmap-preview-actions">
       <nav class="mindmap-preview-tabs" aria-label="脑图预览视图">
         <button
-          v-for="item in ([['mindmap', '脑图'], ['outline', '大纲'], ['source', '源码']] as const)"
-          :key="item[0]"
+          v-for="item in viewOptions"
+          :key="item.value"
           type="button"
-          :class="{ 'is-active': activeView === item[0] }"
-          @click="setView(item[0])"
+          class="mindmap-preview-action"
+          :class="{ 'is-active': activeView === item.value }"
+          :aria-label="item.label"
+          :aria-pressed="activeView === item.value"
+          :title="item.label"
+          @click="setView(item.value)"
         >
-          {{ item[1] }}
+          <MindmapViewIcon :view="item.value" />
         </button>
       </nav>
-      <button v-if="activeView === 'mindmap'" type="button" class="mindmap-fit" @click="viewer?.zoomToFit()">
-        适应视口
+      <span class="mindmap-preview-action-divider" aria-hidden="true" />
+      <button
+        v-if="activeView === 'mindmap'"
+        type="button"
+        class="mindmap-preview-action"
+        aria-label="适应视口"
+        title="适应视口"
+        @click="viewer?.zoomToFit()"
+      >
+        <img :src="icon__zoom_fit" alt="" />
       </button>
-    </header>
+      <button
+        type="button"
+        class="mindmap-preview-action"
+        :aria-label="isFullscreen ? '退出全屏' : '全屏查看'"
+        :title="isFullscreen ? '退出全屏' : '全屏查看'"
+        @click="toggleFullscreen"
+      >
+        <img :src="isFullscreen ? icon__fullscreen_exit : icon__fullscreen" alt="" />
+      </button>
+    </div>
 
     <nav v-if="session && session.focusPath.length > 0" class="mindmap-focus-path" aria-label="当前主题路径">
       <button type="button" @click="exitFocusTo(0)">全部</button>
@@ -118,7 +200,14 @@ onBeforeUnmount(() => {
       </template>
     </nav>
 
-    <div v-show="activeView === 'mindmap'" ref="canvasHost" class="mindmap-canvas-host" />
+    <div
+      v-show="activeView === 'mindmap'"
+      ref="canvasHost"
+      class="mindmap-canvas-host"
+      :class="{ 'is-interaction-active': isCanvasActive }"
+      @pointerdown.capture="activateCanvas"
+      @wheel.capture="handleCanvasWheelCapture"
+    />
 
     <div v-if="activeView === 'outline' && session" class="mindmap-outline" :data-version="renderVersion">
       <ul class="mindmap-outline-root">
@@ -139,6 +228,7 @@ onBeforeUnmount(() => {
 .mindmap-preview {
   --mindmap-panel: var(--vp-c-bg-soft);
   --mindmap-border: var(--vp-c-divider);
+  position: relative;
   margin: 1.5rem 0;
   overflow: hidden;
   border: 1px solid var(--mindmap-border);
@@ -146,36 +236,75 @@ onBeforeUnmount(() => {
   background: var(--vp-c-bg);
 }
 
-.mindmap-preview-header {
+.mindmap-preview-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-height: 42px;
-  padding: 5px 8px;
-  border-bottom: 1px solid var(--mindmap-border);
-  background: var(--mindmap-panel);
+  gap: 4px;
+  padding: 2px;
+  border: .1px solid var(--vp-c-divider);
+  border-radius: 7px;
+  background-color: color-mix(in srgb, var(--vp-code-block-bg) 92%, transparent);
+  box-shadow: var(--vp-shadow-1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
 }
 
 .mindmap-preview-tabs {
   display: flex;
-  gap: 3px;
-
-  button {
-    padding: 5px 12px;
-    border-radius: 6px;
-    color: var(--vp-c-text-2);
-    font-size: 13px;
-    font-weight: 600;
-
-    &:hover,
-    &.is-active {
-      color: var(--vp-c-text-1);
-      background: var(--vp-c-bg);
-    }
-  }
+  gap: 4px;
 }
 
-.mindmap-fit,
+.mindmap-preview:hover > .mindmap-preview-actions,
+.mindmap-preview-actions:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mindmap-preview-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vp-c-brand-1);
+  cursor: pointer;
+  transition: background-color .2s, transform .2s;
+
+  svg,
+  img {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover,
+  &.is-active {
+    background-color: var(--vp-c-default-soft);
+  }
+
+  &.is-active {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vp-c-brand-1) 35%, transparent);
+  }
+
+  &:hover { transform: scale(1.05); }
+  &:active { transform: scale(.95); }
+}
+
+.mindmap-preview-action-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 1px;
+  background: var(--vp-c-divider);
+}
+
 .mindmap-focus-path button {
   color: var(--vp-c-text-2);
   font-size: 12px;
@@ -202,6 +331,10 @@ onBeforeUnmount(() => {
   background: var(--vp-c-bg);
   touch-action: none;
   user-select: none;
+
+  &.is-interaction-active {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vp-c-brand-1) 38%, transparent);
+  }
 }
 
 .mindmap-canvas-host:deep(.mm-canvas),
@@ -279,9 +412,31 @@ onBeforeUnmount(() => {
   white-space: pre;
 }
 
+.mindmap-preview:fullscreen {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--vp-c-bg);
+  flex-direction: column;
+
+  .mindmap-canvas-host,
+  .mindmap-outline,
+  .mindmap-source {
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
+  }
+
+  .mindmap-canvas-host { height: auto; }
+}
+
 @media (max-width: 768px) {
   .mindmap-canvas-host { height: 360px; }
-  .mindmap-preview-tabs button { padding-inline: 9px; }
+  .mindmap-preview-actions { top: 6px; right: 6px; }
+  .mindmap-preview-action { width: 28px; height: 28px; }
   .mindmap-outline { padding-inline: 12px; }
 }
 </style>

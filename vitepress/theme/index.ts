@@ -45,8 +45,6 @@ function registerCoreComponents(ctx: EnhanceAppContext) {
   app.component('Footprints', Footprints)
   app.component('F', Footprints)
   app.component('SidebarCard', SidebarCard)
-  // Keep the historical component name so existing note fences need no migration.
-  app.component('MarkMap', MindmapPreview)
   app.component('MindmapPreview', MindmapPreview)
   app.component('Mermaid', Mermaid)
   app.component('NotesTable', NotesTable)

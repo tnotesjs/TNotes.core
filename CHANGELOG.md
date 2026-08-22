@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.5.0] - 2026-08-22
+
 ### Changed
 
 - Mindmap 预览改用脑图、大纲、源码图标切换视图，工具栏与代码块一致，仅在悬停或键盘聚焦时显示。
@@ -496,7 +500,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/tnotesjs/core/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/tnotesjs/core/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/tnotesjs/core/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/tnotesjs/core/compare/v0.3.0...v0.4.0

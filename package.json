@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.17.1",
   "bin": {
-    "tnotes": "./dist/cli/index.js"
+    "tnotes": "dist/cli/index.js"
   },
   "exports": {
     ".": {
@@ -85,7 +85,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tnotesjs/core"
+    "url": "git+https://github.com/tnotesjs/core.git"
   },
   "keywords": [
     "tnotes",

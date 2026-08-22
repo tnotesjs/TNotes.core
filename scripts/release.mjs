@@ -72,11 +72,11 @@ function verifyPublishSurface() {
 
   const packList = runCapture('npm pack --dry-run --json')
   const tarball = JSON.parse(packList)
-  const files = tarball[0]?.files?.map((f) => f.path) ?? []
+  const files = tarball[0]?.files?.map((f) => f.path.replace(/^package\//, '')) ?? []
   const mustInclude = [
-    'package/dist/vitepress/config/index.js',
-    'package/services/toc/service.ts',
-    'package/utils/tocNodeId.ts',
+    'dist/vitepress/config/index.js',
+    'services/toc/service.ts',
+    'utils/tocNodeId.ts',
   ]
   const missingInPack = mustInclude.filter((p) => !files.includes(p))
   if (missingInPack.length) {

@@ -10,6 +10,7 @@ describe('TNotes Markdown contract', () => {
   it('exposes runtime-neutral component descriptors', () => {
     expect(findTNotesComponent('N')?.name).toBe('NotesTable')
     expect(findTNotesComponent('SWIPER')?.kind).toBe('container')
+    expect(findTNotesComponent('Mermaid')?.editable).toBe('visual')
     expect(TNOTES_COMPONENTS.some((item) => item.name === 'markmap')).toBe(true)
   })
 

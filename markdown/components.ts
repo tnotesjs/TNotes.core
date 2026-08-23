@@ -51,6 +51,11 @@ export const TNOTES_COMPONENTS: readonly TNotesComponentDescriptor[] = [
     editable: 'visual',
   },
   {
+    name: 'Mermaid',
+    kind: 'block-component',
+    editable: 'visual',
+  },
+  {
     name: 'Discussions',
     kind: 'block-component',
     editable: 'placeholder',

@@ -14,7 +14,10 @@ export default defineConfig({
     'markdown/index': 'markdown/index.ts',
     'vitepress/config/index': 'vitepress/config/index.ts',
   },
-  format: ['esm'],
+  format: ['esm', 'cjs'],
+  outExtension({ format }) {
+    return { js: format === 'cjs' ? '.cjs' : '.js' }
+  },
   target: 'node18',
   platform: 'node',
   splitting: true,

@@ -10,17 +10,21 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     },
     "./workspace": {
       "types": "./dist/workspace/index.d.ts",
+      "require": "./dist/workspace/index.cjs",
       "import": "./dist/workspace/index.js"
     },
     "./markdown": {
       "types": "./dist/markdown/index.d.ts",
+      "require": "./dist/markdown/index.cjs",
       "import": "./dist/markdown/index.js"
     },
     "./vitepress/config": {
+      "require": "./dist/vitepress/config/index.cjs",
       "import": "./dist/vitepress/config/index.js"
     },
     "./vitepress/theme": {

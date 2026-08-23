@@ -12,6 +12,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./workspace": {
+      "types": "./dist/workspace/index.d.ts",
+      "import": "./dist/workspace/index.js"
+    },
+    "./markdown": {
+      "types": "./dist/markdown/index.d.ts",
+      "import": "./dist/markdown/index.js"
+    },
     "./vitepress/config": {
       "import": "./dist/vitepress/config/index.js"
     },
@@ -59,6 +67,7 @@
     "marked": "^15.0.11",
     "mermaid": "^11.5.0",
     "minisearch": "^7.2.0",
+    "prettier": "^3.6.2",
     "sass-embedded": "^1.90.0",
     "swiper": "^11.2.1",
     "uuid": "^11.1.0",

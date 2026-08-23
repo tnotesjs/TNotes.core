@@ -10,6 +10,8 @@ export default defineConfig({
   entry: {
     'cli/index': 'index.ts',
     index: 'src/index.ts',
+    'workspace/index': 'workspace/index.ts',
+    'markdown/index': 'markdown/index.ts',
     'vitepress/config/index': 'vitepress/config/index.ts',
   },
   format: ['esm'],
@@ -17,7 +19,7 @@ export default defineConfig({
   platform: 'node',
   splitting: true,
   clean: true,
-  dts: false,
+  dts: true,
   outDir: 'dist',
   // 外部依赖不打包
   external: [

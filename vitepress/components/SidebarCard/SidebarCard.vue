@@ -6,6 +6,8 @@
 import { useData } from 'vitepress'
 import { ref, computed, watch } from 'vue'
 
+import FolderTreeItems from './FolderTreeItems.vue'
+import NotesTrendChart from './NotesTrendChart.vue'
 import {
   icon__fold,
   icon__github,
@@ -14,10 +16,8 @@ import {
   icon__number_gray,
   icon__number_purple,
 } from '../../assets/icons'
-import { NOTES_DIR_KEY, REPO_NAME, AUTHOR, ROOT_ITEM } from '../constants.ts'
 import { useLocalIde } from '../composables/useLocalIde'
-import FolderTreeItems from './FolderTreeItems.vue'
-import NotesTrendChart from './NotesTrendChart.vue'
+import { NOTES_DIR_KEY, REPO_NAME, AUTHOR, ROOT_ITEM } from '../constants.ts'
 import { useSettingsDialog } from '../Settings/composables/useSettingsDialog'
 import { data as sidebarConfig } from '../sidebar.data'
 import {

@@ -180,6 +180,7 @@ vitepress/components/Settings/Settings.vue
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 
+import { useLocalIde } from '../composables/useLocalIde'
 import {
   NOTES_DIR_KEY,
   LOCAL_IDE_KEY,
@@ -188,14 +189,13 @@ import {
   SIDEBAR_UNDONE_PREFIX_KEY,
   CONTENT_WIDTH_MODE_KEY,
 } from '../constants'
-import { useLocalIde } from '../composables/useLocalIde'
+// @ts-expect-error - VitePress Data Loader
+import { data as tnotesConfig } from '../tnotes-config.data'
 import {
   DEFAULT_LOCAL_IDE,
   normalizeLocalIde,
   type LocalIdeId,
 } from '../utils/vscodePaths'
-// @ts-expect-error - VitePress Data Loader
-import { data as tnotesConfig } from '../tnotes-config.data'
 
 type ContentWidthMode = 'wide' | 'standard'
 

@@ -34,11 +34,19 @@ export function getDocIdFromFile(input: {
   rewrites?: Record<string, string>
   absoluteOrRelativeFile: string
 }): string {
-  const absoluteFile = path.isAbsolute(input.absoluteOrRelativeFile)
+  // A knowledge base can be indexed on a different host platform in tests,
+  // build workers or cached metadata. Select the path implementation from the
+  // value instead of assuming the current Node.js platform.
+  const pathApi = /^[a-zA-Z]:[\\/]/.test(
+    input.absoluteOrRelativeFile || input.srcDir,
+  )
+    ? path.win32
+    : path
+  const absoluteFile = pathApi.isAbsolute(input.absoluteOrRelativeFile)
     ? input.absoluteOrRelativeFile
-    : path.join(input.srcDir, input.absoluteOrRelativeFile)
+    : pathApi.join(input.srcDir, input.absoluteOrRelativeFile)
 
-  let relFile = slash(path.relative(input.srcDir, absoluteFile))
+  let relFile = slash(pathApi.relative(input.srcDir, absoluteFile))
   if (input.rewrites?.[relFile]) {
     relFile = input.rewrites[relFile]
   }

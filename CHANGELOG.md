@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+暂无待发布的变更。
+
+## [0.6.0] - 2026-08-24
+
 ### Added
 
 - 新增 `@tnotesjs/core/workspace` 入口，为 Desk 等本地客户端提供可注入根路径的知识库扫描、读取与写入 API。
@@ -510,7 +514,8 @@
 - `tsup` 构建配置，`onSuccess` 钩子为 CLI 入口注入 shebang
 - 发版脚本 `scripts/release.mjs`，规范化发布流程
 
-[Unreleased]: https://github.com/tnotesjs/core/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/tnotesjs/core/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/tnotesjs/core/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/tnotesjs/core/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/tnotesjs/core/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/tnotesjs/core/compare/v0.4.0...v0.4.1

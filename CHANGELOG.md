@@ -4,7 +4,17 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
+### Added
+
+- 新增 `@tnotesjs/core/workspace` 入口，为 Desk 等本地客户端提供可注入根路径的知识库扫描、读取与写入 API。
+- Workspace API 支持笔记创建、保存、重命名、删除预览与删除，目录分组创建、重命名、移动与删除，以及附件写入和笔记配置更新。
+- Workspace 写操作使用原子文件替换与串行变更队列，统一返回知识库快照、诊断信息和结构化错误。
+- 新增 `@tnotesjs/core/markdown` 入口，提供与运行时无关的笔记格式化能力和 TNotes 组件注册表，并登记 Mermaid 组件语法。
+- 为 Workspace 与 Markdown 格式化能力补充自动化测试。
+
+### Fixed
+
+- 为 Workspace、Markdown 和 VitePress Config 扩展补齐 CommonJS 构建与 `require` 导出，确保 Electron 主进程等 CommonJS 环境能够直接加载。
 
 ## [0.5.0] - 2026-08-22
 
@@ -220,14 +230,14 @@
 8. **可选**：`pnpm tn:update-completed-count` 回填近 12 个月统计（TOC 引入前的月份仍读 Git 中的 `README.md`）。
 9. **新建子库**：使用 `pnpm tn:init-sub-repo`，无需手动复制模板。
 
-| 领域 | v0.1.x | v0.2.0 |
-|------|--------|--------|
-| 目录数据源 | 根 `README.md` `endregion:toc` 之后 | **`TOC.md`** |
-| `tn:update` 维护根 README 笔记列表 | 是 | **否** |
-| TOC 笔记行格式 | 带 link 的 markdown 列表 | **checkbox + 编号，无 link** |
-| `sidebarMaxDepth` 默认 | `3` | **`0`（不限）** |
-| 首页 SidebarCard | 文件夹 + 思维导图 | **文件夹 + 搜索** |
-| 设置面板 | 代码块行号/换行、目录风格、MarkMap 主题 | **正文页宽** + MarkMap 展开层级 |
+| 领域                               | v0.1.x                                  | v0.2.0                          |
+| ---------------------------------- | --------------------------------------- | ------------------------------- |
+| 目录数据源                         | 根 `README.md` `endregion:toc` 之后     | **`TOC.md`**                    |
+| `tn:update` 维护根 README 笔记列表 | 是                                      | **否**                          |
+| TOC 笔记行格式                     | 带 link 的 markdown 列表                | **checkbox + 编号，无 link**    |
+| `sidebarMaxDepth` 默认             | `3`                                     | **`0`（不限）**                 |
+| 首页 SidebarCard                   | 文件夹 + 思维导图                       | **文件夹 + 搜索**               |
+| 设置面板                           | 代码块行号/换行、目录风格、MarkMap 主题 | **正文页宽** + MarkMap 展开层级 |
 
 ## [0.1.28] - 2026-06-02
 

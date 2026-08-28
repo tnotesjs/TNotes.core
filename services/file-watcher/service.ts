@@ -24,7 +24,6 @@ import { NoteIndexCache } from '../../core/NoteIndexCache'
 import { logger } from '../../utils'
 import { NoteService } from '../note/service'
 import { ReadmeService } from '../readme/service'
-import { TocService } from '../toc/service'
 
 import type { WatchEvent } from './internal'
 
@@ -49,7 +48,6 @@ export class FileWatcherService {
   private adapter!: FsWatcherAdapter
   private noteService!: NoteService
   private readmeService!: ReadmeService
-  private tocService!: TocService
   private noteIndexCache!: NoteIndexCache
   private unlockTimer: NodeJS.Timeout | null = null
 
@@ -68,7 +66,6 @@ export class FileWatcherService {
   private init(): void {
     this.noteService = NoteService.getInstance()
     this.readmeService = ReadmeService.getInstance()
-    this.tocService = TocService.getInstance()
     this.noteIndexCache = NoteIndexCache.getInstance()
 
     this.watchState = this.initWatchState()
@@ -103,7 +100,6 @@ export class FileWatcherService {
       scheduler: this.scheduler,
       noteService: this.noteService,
       readmeService: this.readmeService,
-      tocService: this.tocService,
       noteIndexCache: this.noteIndexCache,
       logger,
       onRenameSuccess: (payload) => {
@@ -228,9 +224,8 @@ export class FileWatcherService {
 
   private initCoordinator(): GlobalUpdateCoordinator {
     return new GlobalUpdateCoordinator({
+      notesDir: this.notesDir,
       readmeService: this.readmeService,
-      tocService: this.tocService,
-      noteIndexCache: this.noteIndexCache,
       logger,
     })
   }

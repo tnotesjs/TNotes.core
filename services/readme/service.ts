@@ -12,7 +12,7 @@ import {
 } from 'fs'
 
 import { ConfigManager } from '../../config/ConfigManager'
-import { ROOT_README_PATH, VP_SIDEBAR_PATH } from '../../config/constants'
+import { ROOT_DIR_PATH, ROOT_README_PATH, VP_SIDEBAR_PATH } from '../../config/constants'
 import { NoteIndexCache } from '../../core/NoteIndexCache'
 import { NoteManager } from '../../core/NoteManager'
 import { ReadmeGenerator } from '../../core/ReadmeGenerator'
@@ -24,7 +24,8 @@ import {
   genHierarchicalSidebar,
   processEmptyLines,
 } from '../../utils'
-import { TocService } from '../toc/service'
+import { reconcileTocFromFiles } from '../reconcileToc'
+
 
 import type { NoteInfo, NoteConfig } from '../../types'
 
@@ -60,14 +61,12 @@ export class ReadmeService {
   private readmeGenerator: ReadmeGenerator
   private configManager: ConfigManager
   private noteIndexCache: NoteIndexCache
-  private tocService: TocService
 
   private constructor() {
     this.noteManager = NoteManager.getInstance()
     this.readmeGenerator = new ReadmeGenerator()
     this.configManager = ConfigManager.getInstance()
     this.noteIndexCache = NoteIndexCache.getInstance()
-    this.tocService = TocService.getInstance()
   }
 
   static getInstance(): ReadmeService {
@@ -121,10 +120,9 @@ export class ReadmeService {
       await this.updateHomeReadme(notes)
     }
 
-    // 规范化 TOC.md 并更新 sidebar.json
+    // files→TOC 对齐（Workspace）：规范化 TOC.md 并重建 sidebar.json
     if (updateSidebar) {
-      await this.tocService.normalizeToc(notes)
-      await this.tocService.regenerateSidebar(notes)
+      await reconcileTocFromFiles(ROOT_DIR_PATH)
     }
 
     logger.info('知识库更新完成！')
@@ -618,23 +616,18 @@ export class ReadmeService {
   /**
    * 更新 TOC.md 和 sidebar，不重写每篇笔记 README
    */
-  async refreshHomeReadmeAndSidebar(notes?: NoteInfo[]): Promise<void> {
-    const allNotes =
-      notes ??
-      (this.noteIndexCache.isInitialized()
-        ? this.noteIndexCache.toNoteInfoList()
-        : this.noteManager.scanNotes())
-
-    await this.tocService.normalizeToc(allNotes)
-    await this.tocService.regenerateSidebar(allNotes)
+  async refreshHomeReadmeAndSidebar(_notes?: NoteInfo[]): Promise<void> {
+    // files→TOC 对齐（Workspace）：TOC.md 规范化 + sidebar 重建
+    await reconcileTocFromFiles(ROOT_DIR_PATH)
   }
 
   /**
    * 重新生成 sidebar.json（基于当前 TOC.md）
    * @param notes - 可选的笔记列表，不传则内部扫描
    */
-  async regenerateSidebar(notes?: NoteInfo[]): Promise<void> {
-    await this.tocService.regenerateSidebar(notes)
+  async regenerateSidebar(_notes?: NoteInfo[]): Promise<void> {
+    // files→TOC 对齐（Workspace）：sidebar 由重建的 TOC 派生
+    await reconcileTocFromFiles(ROOT_DIR_PATH)
     logger.info('重新生成 sidebar.json')
   }
 

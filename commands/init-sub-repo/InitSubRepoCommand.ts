@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url'
 import { v4 as uuidv4 } from 'uuid'
 
 import { getConfigManager } from '../../config/ConfigManager'
-import { NoteService } from '../../services'
+import { ROOT_DIR_PATH } from '../../config/constants'
 import {
   buildInitContext,
   buildManualSteps,
@@ -24,7 +24,7 @@ import {
   validateTopic,
   InitSubRepoService,
 } from '../../services/init-sub-repo'
-import { TocService } from '../../services/toc/service'
+import { reconcileTocFromFiles } from '../../services/reconcileToc'
 import { BaseCommand } from '../BaseCommand'
 
 import type { InitSubRepoInput } from '../../services/init-sub-repo'
@@ -114,11 +114,7 @@ export class InitSubRepoCommand extends BaseCommand {
     try {
       this.logger.info('')
       this.logger.info('正在规范化 TOC.md 并生成 sidebar.json...')
-      const noteService = NoteService.getInstance()
-      const tocService = TocService.getInstance()
-      const notes = noteService.getAllNotes()
-      await tocService.normalizeToc(notes)
-      await tocService.regenerateSidebar(notes)
+      await reconcileTocFromFiles(ROOT_DIR_PATH)
       this.logger.success('sidebar.json 已生成')
     } catch (error) {
       this.logger.warn(

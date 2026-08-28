@@ -1,11 +1,23 @@
-import { format as prettierFormat } from 'prettier'
-
 import { generateAnchor } from '../utils/generateAnchor'
 
 import type { WorkspaceNoteConfig } from '../workspace/types'
 
 export const NOTE_TOC_START_TAG = '<!-- region:toc -->'
 export const NOTE_TOC_END_TAG = '<!-- endregion:toc -->'
+
+/**
+ * Lazy-loads prettier so consumers that never format (e.g. the read-only Nav
+ * VS Code extension) don't pay the top-level import cost / don't break their
+ * bundle (prettier's ESM entry crashes inside a CJS bundle at load time).
+ */
+async function prettierFormat(
+  content: string,
+  options: { parser: string; proseWrap: string; endOfLine: string },
+): Promise<string> {
+  const module = await import('prettier')
+  const prettier = (module as { default?: typeof import('prettier') }).default ?? module
+  return prettier.format(content, options as Parameters<typeof prettier.format>[1])
+}
 
 export interface FormatTNotesNoteInput {
   content: string

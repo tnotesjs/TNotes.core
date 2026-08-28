@@ -108,11 +108,11 @@ export const TOC_MD: string = TOC + '.md'
  * https://github.com/tnotesjs/en-words/blob/main/{word}.md
  */
 export const EN_WORDS_REPO_BASE_URL: string =
-  'https://github.com/tnotesjs/TNotes.en-words/blob/main/'
+  'https://github.com/tnotesjs/en-words/blob/main/'
 
 /**
  * 英语单词仓库 raw 地址
  * https://raw.githubusercontent.com/tnotesjs/TNotes.en-words/refs/heads/main/{word}.md
  */
 export const EN_WORDS_REPO_BASE_RAW_URL: string =
-  'https://raw.githubusercontent.com/tnotesjs/TNotes.en-words/refs/heads/main/'
+  'https://raw.githubusercontent.com/tnotesjs/en-words/refs/heads/main/'

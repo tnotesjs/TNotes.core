@@ -53,7 +53,7 @@ export interface NoteDocument extends WorkspaceNoteSummary {
 
 export interface ChangedFile {
   path: string
-  kind: 'created' | 'updated' | 'deleted' | 'renamed'
+  kind: 'created' | 'updated' | 'deleted' | 'renamed' | 'trashed'
   previousPath?: string
 }
 
@@ -205,6 +205,13 @@ export interface TNotesWorkspace {
       input: DeleteTocEntryInput,
     ): Promise<MutationResult<KnowledgeBaseSnapshot>>
     setDone(input: UpdateNoteConfigInput): Promise<MutationResult<NoteDocument>>
+    /**
+     * Align TOC.md + sidebar.json with the filesystem truth (files-first).
+     * Valid notes missing from the TOC are appended (root level, by index);
+     * note dirs with a missing/invalid config are soft-deleted to
+     * notes/.trash/. Idempotent: no changes -> changedFiles = [].
+     */
+    reconcileFromFiles(): Promise<MutationResult<KnowledgeBaseSnapshot>>
   }
 
   attachments: {

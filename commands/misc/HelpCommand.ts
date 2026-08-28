@@ -28,7 +28,6 @@ const COMMAND_CATEGORIES = {
     COMMAND_NAMES.CREATE_NOTES,
   ],
   'Git 操作': [COMMAND_NAMES.PUSH, COMMAND_NAMES.PULL],
-  '迁移（v0.2.x 过渡）': [COMMAND_NAMES.INIT_TOC],
   初始化: [COMMAND_NAMES.INIT_SUB_REPO],
   其他: [COMMAND_NAMES.HELP],
 } as const
@@ -84,9 +83,6 @@ export class HelpCommand extends BaseCommand {
     this.logger.info('  pnpm tn:build')
     this.logger.info('  pnpm tn:create-notes     # 批量创建笔记')
     this.logger.info('  pnpm tn:update')
-    this.logger.info(
-      '  pnpm tn:init-toc              # v0.1.x → v0.2.x：从 README.md 生成 TOC.md',
-    )
     this.logger.info(
       '  pnpm tn:update-completed-count           # 生成当前知识库最近 12 个月的完成笔记数量统计',
     )

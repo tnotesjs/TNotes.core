@@ -2,13 +2,17 @@
  * vitepress/plugins/sidebarStructurePlugin.ts
  *
  * VitePress dev middleware - 处理语雀风格侧边栏的目录结构操作。
+ * 所有 TOC 写入统一走 Core Workspace（toc.move/createGroup/renameGroup/
+ * deleteEntry + notes.create；files→TOC 用 reconcileFromFiles）。
  */
 
 import { scheduleNoteSearchReindex } from './localSearchReindexPlugin'
-import { FileWatcherService, NoteService, TocService } from '../../services'
+import { ROOT_DIR_PATH } from '../../config/constants'
+import { FileWatcherService } from '../../services'
+import { createWorkspace } from '../../workspace'
 
-
-import type { NoteInfo } from '../../types'
+import type { TocTreeNode } from '../../utils'
+import type { TocEntryRef, KnowledgeBaseSnapshot } from '../../workspace'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { PluginOption } from 'vite'
 
@@ -22,7 +26,7 @@ interface JsonResponse {
   deletedNoteIndexes?: string[]
 }
 
-async function readJsonBody(req: IncomingMessage): Promise<any> {
+async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   let body = ''
 
   await new Promise<void>((resolve, reject) => {
@@ -58,28 +62,8 @@ function normalizeCount(value: unknown): number {
   return count
 }
 
-function getCreatedNotePayload(notes: NoteInfo[]) {
-  return notes.map((note) => ({
-    index: note.index,
-    dirName: note.dirName,
-    link: `/notes/${encodeURIComponent(note.dirName)}/README`,
-  }))
-}
-
-function buildNoteReadmeLink(note: NoteInfo): string {
-  return `/notes/${encodeURIComponent(note.dirName)}/README`
-}
-
-function resolveDeleteRedirectUrl(
-  noteService: NoteService,
-  previousNoteIndex: string | null,
-): string {
-  if (!previousNoteIndex) return '/'
-
-  const previousNote = noteService.getNoteByIndex(previousNoteIndex)
-  if (!previousNote) return '/'
-
-  return buildNoteReadmeLink(previousNote)
+function buildNoteReadmeLink(dirName: string): string {
+  return `/notes/${encodeURIComponent(dirName)}/README`
 }
 
 async function withSuspendedWatcher<T>(task: () => Promise<T>): Promise<T> {
@@ -93,38 +77,107 @@ async function withSuspendedWatcher<T>(task: () => Promise<T>): Promise<T> {
   }
 }
 
-export function sidebarStructurePlugin(): PluginOption {
-  const noteService = NoteService.getInstance()
-  const tocService = TocService.getInstance()
+// ---------------------------------------------------------------------------
+// Snapshot-based mapping helpers (pure; operate on the workspace snapshot).
+// ---------------------------------------------------------------------------
 
-  async function createNotes(count: number) {
-    const notes = []
-    const usedIndexes = new Set<number>()
+type WalkedRef = {
+  tocLineIndex: number
+  ref: TocEntryRef
+  subtreeIndexes: string[]
+  orderIndex: number
+}
 
-    for (const note of noteService.getAllNotes()) {
-      const index = parseInt(note.index, 10)
-      if (!isNaN(index)) {
-        usedIndexes.add(index)
+function collectRefs(snapshot: KnowledgeBaseSnapshot): {
+  byLine: Map<number, WalkedRef>
+  orderedIndexes: string[]
+} {
+  const byLine = new Map<number, WalkedRef>()
+  const orderedIndexes: string[] = []
+  let order = 0
+
+  const walk = (nodes: TocTreeNode[]): void => {
+    for (const node of nodes) {
+      if (node.kind === 'folder') {
+        walk(node.children)
+        continue
       }
-    }
-
-    for (let i = 0; i < count; i++) {
-      const note = await noteService.createNote({
-        title: 'new',
-        usedIndexes,
+      const subtree: string[] = []
+      const collect = (n: TocTreeNode): void => {
+        if (n.kind === 'note') subtree.push(n.noteIndex)
+        for (const child of n.children) collect(child)
+      }
+      collect(node)
+      byLine.set(node.tocLineIndex, {
+        tocLineIndex: node.tocLineIndex,
+        ref: { type: 'note', noteUuid: '' },
+        subtreeIndexes: subtree,
+        orderIndex: order,
       })
-      const index = parseInt(note.index, 10)
-      if (!isNaN(index)) {
-        usedIndexes.add(index)
-      }
-      notes.push(note)
+      orderedIndexes.push(...subtree)
+      order += 1
     }
-
-    return notes
   }
+  walk(snapshot.toc)
+  return { byLine, orderedIndexes }
+}
 
-  async function refreshTocAndSidebar() {
-    await tocService.regenerateSidebar()
+function noteUuidForIndex(snapshot: KnowledgeBaseSnapshot, index: string): string {
+  const note = snapshot.notes.find((item) => item.index === index)
+  if (!note) throw new Error(`未找到笔记: ${index}`)
+  return note.uuid
+}
+
+/** TOC 树中位于某 entry 之前的最后一个笔记索引（用于删除后的跳转）。 */
+function previousNoteIndex(
+  snapshot: KnowledgeBaseSnapshot,
+  entry: WalkedRef | undefined,
+): string | null {
+  if (!entry) return null
+  const entries = [...collectRefs(snapshot).byLine.values()].sort(
+    (a, b) => a.orderIndex - b.orderIndex,
+  )
+  let cursor = 0
+  for (const item of entries) {
+    if (item === entry) return cursor > 0 ? collectRefs(snapshot).orderedIndexes[cursor - 1] : null
+    cursor += item.subtreeIndexes.length
+  }
+  return null
+}
+
+function isNoteInSubtree(
+  snapshot: KnowledgeBaseSnapshot,
+  lineIndex: number,
+  noteIndex: string,
+): boolean {
+  const entry = collectRefs(snapshot).byLine.get(lineIndex)
+  return entry ? entry.subtreeIndexes.includes(noteIndex) : false
+}
+
+function folderPathAtLine(snapshot: KnowledgeBaseSnapshot, lineIndex: number): string[] {
+  const result: string[] = []
+  const walk = (nodes: TocTreeNode[], path: string[]): boolean => {
+    for (const node of nodes) {
+      if (node.kind === 'folder') {
+        if (node.tocLineIndex === lineIndex) {
+          result.push(...[...path, node.title])
+          return true
+        }
+        if (walk(node.children, [...path, node.title])) return true
+      }
+    }
+    return false
+  }
+  walk(snapshot.toc, [])
+  if (result.length === 0) throw new Error(`未找到目录行: ${lineIndex}`)
+  return result
+}
+
+export function sidebarStructurePlugin(): PluginOption {
+  const workspace = createWorkspace({ rootPath: ROOT_DIR_PATH })
+
+  async function refreshTocAndSidebar(): Promise<void> {
+    await workspace.toc.reconcileFromFiles()
   }
 
   return {
@@ -156,26 +209,33 @@ export function sidebarStructurePlugin(): PluginOption {
           const data = await readJsonBody(req)
 
           const result = await withSuspendedWatcher(async () => {
+            const snapshot = await workspace.inspect()
+
             if (pathname === '/__tnotes_sidebar_delete_note') {
               const noteIndex = String(data.noteIndex || '')
               if (!noteIndex) throw new Error('Missing noteIndex')
 
-              const previousNoteIndex =
-                await tocService.getPreviousNoteIndexBeforeDelete(noteIndex)
+              const refs = collectRefs(snapshot)
+              const deletedRef = [...refs.byLine.values()].find((item) =>
+                item.subtreeIndexes.includes(noteIndex),
+              )
+              const previous = previousNoteIndex(snapshot, deletedRef)
 
-              await tocService.deleteNoteFromToc(noteIndex)
-              await noteService.deleteNote(noteIndex)
+              await workspace.toc.deleteEntry({
+                entry: { type: 'note', noteUuid: noteUuidForIndex(snapshot, noteIndex) },
+                expectedSnapshotRevision: snapshot.revision,
+              })
               await refreshTocAndSidebar()
               scheduleNoteSearchReindex('api:delete-note')
 
+              const redirectDir = previous
+                ? snapshot.notes.find((item) => item.index === previous)?.dirName
+                : undefined
               return {
                 success: true,
                 sidebarChanged: true,
-                redirectUrl: resolveDeleteRedirectUrl(
-                  noteService,
-                  previousNoteIndex,
-                ),
-                redirectNoteIndex: previousNoteIndex,
+                redirectUrl: redirectDir ? buildNoteReadmeLink(redirectDir) : '/',
+                redirectNoteIndex: previous,
                 deletedNoteIndexes: [noteIndex],
                 message: '笔记已删除',
               }
@@ -188,30 +248,33 @@ export function sidebarStructurePlugin(): PluginOption {
               }
 
               const currentNoteIndex = String(data.currentNoteIndex || '')
-              const previousNoteIndex =
-                await tocService.getPreviousNoteIndexBeforeEntryDelete(
-                  tocLineIndex,
-                )
-              const inSubtree =
-                currentNoteIndex &&
-                (await tocService.isNoteInTocEntrySubtree(
-                  tocLineIndex,
-                  currentNoteIndex,
-                ))
+              const inSubtree = currentNoteIndex
+                ? isNoteInSubtree(snapshot, tocLineIndex, currentNoteIndex)
+                : false
+              const entry = collectRefs(snapshot).byLine.get(tocLineIndex)
+              const previous = previousNoteIndex(snapshot, entry)
 
-              const deletedNoteIndexes =
-                await tocService.deleteTocEntryCascade(tocLineIndex)
+              const preview = await workspace.toc.previewDelete({
+                type: 'line',
+                tocLineIndex,
+              })
+              await workspace.toc.deleteEntry({
+                entry: { type: 'line', tocLineIndex },
+                expectedSnapshotRevision: snapshot.revision,
+              })
               await refreshTocAndSidebar()
               scheduleNoteSearchReindex('api:delete-entry')
 
+              const redirectDir =
+                inSubtree && previous
+                  ? snapshot.notes.find((item) => item.index === previous)?.dirName
+                  : undefined
               return {
                 success: true,
                 sidebarChanged: true,
-                redirectUrl: inSubtree
-                  ? resolveDeleteRedirectUrl(noteService, previousNoteIndex)
-                  : undefined,
-                redirectNoteIndex: inSubtree ? previousNoteIndex : null,
-                deletedNoteIndexes,
+                redirectUrl: redirectDir ? buildNoteReadmeLink(redirectDir) : undefined,
+                redirectNoteIndex: inSubtree ? previous : null,
+                deletedNoteIndexes: preview.notes.map((note) => note.index),
                 message: '已删除',
               }
             }
@@ -223,7 +286,11 @@ export function sidebarStructurePlugin(): PluginOption {
                 throw new Error('Missing tocLineIndex')
               }
 
-              await tocService.renameFolderInToc(tocLineIndex, newTitle)
+              await workspace.toc.renameGroup({
+                folderPath: folderPathAtLine(snapshot, tocLineIndex),
+                title: newTitle,
+                expectedSnapshotRevision: snapshot.revision,
+              })
               await refreshTocAndSidebar()
 
               return {
@@ -234,12 +301,29 @@ export function sidebarStructurePlugin(): PluginOption {
             }
 
             if (pathname === '/__tnotes_sidebar_reorder') {
+              const awaitMove = async (
+                source: TocEntryRef,
+                target: TocEntryRef,
+                placement: 'before' | 'after' | 'inside',
+              ): Promise<void> => {
+                await workspace.toc.move({
+                  source,
+                  target,
+                  placement,
+                  expectedSnapshotRevision: snapshot.revision,
+                })
+              }
+
               if (
-                data.node_uuid &&
+                typeof data.node_uuid === 'string' &&
                 data.action === 'prependChild' &&
                 !data.target_uuid
               ) {
-                await tocService.prependToRootByNodeId(String(data.node_uuid))
+                await awaitMove(
+                  { type: 'note', noteUuid: data.node_uuid },
+                  { type: 'line', tocLineIndex: 0 },
+                  data.placement === 'after' ? 'after' : 'before',
+                )
                 await refreshTocAndSidebar()
                 return {
                   success: true,
@@ -249,21 +333,15 @@ export function sidebarStructurePlugin(): PluginOption {
               }
 
               if (
-                data.node_uuid &&
-                data.target_uuid &&
+                typeof data.node_uuid === 'string' &&
+                typeof data.target_uuid === 'string' &&
                 (data.action === 'moveAfter' || data.action === 'prependChild')
               ) {
-                if (data.action === 'moveAfter') {
-                  await tocService.moveAfterByNodeId(
-                    String(data.node_uuid),
-                    String(data.target_uuid),
-                  )
-                } else {
-                  await tocService.prependChildByNodeId(
-                    String(data.node_uuid),
-                    String(data.target_uuid),
-                  )
-                }
+                await awaitMove(
+                  { type: 'note', noteUuid: data.node_uuid },
+                  { type: 'note', noteUuid: data.target_uuid },
+                  data.action === 'prependChild' ? 'inside' : 'after',
+                )
                 await refreshTocAndSidebar()
                 return {
                   success: true,
@@ -279,39 +357,44 @@ export function sidebarStructurePlugin(): PluginOption {
 
               const placement =
                 data.targetType === 'group' || data.placement === 'inside'
-                  ? 'inside'
+                  ? ('inside' as const)
                   : data.placement === 'after'
-                    ? 'after'
-                    : 'before'
+                    ? ('after' as const)
+                    : ('before' as const)
+
+              const source: TocEntryRef = { type: 'line', tocLineIndex: dragTocLineIndex }
 
               if (
                 data.targetTocLineIndex !== undefined &&
                 data.targetTocLineIndex !== null
               ) {
-                await tocService.moveTocEntryByLineIndex(dragTocLineIndex, {
-                  targetTocLineIndex: Number(data.targetTocLineIndex),
+                await awaitMove(
+                  source,
+                  { type: 'line', tocLineIndex: Number(data.targetTocLineIndex) },
                   placement,
-                })
+                )
               } else if (
                 Array.isArray(data.targetFolderPath) &&
                 data.targetFolderPath.length > 0
               ) {
-                await tocService.moveTocEntryByLineIndex(dragTocLineIndex, {
-                  targetType: 'folder',
-                  targetFolderPath: data.targetFolderPath.map(String),
+                await awaitMove(
+                  source,
+                  {
+                    type: 'folder',
+                    folderPath: data.targetFolderPath.map(String) as string[],
+                  },
                   placement,
-                })
+                )
               } else {
                 const targetNoteIndex = String(
                   data.targetNoteIndex || data.targetGroupNoteIndex || '',
                 )
                 if (!targetNoteIndex) throw new Error('Missing targetNoteIndex')
-
-                await tocService.moveTocEntryByLineIndex(dragTocLineIndex, {
-                  targetType: 'note',
-                  targetNoteIndex,
+                await awaitMove(
+                  source,
+                  { type: 'note', noteUuid: noteUuidForIndex(snapshot, targetNoteIndex) },
                   placement,
-                })
+                )
               }
 
               await refreshTocAndSidebar()
@@ -332,10 +415,17 @@ export function sidebarStructurePlugin(): PluginOption {
                 throw new Error('Missing parentTocLineIndex')
               }
 
-              await tocService.insertFolderUnderParent(
-                parentTocLineIndex,
+              const sibling = collectRefs(snapshot).byLine.get(parentTocLineIndex)
+              if (!sibling) throw new Error('未找到目录行')
+
+              await workspace.toc.createGroup({
                 title,
-              )
+                placement:
+                  sibling.ref.type === 'note'
+                    ? { type: 'note', targetNoteUuid: sibling.ref.noteUuid, placement: 'inside' }
+                    : { type: 'root', placement: 'end' },
+                expectedSnapshotRevision: snapshot.revision,
+              })
               await refreshTocAndSidebar()
 
               return {
@@ -346,49 +436,56 @@ export function sidebarStructurePlugin(): PluginOption {
             }
 
             const count = normalizeCount(data.count)
-            const notes = await createNotes(count)
+            const targetNoteIndex = String(
+              data.targetNoteIndex || data.targetGroupNoteIndex || '',
+            )
+            const parentLine =
+              data.parentTocLineIndex !== undefined && data.parentTocLineIndex !== null
+                ? Number(data.parentTocLineIndex)
+                : null
 
-            if (data.targetNoteIndex) {
-              const placement = data.placement === 'after' ? 'after' : 'before'
-              await tocService.insertNotesAroundNote(
-                String(data.targetNoteIndex),
-                notes,
-                placement,
-              )
-            } else if (
-              data.parentTocLineIndex !== undefined &&
-              data.parentTocLineIndex !== null
-            ) {
-              await tocService.insertNotesUnderTocLine(
-                Number(data.parentTocLineIndex),
-                notes,
-              )
-            } else if (
-              Array.isArray(data.parentFolderPath) &&
-              data.parentFolderPath.length > 0
-            ) {
-              await tocService.insertNotesUnderFolder(
-                data.parentFolderPath.map(String),
-                notes,
-              )
-            } else if (data.parentNoteIndex) {
-              await tocService.insertNotesUnderParent(
-                String(data.parentNoteIndex),
-                notes,
-              )
-            } else {
-              for (const note of notes) {
-                await tocService.appendNoteToToc(note.index)
+            const created: Array<{ index: string; dirName: string }> = []
+            for (let i = 0; i < count; i++) {
+              let placement:
+                | { type: 'note'; targetNoteUuid: string; placement: 'before' | 'after' | 'inside' }
+                | { type: 'root'; placement?: 'start' | 'end' }
+                | undefined
+              if (targetNoteIndex) {
+                placement = {
+                  type: 'note',
+                  targetNoteUuid: noteUuidForIndex(snapshot, targetNoteIndex),
+                  placement: data.placement === 'after' ? 'after' : 'before',
+                }
+              } else if (parentLine !== null) {
+                const sibling = collectRefs(snapshot).byLine.get(parentLine)
+                if (sibling && sibling.ref.type === 'note') {
+                  placement = {
+                    type: 'note',
+                    targetNoteUuid: sibling.ref.noteUuid,
+                    placement: 'inside',
+                  }
+                }
               }
+              const result = await workspace.notes.create({
+                title: 'new',
+                placement,
+                expectedSnapshotRevision: snapshot.revision,
+              })
+              created.push({
+                index: result.value.index,
+                dirName: result.value.dirName,
+              })
             }
-
             await refreshTocAndSidebar()
             scheduleNoteSearchReindex('api:create-notes')
 
             return {
               success: true,
               sidebarChanged: true,
-              createdNotes: getCreatedNotePayload(notes),
+              createdNotes: created.map((note) => ({
+                ...note,
+                link: buildNoteReadmeLink(note.dirName),
+              })),
               message: '笔记已创建',
             }
           })

@@ -5,12 +5,10 @@
  */
 
 import { ConfigManager } from '../../config/ConfigManager'
+import { ROOT_DIR_PATH } from '../../config/constants'
 import { NoteManager, NoteIndexCache } from '../../core'
-import {
-  VitepressService,
-  FileWatcherService,
-  TocService,
-} from '../../services'
+import { VitepressService, FileWatcherService } from '../../services'
+import { reconcileTocFromFiles } from '../../services/reconcileToc'
 import { BaseCommand } from '../BaseCommand'
 
 export class DevCommand extends BaseCommand {
@@ -18,7 +16,6 @@ export class DevCommand extends BaseCommand {
   private fileWatcherService: FileWatcherService
   private noteIndexCache: NoteIndexCache
   private noteManager: NoteManager
-  private tocService: TocService
   private vitepressService: VitepressService
 
   constructor() {
@@ -28,7 +25,6 @@ export class DevCommand extends BaseCommand {
     this.fileWatcherService = new FileWatcherService()
     this.noteIndexCache = NoteIndexCache.getInstance()
     this.noteManager = NoteManager.getInstance()
-    this.tocService = TocService.getInstance()
     this.vitepressService = new VitepressService()
   }
 
@@ -47,8 +43,8 @@ export class DevCommand extends BaseCommand {
     // 与当前笔记/TOC.md 不同步（例如 git pull、切分支、或上次会话外离线增删改了
     // 笔记），VitePress 就会把过期数据读进来，导致侧边栏显示错误，需要手动删除
     // .vitepress/cache 才能恢复。这里在启动前主动重建一次，消除启动时的过期窗口。
-    this.tocService.ensureTocExists()
-    await this.tocService.regenerateSidebar(notes)
+    // files→TOC 对齐（Workspace）：冷启动前从磁盘真值重建 TOC/sidebar
+    await reconcileTocFromFiles(ROOT_DIR_PATH)
 
     // 4. 启动 VitePress 服务器（会等待服务就绪后返回）
     const result = await this.vitepressService.startServer()

@@ -5,11 +5,12 @@
  */
 
 import { existsSync, promises as fsPromises } from 'fs'
-import { join } from 'path'
+import { dirname, join } from 'path'
 
 import { safeExecute } from './internal'
 import { REPO_NOTES_URL } from '../../config/constants'
 import { generateNoteTitle } from '../../config/templates'
+import { reconcileTocFromFiles } from '../reconcileToc'
 
 import type { EventScheduler } from './eventScheduler'
 import type { WatchState } from './watchState'
@@ -17,7 +18,6 @@ import type { NoteIndexCache } from '../../core/NoteIndexCache'
 import type { Logger } from '../../utils'
 import type { NoteService } from '../note/service'
 import type { ReadmeService } from '../readme/service'
-import type { TocService } from '../toc/service'
 
 const RENAME_REVERT_DELAY_MS = 2000
 
@@ -41,8 +41,6 @@ interface FolderChangeHandlerConfig {
   noteService: NoteService
   /** README 服务实例 */
   readmeService: ReadmeService
-  /** TOC 服务实例 */
-  tocService: TocService
   /** 笔记索引缓存实例 */
   noteIndexCache: NoteIndexCache
   /** 日志记录器 */
@@ -89,7 +87,7 @@ export class FolderChangeHandler {
   }
 
   async handleFolderDeletion(deletedFolderName: string): Promise<void> {
-    const { scheduler, watchState, noteIndexCache, tocService, logger } =
+    const { scheduler, watchState, noteIndexCache, logger, notesDir } =
       this.config
 
     if (scheduler.getUpdating()) return
@@ -106,12 +104,11 @@ export class FolderChangeHandler {
       watchState.clearNoteCaches(deletedFolderName)
       noteIndexCache.delete(noteIndex)
 
-      // 更新根 README.md、sidebar.json
+      // files→TOC 对齐（Workspace）：TOC 行随目录消失而移除
       await safeExecute(
         `删除笔记 ${noteIndex}`,
         async () => {
-          await tocService.deleteNoteFromToc(noteIndex)
-          await tocService.regenerateSidebar()
+          await reconcileTocFromFiles(dirname(notesDir))
           this.config.onNoteStructureChanged?.(`watcher:delete:${noteIndex}`)
         },
         logger,
@@ -202,7 +199,7 @@ export class FolderChangeHandler {
     noteIndex: string,
     newName: string,
   ): Promise<void> {
-    const { noteIndexCache, tocService, logger, notesDir } = this.config
+    const { noteIndexCache, logger, notesDir } = this.config
 
     logger.info(`笔记索引未变 (${noteIndex})，只更新标题`)
     noteIndexCache.updateFolderName(noteIndex, newName)
@@ -214,8 +211,12 @@ export class FolderChangeHandler {
       logger,
     )
 
-    await tocService.renameNoteInToc(noteIndex, newName)
-    await tocService.regenerateSidebar()
+    // files→TOC 对齐（Workspace）：标题以目录名为准，行位置/完成标记保留
+    await safeExecute(
+      `标题重命名同步目录 ${noteIndex}`,
+      () => reconcileTocFromFiles(dirname(notesDir)),
+      logger,
+    )
     this.config.onNoteStructureChanged?.(`watcher:rename-title:${noteIndex}`)
     logger.success(`标题更新完成`)
   }
@@ -266,11 +267,16 @@ export class FolderChangeHandler {
     oldNoteIndex: string,
     newNoteIndex: string,
   ): Promise<void> {
-    const { noteService, noteIndexCache, tocService, logger } = this.config
+    const { noteService, noteIndexCache, logger, notesDir } = this.config
 
     logger.info(`笔记索引变更: ${oldNoteIndex} → ${newNoteIndex}`)
 
-    await tocService.deleteNoteFromToc(oldNoteIndex)
+    // files→TOC 对齐（Workspace）：旧索引行随目录消失移除，新索引行按编号追加
+    await safeExecute(
+      `索引变更同步目录 ${oldNoteIndex}→${newNoteIndex}`,
+      () => reconcileTocFromFiles(dirname(notesDir)),
+      logger,
+    )
 
     const newNote = noteService.getNoteByIndex(newNoteIndex)
 
@@ -278,8 +284,6 @@ export class FolderChangeHandler {
       noteIndexCache.delete(oldNoteIndex)
       noteIndexCache.add(newNote)
 
-      await tocService.appendNoteToToc(newNoteIndex)
-      await tocService.regenerateSidebar()
       this.config.onNoteStructureChanged?.(
         `watcher:rename-index:${oldNoteIndex}->${newNoteIndex}`,
       )

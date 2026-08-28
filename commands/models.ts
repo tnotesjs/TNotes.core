@@ -17,7 +17,6 @@ export const COMMAND_NAMES = {
   PULL: 'pull',
   PUSH: 'push',
   RENAME_NOTE: 'rename-note',
-  INIT_TOC: 'init-toc',
   INIT_SUB_REPO: 'init-sub-repo',
   UPDATE: 'update',
   UPDATE_COMPLETED_COUNT: 'update-completed-count',
@@ -36,8 +35,6 @@ export const COMMAND_DESCRIPTIONS: Record<CommandName, string> = {
   [COMMAND_NAMES.DEV]: '启动知识库开发服务',
   [COMMAND_NAMES.BUILD]: '构建知识库',
   [COMMAND_NAMES.PREVIEW]: '预览构建后的知识库',
-  [COMMAND_NAMES.INIT_TOC]:
-    '从 README.md 初始化 TOC.md（v0.2.x 过渡命令，v0.3.x 移除）',
   [COMMAND_NAMES.INIT_SUB_REPO]: '初始化 TNotes 子知识库（一次性脚手架）',
   [COMMAND_NAMES.UPDATE]: '根据笔记内容更新知识库',
   [COMMAND_NAMES.UPDATE_COMPLETED_COUNT]:

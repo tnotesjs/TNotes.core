@@ -52,15 +52,6 @@ export type {
   TocSidebarItem,
   TocLineKind,
 } from './tocHelpers'
-export {
-  migrateReadmeToToc,
-  extractReadmeBodyAfterToc,
-  README_TOC_END_TAG,
-} from './migrateReadmeToToc'
-export type {
-  MigratedTocEntry,
-  MigrateReadmeToTocResult,
-} from './migrateReadmeToToc'
 export { isPortInUse, killPortProcess, waitForPort } from './portUtils'
 export {
   parseNoteLine,

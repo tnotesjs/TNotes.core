@@ -11,6 +11,7 @@ import {
   createWorkspacePaths,
   sanitizeFileName,
 } from './paths'
+import { planReconcile } from './reconcile'
 import { scanWorkspace, toNoteInfo } from './scanner'
 import { getNewNoteReadmeBody } from '../config/templates'
 import { formatTNotesNote } from '../markdown/noteFormatter'
@@ -27,8 +28,10 @@ import {
   parseTocToTree,
   processTocEmptyLines,
   renameFolderLine,
+  serializeTocTree,
   TOC_INDENT_SPACES,
 } from '../utils/tocHelpers'
+
 
 import type { WorkspacePaths } from './paths'
 import type {
@@ -316,6 +319,7 @@ export class Workspace implements TNotesWorkspace {
       previewDelete: (entry) => this.previewDelete(entry),
       deleteEntry: (input) => this.deleteTocEntry(input),
       setDone: (input) => this.updateNoteConfig(input),
+      reconcileFromFiles: () => this.reconcileTocFromFiles(),
     }
     this.attachments = {
       writeLocal: (input) => this.writeLocalAttachment(input),
@@ -329,6 +333,91 @@ export class Workspace implements TNotesWorkspace {
 
   async refresh(): Promise<KnowledgeBaseSnapshot> {
     return this.inspect()
+  }
+
+  /**
+   * Files-first TOC reconcile (0004): align TOC.md + sidebar.json with the
+   * disk truth. Valid notes missing from the TOC are appended at root level
+   * (by index); note dirs whose config is missing/invalid are soft-deleted to
+   * notes/.trash/. Idempotent: runs again without changes -> no file writes.
+   */
+  private async reconcileTocFromFiles(): Promise<
+    MutationResult<KnowledgeBaseSnapshot>
+  > {
+    return this.queue.run(async () => {
+      this.assertActive()
+      const scanned = await scanWorkspace(this.paths)
+      const { snapshot } = scanned
+      if (!snapshot.config) {
+        throw new WorkspaceError(
+          'WORKSPACE_INVALID',
+          '知识库配置异常，禁止修改',
+          { diagnostics: snapshot.health.diagnostics },
+        )
+      }
+
+      const plan = planReconcile(snapshot)
+      const changedFiles: ChangedFile[] = []
+
+      // 1) soft-delete invalid note dirs -> notes/.trash/
+      if (plan.trashDirs.length > 0) {
+        const trashDir = path.join(this.paths.notes, '.trash')
+        await fs.mkdir(trashDir, { recursive: true })
+        for (const dir of plan.trashDirs) {
+          const source = path.join(this.paths.notes, dir)
+          let target = path.join(trashDir, dir)
+          try {
+            await fs.stat(target)
+            target = path.join(trashDir, `${dir}-${Date.now()}`)
+          } catch {
+            // name free
+          }
+          await fs.rename(source, target)
+          changedFiles.push({ path: target, previousPath: source, kind: 'trashed' })
+        }
+      }
+
+      // 2) rebuild TOC.md + sidebar.json, write only when changed
+      const noteInfos = snapshot.notes.map(toNoteInfo)
+      const configByIndex = new Map(
+        snapshot.notes.map((note) => [note.index, { done: note.config.done }]),
+      )
+      const lines = serializeTocTree(plan.tree, noteInfos, configByIndex)
+      const nextToc = normalizeTocContent(lines)
+      if (nextToc !== (scanned.tocText ?? '')) {
+        changedFiles.push({ path: this.paths.toc, kind: 'updated' })
+        await writeFilesAtomically([{ path: this.paths.toc, data: nextToc }])
+      }
+
+      // Sidebar must be derived from the FINAL TOC content so tocLineIndex
+      // values in the sidebar match the actually written TOC.md (idempotency).
+      const finalTocTree = parseTocToTree(
+        nextToc.split('\n'),
+        noteInfos,
+      )
+      const sidebar = buildSidebarFromTocTree(finalTocTree, noteInfos, {
+        sidebarShowNoteId: snapshot.config.sidebarShowNoteId ?? true,
+        sidebarIsCollapsed: true,
+      })
+      const nextSidebar = `${JSON.stringify(sidebar, null, 2)}\n`
+      let currentSidebar = ''
+      try {
+        currentSidebar = await fs.readFile(this.paths.sidebar, 'utf-8')
+      } catch {
+        // sidebar may not exist yet
+      }
+      if (nextSidebar !== currentSidebar) {
+        changedFiles.push({ path: this.paths.sidebar, kind: 'updated' })
+        await writeFilesAtomically([{ path: this.paths.sidebar, data: nextSidebar }])
+      }
+
+      const refreshed = await this.inspect()
+      return {
+        value: refreshed,
+        changedFiles,
+        snapshotRevision: refreshed.revision,
+      }
+    })
   }
 
   async reconcileTocCompletion(): Promise<

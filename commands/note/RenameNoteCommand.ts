@@ -8,8 +8,10 @@ import { existsSync, renameSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 import { NOTES_PATH, REPO_NOTES_URL } from '../../config/constants'
+import { ROOT_DIR_PATH } from '../../config/constants'
 import { generateNoteTitle } from '../../config/templates'
-import { NoteService, FileWatcherService, TocService } from '../../services'
+import { NoteService, FileWatcherService } from '../../services'
+import { reconcileTocFromFiles } from '../../services/reconcileToc'
 import { validateNoteTitle } from '../../utils'
 import { BaseCommand } from '../BaseCommand'
 
@@ -20,12 +22,10 @@ interface RenameNoteParams {
 
 export class RenameNoteCommand extends BaseCommand {
   private noteService: NoteService
-  private tocService: TocService
 
   constructor() {
     super('rename-note')
     this.noteService = NoteService.getInstance()
-    this.tocService = TocService.getInstance()
   }
 
   protected async run(): Promise<void> {
@@ -136,8 +136,7 @@ export class RenameNoteCommand extends BaseCommand {
     try {
       this.logger.info('正在更新 TOC.md 和 sidebar.json...')
 
-      await this.tocService.renameNoteInToc(noteIndex, newDirName)
-      await this.tocService.regenerateSidebar()
+      await reconcileTocFromFiles(ROOT_DIR_PATH)
 
       this.logger.success('✅ 全局文件已更新')
     } catch (error) {

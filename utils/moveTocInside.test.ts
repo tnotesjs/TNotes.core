@@ -11,7 +11,7 @@ import {
   getTocEntrySubtreeRange,
   parseTocLine,
   TOC_INDENT_SPACES,
-} from '../../utils/tocHelpers'
+} from './tocHelpers'
 
 function adjustSubtreeIndent(lines: string[], delta: number): string[] {
   if (delta === 0) return lines

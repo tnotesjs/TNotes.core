@@ -8,7 +8,6 @@ import { BuildCommand, PreviewCommand } from './build'
 import { DevCommand } from './dev'
 import { PushCommand, PullCommand } from './git'
 import { InitSubRepoCommand } from './init-sub-repo'
-import { InitTocCommand } from './init-toc'
 import { HelpCommand } from './misc'
 import { type Command, type CommandName } from './models'
 import {
@@ -25,7 +24,6 @@ const commandFactories: Record<CommandName, () => Command> = {
   'create-notes': () => new CreateNoteCommand(),
   'dev': () => new DevCommand(),
   'init-sub-repo': () => new InitSubRepoCommand(),
-  'init-toc': () => new InitTocCommand(),
   'help': () => new HelpCommand(),
   'preview': () => new PreviewCommand(),
   'pull': () => new PullCommand(),

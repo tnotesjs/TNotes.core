@@ -8,7 +8,7 @@ import { writeFileSync, readFileSync, promises as fsPromises } from 'fs'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 
-import { NOTES_PATH, CONSTANTS, REPO_NOTES_URL } from '../../config/constants'
+import { NOTES_PATH, CONSTANTS, REPO_NOTES_URL, ROOT_DIR_PATH } from '../../config/constants'
 import {
   generateNoteTitle,
   getNewNoteReadmeBody,
@@ -16,7 +16,7 @@ import {
 import { NoteIndexCache } from '../../core/NoteIndexCache'
 import { NoteManager } from '../../core/NoteManager'
 import { ensureDirectory, logger } from '../../utils'
-import { TocService } from '../toc/service'
+import { reconcileTocFromFiles } from '../reconcileToc'
 
 import type { NoteInfo, NoteConfig } from '../../types'
 
@@ -247,10 +247,8 @@ export class NoteService {
       logger.info(`检测到全局字段变更 (${noteIndex})，正在增量更新全局文件...`)
 
       // 使用增量更新
-      const tocService = TocService.getInstance()
-
-      await tocService.updateNoteInToc(noteIndex, updates)
-      await tocService.regenerateSidebar()
+      // files→TOC 对齐（Workspace）：config 已写盘，同步 TOC 行标记与 sidebar
+      await reconcileTocFromFiles(ROOT_DIR_PATH)
 
       logger.info(`全局文件增量更新完成 (${noteIndex})`)
     } else {

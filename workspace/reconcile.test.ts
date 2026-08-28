@@ -258,6 +258,36 @@ describe('workspace.toc.reconcileFromFiles', () => {
     await expect(workspace.toc.reconcileFromFiles()).rejects.toThrow(/知识库配置异常/)
     await workspace.dispose()
   })
+
+  it('同名笔记二次软删不报错，进入带时间戳的目标（不覆盖第一次回收内容）', async () => {
+    const root = await createFixture({
+      notes: [{ index: '0001', title: 'Alpha', id: 'note-alpha' }],
+    })
+    const workspace = createWorkspace({ rootPath: root })
+    const noteDir = path.join(root, 'notes', '0001. Alpha')
+
+    // 第一次破坏：config 丢失 → 软删为 .trash/0001. Alpha
+    await fs.rm(path.join(noteDir, '.tnotes.json'))
+    await workspace.toc.reconcileFromFiles()
+    expect(await exists(path.join(root, 'notes', '.trash', '0001. Alpha'))).toBe(true)
+
+    // 重建同名合法笔记，再破坏 → 不应报错，目标带时间戳
+    await fs.mkdir(noteDir, { recursive: true })
+    await fs.writeFile(
+      path.join(noteDir, '.tnotes.json'),
+      `${JSON.stringify(noteConfig('note-alpha-2'), null, 2)}\n`,
+    )
+    await fs.writeFile(path.join(noteDir, 'README.md'), '# Alpha\n')
+    await fs.rm(path.join(noteDir, '.tnotes.json'))
+    const result = await workspace.toc.reconcileFromFiles()
+
+    const trashEntries = await fs.readdir(path.join(root, 'notes', '.trash'))
+    expect(trashEntries.length).toBe(2)
+    expect(trashEntries).toContain('0001. Alpha')
+    expect(trashEntries.some((name) => name.startsWith('0001. Alpha-'))).toBe(true)
+    expect(result.changedFiles.some((file) => file.kind === 'trashed')).toBe(true)
+    await workspace.dispose()
+  })
 })
 
 async function exists(target: string): Promise<boolean> {

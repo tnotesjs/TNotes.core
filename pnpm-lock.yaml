@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@tnotesjs/mindmap-core':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.1
+        version: 0.2.1
       echarts:
         specifier: ^6.0.0
         version: 6.0.0
@@ -859,8 +859,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tnotesjs/mindmap-core@0.2.0':
-    resolution: {integrity: sha512-0LT3OebNdVBU/Ie6Y0gyzjjHhZRa4+m9arwOwFcyY1NSQt8NOFdrTJiHEnnJgtBneWJQCLHW2OoPGQ5zr80M8g==}
+  '@tnotesjs/mindmap-core@0.2.1':
+    resolution: {integrity: sha512-9VgLdaebnotmyxrHv1Ax4CajLfEZqAfePBQGSkc6m0sIAi9Xj2Z/izaeVurOBk8mccIbmWLZYFLdR3fhk+l8Ww==}
     engines: {node: '>=18.0.0'}
 
   '@types/chai@5.2.3':
@@ -3811,7 +3811,7 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tnotesjs/mindmap-core@0.2.0': {}
+  '@tnotesjs/mindmap-core@0.2.1': {}
 
   '@types/chai@5.2.3':
     dependencies:

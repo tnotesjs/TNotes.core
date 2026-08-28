@@ -112,7 +112,9 @@ function normalizeHeadings(lines: string[]): Heading[] {
     if (!match) continue
 
     const level = match[1].length
-    const plainText = match[2].replace(/^\d+(?:\.\d+)*\.\s+/, '').trim()
+    const plainText = match[2]
+      .replace(/^\d+(?:\.\d+)+\.?\s+|^\d+\.\s+/, '')
+      .trim()
     let text = plainText
 
     if (level === 2) {

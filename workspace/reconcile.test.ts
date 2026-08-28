@@ -231,6 +231,33 @@ describe('workspace.toc.reconcileFromFiles', () => {
 
     await workspace.dispose()
   })
+
+  it('TOC.md 缺失时从零构建（全部合法笔记排根级）', async () => {
+    const root = await createFixture({
+      notes: [
+        { index: '0001', title: 'Alpha', id: 'note-alpha' },
+        { index: '0002', title: 'Beta', id: 'note-beta' },
+      ],
+    })
+    await fs.rm(path.join(root, 'TOC.md'))
+
+    const workspace = createWorkspace({ rootPath: root })
+    const result = await workspace.toc.reconcileFromFiles()
+    const toc = await fs.readFile(path.join(root, 'TOC.md'), 'utf-8')
+    expect(toc).toContain('- [ ] 0001. Alpha')
+    expect(toc).toContain('- [ ] 0002. Beta')
+    expect(result.value.health.status).toBe('ready')
+    await workspace.dispose()
+  })
+
+  it('根配置缺失时拒绝（WORKSPACE_INVALID），不静默改动', async () => {
+    const root = await createFixture()
+    await fs.rm(path.join(root, '.tnotes.json'))
+
+    const workspace = createWorkspace({ rootPath: root })
+    await expect(workspace.toc.reconcileFromFiles()).rejects.toThrow(/知识库配置异常/)
+    await workspace.dispose()
+  })
 })
 
 async function exists(target: string): Promise<boolean> {

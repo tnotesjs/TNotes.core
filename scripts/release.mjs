@@ -60,10 +60,12 @@ function verifyDistArtifacts() {
 
 function verifyPublishSurface() {
   const required = [
-    'services/toc/service.ts',
+    'services/index.ts',
+    'services/reconcileToc.ts',
     'utils/tocNodeId.ts',
     'config/ConfigManager.ts',
     'core/NoteManager.ts',
+    'workspace/index.ts',
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length) {
@@ -75,8 +77,9 @@ function verifyPublishSurface() {
   const files = tarball[0]?.files?.map((f) => f.path.replace(/^package\//, '')) ?? []
   const mustInclude = [
     'dist/vitepress/config/index.js',
-    'services/toc/service.ts',
+    'services/index.ts',
     'utils/tocNodeId.ts',
+    'workspace/index.ts',
   ]
   const missingInPack = mustInclude.filter((p) => !files.includes(p))
   if (missingInPack.length) {

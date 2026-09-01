@@ -4,18 +4,21 @@
  * Markdown 配置
  */
 
-import fs from 'fs'
 import markdownItContainer from 'markdown-it-container'
 import mila from 'markdown-it-link-attributes'
 import markdownItTaskLists from 'markdown-it-task-lists'
-import path from 'path'
 
 import { generateAnchor } from '../../utils'
 import {
   normalizeMindmapMarkdown,
   parseMindmapFence,
-  parseMindmapReference,
 } from '../components/MindmapPreview/markdown'
+// Pure helper only — do not import `@tnotesjs/ui` root from Node config
+// (package entry is .ts; Node cannot strip types under node_modules).
+import {
+  parseFootprintsDatetime,
+  parseFootprintsSource,
+} from '@tnotesjs/ui/footprints-parse'
 
 import type MarkdownIt from 'markdown-it'
 import type { MarkdownOptions } from 'vitepress'
@@ -47,15 +50,18 @@ const simpleMermaidMarkdown = (md: MarkdownIt) => {
 
   md.renderer.rules.fence = (tokens, index, options, env, slf) => {
     const token = tokens[index]
+    const parts = token.info.trim().split(/\s+/).filter(Boolean)
 
-    // 检查是否为 mermaid 代码块
-    if (token.info.trim() === 'mermaid') {
+    // `mermaid` or `mermaid center`
+    if (parts[0] === 'mermaid') {
       try {
+        const centered = parts.slice(1).some((part) => part.toLowerCase() === 'center')
         const key = `mermaid-${Date.now()}-${Math.random()
           .toString(36)
           .substr(2, 9)}`
         const content = token.content
-        return `<Mermaid id="${key}" graph="${encodeURIComponent(content)}" />`
+        const centerAttr = centered ? ' :center="true"' : ''
+        return `<Mermaid id="${key}" graph="${encodeURIComponent(content)}"${centerAttr} />`
       } catch (err) {
         return `<pre>${err}</pre>`
       }
@@ -81,25 +87,10 @@ function configureMindmapFence(md: MarkdownIt) {
     const info = token.info.trim()
     const fenceOptions = parseMindmapFence(info)
     if (!fenceOptions) return fence(tokens, index, options, env, slf)
-    let content = token.content
-    const firstNonEmptyLine = content.split('\n').find((line) => line.trim()) ?? ''
-    const reference = parseMindmapReference(firstNonEmptyLine)
-
-    if (reference) {
-      const possibleRel = env?.relativePath || env?.path || env?.filePath || env?.file || ''
-      const refFullPath = path.isAbsolute(reference.path)
-        ? reference.path
-        : path.resolve(process.cwd(), possibleRel ? path.dirname(possibleRel) : '', reference.path)
-      try {
-        content = fs.readFileSync(refFullPath, 'utf8')
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        content = `- Failed to load referenced file: ${reference.path}\n  - Error: ${message}`
-      }
-    }
-
-    content = normalizeMindmapMarkdown(content, {
-      title: fenceOptions.title || reference?.title,
+    // Mindmap nodes must live in the fence body. External `<<<` includes are
+    // no longer resolved here (body-level VitePress snippets remain separate).
+    const content = normalizeMindmapMarkdown(token.content, {
+      title: fenceOptions.title,
     })
     const props = [
       `content="${encodeURIComponent(content.trim())}"`,
@@ -107,7 +98,7 @@ function configureMindmapFence(md: MarkdownIt) {
         ? ''
         : `:initialExpandLevel="${fenceOptions.initialExpandLevel}"`,
     ].filter(Boolean).join(' ')
-    return `<MindmapPreview ${props}></MindmapPreview>\n`
+    return `<Mindmap ${props}></Mindmap>\n`
   }
 }
 
@@ -187,6 +178,156 @@ function configureSwiperContainer(md: MarkdownIt) {
   })
 }
 
+/** Escape text for HTML element bodies (not attributes). */
+function escapeHtmlText(s: string) {
+  return s.replace(
+    /[&<>"']/g,
+    (ch) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch] as string
+  )
+}
+
+/**
+ * `::: footprints 2025-01-22 23:47` → Footprints Vue block.
+ * Prefer token-based extraction (source line maps are unreliable in VitePress).
+ * Text goes through encoded props; images use a slot so Vite rewrites asset URLs.
+ */
+function extractFootprintsPayloadFromTokens(tokens: any[], idx: number) {
+  const meta = String(tokens[idx].info || '')
+    .trim()
+    .replace(/^footprints\s*/i, '')
+  const times = parseFootprintsDatetime(meta)
+  const paragraphs: string[] = []
+  const images: string[] = []
+  let otherInfo = ''
+  let inOther = false
+
+  for (let i = idx + 1; i < tokens.length; i++) {
+    const t = tokens[i]
+    if (t.type === 'container_footprints_close') break
+    if (t.type !== 'inline') continue
+
+    const childImgs: string[] = []
+    if (Array.isArray(t.children)) {
+      for (const c of t.children) {
+        if (c.type === 'image') {
+          const src = c.attrGet?.('src') || c.attrs?.find((a: string[]) => a[0] === 'src')?.[1]
+          if (src) childImgs.push(src)
+        }
+      }
+    }
+
+    const content = String(t.content || '').trim()
+    if (content === '---') {
+      inOther = true
+      continue
+    }
+    if (childImgs.length) {
+      // Treat as image block when the inline is image-only (ignore bare alt text).
+      const withoutImgs = content.replace(/!\[[^\]]*\]\([^)]+\)/g, '').trim()
+      if (!withoutImgs) {
+        images.push(...childImgs)
+        continue
+      }
+    }
+    const imgOnly = content.match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)$/)
+    if (imgOnly) {
+      images.push(imgOnly[2])
+      continue
+    }
+    if (!content) continue
+    if (inOther) otherInfo = otherInfo ? `${otherInfo}\n${content}` : content
+    else paragraphs.push(content)
+  }
+
+  return { times, paragraphs, images, otherInfo }
+}
+
+function configureFootprintsContainer(md: MarkdownIt) {
+  md.use(markdownItContainer, 'footprints', {
+    validate: (params: string) => /^footprints(\s|$)/i.test(params.trim()),
+    render: (tokens: any[], idx: number, _opts: unknown, env: any) => {
+      if (tokens[idx].nesting !== 1) return ''
+
+      // Extract BEFORE hiding/clearing tokens.
+      let payload = extractFootprintsPayloadFromTokens(tokens, idx)
+
+      // Optional enrichment from source slice when tokens missed content.
+      const startLine = tokens[idx].map?.[0] ?? 0
+      let endLine = startLine
+      for (let i = idx + 1; i < tokens.length; i++) {
+        if (tokens[i].type === 'container_footprints_close') {
+          endLine = tokens[i].map?.[0] ?? endLine
+          break
+        }
+      }
+      const raw = String(env?.src ?? env?.source ?? '')
+      if (raw && endLine > startLine) {
+        const slice = raw.split(/\r?\n/).slice(startLine, endLine + 1).join('\n')
+        const fromSource = parseFootprintsSource(
+          slice.includes(':::') ? slice : `::: ${tokens[idx].info}\n${slice}\n:::`
+        )
+        if (!payload.paragraphs.length && fromSource.paragraphs.length) {
+          payload = { ...payload, paragraphs: fromSource.paragraphs }
+        }
+        if (!payload.images.length && fromSource.images.length) {
+          payload = { ...payload, images: fromSource.images }
+        }
+        if (!payload.otherInfo && fromSource.otherInfo) {
+          payload = { ...payload, otherInfo: fromSource.otherInfo }
+        }
+        if (!payload.times.length && fromSource.times.length) {
+          payload = { ...payload, times: fromSource.times }
+        }
+      }
+
+      for (let i = idx + 1; i < tokens.length; i++) {
+        if (tokens[i].type === 'container_footprints_close') break
+        tokens[i].hidden = true
+        tokens[i].content = ''
+        if (Array.isArray(tokens[i].children)) {
+          for (const child of tokens[i].children) {
+            child.hidden = true
+            child.content = ''
+          }
+          tokens[i].children = []
+        }
+      }
+
+      const enc = (value: unknown) =>
+        encodeURIComponent(JSON.stringify(value)).replace(/'/g, '%27')
+      const bindExpr = (value: unknown) =>
+        "JSON.parse(decodeURIComponent('" + enc(value) + "'))"
+      const imageSlot = payload.images
+        .map((src, i) => {
+          return (
+            '<img src="' +
+            escapeHtmlText(src) +
+            '" @click="openModal(' +
+            String(i) +
+            ')" />'
+          )
+        })
+        .join('\n')
+      const openTag =
+        '<Footprints :times="' +
+        bindExpr(payload.times) +
+        '" :paragraphs="' +
+        bindExpr(payload.paragraphs) +
+        '" :other-info="' +
+        bindExpr(payload.otherInfo) +
+        '">'
+      if (!payload.images.length) return openTag + '</Footprints>\n'
+      return (
+        openTag +
+        '\n<template #image-list="{ openModal }">\n' +
+        imageSlot +
+        '\n</template>\n</Footprints>\n'
+      )
+    },
+  })
+}
+
 /**
  * Markdown 配置
  */
@@ -220,6 +361,9 @@ export function getMarkdownConfig(): MarkdownOptions {
 
       // 添加 Swiper 支持
       configureSwiperContainer(md)
+
+      // Footprints 容器（Type A）
+      configureFootprintsContainer(md)
     },
     anchor: {
       slugify: generateAnchor,

@@ -17,26 +17,22 @@ export interface TNotesComponentDescriptor {
  */
 export const TNOTES_COMPONENTS: readonly TNotesComponentDescriptor[] = [
   {
-    name: 'BilibiliOutsidePlayer',
-    aliases: ['B'],
+    name: 'BilibiliVideo',
     kind: 'block-component',
     editable: 'visual',
   },
   {
-    name: 'EnWordList',
-    aliases: ['E'],
+    name: 'WordList',
     kind: 'block-component',
     editable: 'visual',
   },
   {
     name: 'Footprints',
-    aliases: ['F'],
     kind: 'block-component',
     editable: 'visual',
   },
   {
     name: 'NotesTable',
-    aliases: ['N'],
     kind: 'block-component',
     editable: 'visual',
   },
@@ -46,7 +42,8 @@ export const TNOTES_COMPONENTS: readonly TNotesComponentDescriptor[] = [
     editable: 'visual',
   },
   {
-    name: 'MindmapPreview',
+    name: 'Mindmap',
+    aliases: ['MindmapPreview'],
     kind: 'block-component',
     editable: 'visual',
   },
@@ -67,6 +64,7 @@ export const TNOTES_COMPONENTS: readonly TNotesComponentDescriptor[] = [
   },
   { name: 'swiper', kind: 'container', editable: 'visual' },
   { name: 'code-group', kind: 'container', editable: 'visual' },
+  { name: 'footprints', kind: 'container', editable: 'visual' },
   { name: 'details', kind: 'container', editable: 'visual' },
   { name: 'info', kind: 'container', editable: 'visual' },
   { name: 'tip', kind: 'container', editable: 'visual' },
@@ -74,7 +72,6 @@ export const TNOTES_COMPONENTS: readonly TNotesComponentDescriptor[] = [
   { name: 'danger', kind: 'container', editable: 'visual' },
   { name: 'mermaid', kind: 'fenced-language', editable: 'visual' },
   { name: 'mindmap', kind: 'fenced-language', editable: 'visual' },
-  { name: 'markmap', kind: 'fenced-language', editable: 'visual' },
 ] as const
 
 export function findTNotesComponent(

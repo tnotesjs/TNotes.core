@@ -1,24 +1,15 @@
-<!-- 
-vitepress/components/BilibiliOutsidePlayer/BilibiliOutsidePlayer.vue 
+<!--
+  Deprecated local shell. Canonical implementation lives in @tnotesjs/ui as
+  BilibiliVideo. Kept so deep path imports do not break during migration.
 -->
-
 <template>
-  <iframe
-    style="width: 100%; aspect-ratio: 16/9; margin: 1rem 0"
-    :src="'//player.bilibili.com/player.html?isOutside=true&bvid=' + id"
-    scrolling="no"
-    border="0"
-    frameborder="no"
-    framespacing="0"
-    allowfullscreen="true"
-  ></iframe>
+  <BilibiliVideo :id="id" />
 </template>
 
 <script setup lang="ts">
-defineProps({
-  id: {
-    type: String,
-    required: true,
-  },
-})
+import { BilibiliVideo } from '@tnotesjs/ui'
+
+defineProps<{
+  id: string
+}>()
 </script>

@@ -6,21 +6,32 @@
 
 暂无待发布的变更。
 
-## [0.6.0] - 2026-08-24
+## [0.8.0] - 2026-09-01
 
 ### Added
 
-- 新增 `@tnotesjs/core/workspace` 入口，为 Desk 等本地客户端提供可注入根路径的知识库扫描、读取与写入 API。
-- Workspace API 支持笔记创建、保存、重命名、删除预览与删除，目录分组创建、重命名、移动与删除，以及附件写入和笔记配置更新。
-- Workspace 写操作使用原子文件替换与串行变更队列，统一返回知识库快照、诊断信息和结构化错误。
-- 新增 `@tnotesjs/core/markdown` 入口，提供与运行时无关的笔记格式化能力和 TNotes 组件注册表，并登记 Mermaid 组件语法。
-- 为 Workspace 与 Markdown 格式化能力补充自动化测试。
+- 接入 `@tnotesjs/ui@^0.1.0`：BilibiliVideo、WordList、Mermaid、Mindmap、NotesTable、Footprints 共享 Vue 组件与 `--tn-*` token。
+- 新增 `scripts/migrate-vue-component-tags.mjs`，将历史 `<B>` / `<N>` / `<E>` / `<F>` 迁移为全名标签。
+- Mindmap 预览改用 `@tnotesjs/ui` 的 `Mindmap` 与 `FocusBreadcrumbs`。
 
-### Fixed
+### Changed
 
-- 为 Workspace、Markdown 和 VitePress Config 扩展补齐 CommonJS 构建与 `require` 导出，确保 Electron 主进程等 CommonJS 环境能够直接加载。
+- **Breaking**：移除短名 Vue 全局组件注册（`B` / `N` / `E` / `F`）；落盘仅支持 `BilibiliVideo`、`WordList`、`NotesTable` 等全名。
+- **Breaking**：Footprints 改为 `::: footprints` 容器语法；旧 `<Footprints>` Vue 标签不再支持。
+- VitePress theme 从 `@tnotesjs/ui` 注册内置组件，本地 VP adapter 仅保留 data loader / Layout enhancer。
+- 依赖 `@tnotesjs/mindmap-core` 升级至 `^0.2.2`。
 
-## [0.5.0] - 2026-08-22
+### Removed
+
+- 删除 core 内重复的 EnWordList RightClickMenu、旧 Mindmap 预览实现等已迁入 `@tnotesjs/ui` 的代码。
+
+## [0.7.0] - 2026-08-28
+
+### Changed
+
+- Workspace TOC 改为 files-first reconcile，移除 TocService。
+
+## [0.6.0] - 2026-08-24
 
 ### Changed
 

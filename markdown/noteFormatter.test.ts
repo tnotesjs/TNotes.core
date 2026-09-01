@@ -8,10 +8,14 @@ import {
 
 describe('TNotes Markdown contract', () => {
   it('exposes runtime-neutral component descriptors', () => {
-    expect(findTNotesComponent('N')?.name).toBe('NotesTable')
+    expect(findTNotesComponent('NotesTable')?.name).toBe('NotesTable')
+    expect(findTNotesComponent('WordList')?.name).toBe('WordList')
+    expect(findTNotesComponent('BilibiliVideo')?.name).toBe('BilibiliVideo')
+    expect(findTNotesComponent('N')).toBeUndefined()
     expect(findTNotesComponent('SWIPER')?.kind).toBe('container')
     expect(findTNotesComponent('Mermaid')?.editable).toBe('visual')
-    expect(TNOTES_COMPONENTS.some((item) => item.name === 'markmap')).toBe(true)
+    expect(TNOTES_COMPONENTS.some((item) => item.name === 'markmap')).toBe(false)
+    expect(TNOTES_COMPONENTS.some((item) => item.name === 'mindmap')).toBe(true)
   })
 
   it('restores missing generated markers without interpreting fenced headings', async () => {

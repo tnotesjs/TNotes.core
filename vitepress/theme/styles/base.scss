@@ -13,6 +13,21 @@
   /* 品牌色 */
   --vp-c-brand-1: #646cff;
   --vp-c-brand-2: #747bff;
+
+  /* Map VitePress tokens onto @tnotesjs/ui --tn-* */
+  --tn-c-brand: var(--vp-c-brand-1);
+  --tn-c-text: var(--vp-c-text-1);
+  --tn-c-text-2: var(--vp-c-text-2);
+  --tn-c-bg: var(--vp-c-bg);
+  --tn-c-bg-soft: var(--vp-c-bg-soft);
+  --tn-c-bg-elv: var(--vp-c-bg-elv);
+  --tn-c-divider: var(--vp-c-divider);
+  --tn-c-danger: var(--vp-c-danger-1);
+  --tn-c-success-soft: var(--vp-c-green-soft);
+  --tn-c-danger-soft: var(--vp-c-danger-soft);
+  --tn-c-default-soft: var(--vp-c-default-soft);
+  --tn-shadow-2: var(--vp-shadow-2);
+  --tn-font-mono: var(--vp-font-family-mono);
 }
 
 /* #endregion */

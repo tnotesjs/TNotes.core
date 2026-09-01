@@ -32,6 +32,9 @@ export default defineConfig({
     // Node.js built-ins
     /^node:/,
   ],
+  // Inline pure TS helpers from @tnotesjs/ui. The package root entry is
+  // Vite-oriented `.ts` / `.vue` and must never be loaded by Node config/CLI.
+  noExternal: ['@tnotesjs/ui/footprints-parse'],
   // shebang 不能通过 banner 加（splitting 模式下会给所有 chunk 加），
   // 改为构建后只给 CLI 入口补上
   async onSuccess() {

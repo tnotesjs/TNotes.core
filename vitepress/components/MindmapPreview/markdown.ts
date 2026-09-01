@@ -33,7 +33,7 @@ export function parseMindmapFence(openLine: string): MindmapFenceOptions | null 
   return options
 }
 
-/** Parse `<<< file.md [title]`; the title is optional and paths may be quoted. */
+/** @deprecated Mindmap fences no longer resolve `<<<` includes; kept for tests / migration docs. */
 export function parseMindmapReference(line: string): MindmapReference | null {
   const match = line.trim().match(/^<<<\s+(.+?)\s*$/)
   if (!match) return null

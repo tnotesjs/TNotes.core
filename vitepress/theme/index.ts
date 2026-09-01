@@ -13,23 +13,19 @@
  */
 
 import DefaultTheme from 'vitepress/theme'
-
+import { BilibiliVideo, WordList, Mermaid, Mindmap, Footprints } from '@tnotesjs/ui'
 import { initTnotesSearchIndexHmr } from '../client/localSearchIndexBridge'
-import BilibiliOutsidePlayer from '../components/BilibiliOutsidePlayer/BilibiliOutsidePlayer.vue'
 import Discussions from '../components/Discussions/Discussions.vue'
-import EnWordList from '../components/EnWordList/EnWordList.vue'
-import Footprints from '../components/Footprints/Footprints.vue'
 import { useRenameOverlay } from '../components/Layout/composables/useRenameOverlay'
 import { redirectAfterRename } from '../components/Layout/composables/useRenameRedirect'
 import Layout from '../components/Layout/Layout.vue'
-import Mermaid from '../components/Mermaid/Mermaid.vue'
-import MindmapPreview from '../components/MindmapPreview/MindmapPreview.vue'
 import NotesTable from '../components/NotesTable/NotesTable.vue'
 import SidebarCard from '../components/SidebarCard/SidebarCard.vue'
 import Tooltip from '../components/Tooltip/Tooltip.vue'
 
 
 import type { Theme, EnhanceAppContext } from 'vitepress'
+import '@tnotesjs/ui/styles/tokens.css'
 import './styles/index.scss'
 
 /**
@@ -37,18 +33,18 @@ import './styles/index.scss'
  */
 function registerCoreComponents(ctx: EnhanceAppContext) {
   const { app } = ctx
-  app.component('BilibiliOutsidePlayer', BilibiliOutsidePlayer)
-  app.component('B', BilibiliOutsidePlayer)
+  app.component('BilibiliVideo', BilibiliVideo)
+  // Legacy full tag until knowledge-base migration; short aliases B/E/N/F are removed.
+  app.component('BilibiliOutsidePlayer', BilibiliVideo)
+  app.component('WordList', WordList)
+  app.component('EnWordList', WordList)
   app.component('Discussions', Discussions)
-  app.component('EnWordList', EnWordList)
-  app.component('E', EnWordList)
   app.component('Footprints', Footprints)
-  app.component('F', Footprints)
   app.component('SidebarCard', SidebarCard)
-  app.component('MindmapPreview', MindmapPreview)
+  app.component('Mindmap', Mindmap)
+  app.component('MindmapPreview', Mindmap)
   app.component('Mermaid', Mermaid)
   app.component('NotesTable', NotesTable)
-  app.component('N', NotesTable)
   app.component('Tooltip', Tooltip)
 }
 

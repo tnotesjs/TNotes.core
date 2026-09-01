@@ -34,14 +34,17 @@
     "./vitepress/*": "./vitepress/*"
   },
   "files": [
+    "commands/",
     "config/",
     "core/",
+    "markdown/",
     "services/",
     "utils/",
     "dist/",
     "templates/",
     "vitepress/",
-    "types/"
+    "types/",
+    "workspace/"
   ],
   "scripts": {
     "build": "tsup",
@@ -61,7 +64,8 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@tnotesjs/mindmap-core": "^0.2.1",
+    "@tnotesjs/mindmap-core": "^0.2.2",
+    "@tnotesjs/ui": "^0.1.1",
     "echarts": "^6.0.0",
     "github-slugger": "^2.0.0",
     "markdown-it-container": "^4.0.0",

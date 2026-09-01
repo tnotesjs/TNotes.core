@@ -112,7 +112,7 @@ export const EN_WORDS_REPO_BASE_URL: string =
 
 /**
  * 英语单词仓库 raw 地址
- * https://raw.githubusercontent.com/tnotesjs/TNotes.en-words/refs/heads/main/{word}.md
+ * https://raw.githubusercontent.com/tnotesjs/en-words/refs/heads/main/{word}.md
  */
 export const EN_WORDS_REPO_BASE_RAW_URL: string =
   'https://raw.githubusercontent.com/tnotesjs/en-words/refs/heads/main/'

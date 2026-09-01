@@ -12,8 +12,8 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       '@tnotesjs/ui':
-        specifier: ^0.1.0
-        version: 0.1.0(vue@3.5.31(typescript@5.9.3))
+        specifier: ^0.1.1
+        version: 0.1.1(vue@3.5.31(typescript@5.9.3))
       echarts:
         specifier: ^6.0.0
         version: 6.0.0
@@ -609,6 +609,9 @@ packages:
   '@iconify/utils@3.1.0':
     resolution: {integrity: sha512-Zlzem1ZXhI1iHeeERabLNzBHdOa4VhQbqAcOQaMKuTuyZCpwKbC2R4Dd0Zo3g9EAc+Y4fiarO8HIHRAth7+skw==}
 
+  '@iconify/utils@3.1.4':
+    resolution: {integrity: sha512-b1S7B1k9ohZ+iNTi2ATxbRYG9fTrJmUT0rc46bvVnNxqNRGW7dyo/vRREwyniI5IRN2RSJHDcm+s3BjWrSAjHw==}
+
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
 
@@ -869,8 +872,8 @@ packages:
     resolution: {integrity: sha512-uDMllL2l7zq0d63K8i1cnzdBZfwnkXLw+t48cXIhYg3tvVCpb38YOy0QFAhHTg8xRreV+Jdh3jBaf+wo0FAEFg==}
     engines: {node: '>=18.0.0'}
 
-  '@tnotesjs/ui@0.1.0':
-    resolution: {integrity: sha512-uWxCIrU5DFnCVSIMtHa7RfJfV9wj6sOzajK+/Jt8LkyjvA4gDEglUTn4bpJJXwKSLta+Kt1NREa/v1yesf7h0A==}
+  '@tnotesjs/ui@0.1.1':
+    resolution: {integrity: sha512-BuVmFzwkT/HdbttL4QBziycpgoTA6sLWIj7HkOge3sw3ULdvy/jM72vOYxfrc31RAgAiXUZ+DhFl2b0X8hzQrg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       vue: ^3.5.0
@@ -1689,6 +1692,9 @@ packages:
   dompurify@3.3.3:
     resolution: {integrity: sha512-Oj6pzI2+RqBfFG+qOaOLbFXLQ90ARpcGG6UePL82bJLtdsa6CYJD7nmiU8MW9nQNOtCHV3lZ/Bzq1X0QYbBZCA==}
 
+  dompurify@3.4.14:
+    resolution: {integrity: sha512-dVoH9z+MY+C9IilgGCk3YfFqjLi3fChm2OiKJMzh6axrJ5qwxqWaZamgmHrpv22CN/KdbZJuGEGgfQoL00LTdg==}
+
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
 
@@ -2043,6 +2049,9 @@ packages:
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
     engines: {node: '>=6'}
+
+  import-meta-resolve@4.2.0:
+    resolution: {integrity: sha512-Iqv2fzaTQN28s/FwZAoFq0ZSs/7hMAHJVX+w8PZl3cY19Pxk6jFFalxQoIfW2826i/fDLXv8IiEZRIT0lDuWcg==}
 
   imurmurhash@0.1.4:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
@@ -2826,6 +2835,9 @@ packages:
   stylis@4.3.6:
     resolution: {integrity: sha512-yQ3rwFWRfwNUY7H5vpU0wfdkNSnvnJinhF9830Swlaxl03zsOjCfmX0ugac+3LtK0lYSgwL/KXc8oYL3mG4YFQ==}
 
+  stylis@4.4.0:
+    resolution: {integrity: sha512-5Z9ZpRzfuH6l/UAvCPAPUo3665Nk2wLaZU3x+TLHKVzIz33+sbJqbtrYoC3KD4/uVOr2Zp+L0LySezP9OHV9yA==}
+
   sucrase@3.35.1:
     resolution: {integrity: sha512-DhuTmvZWux4H1UOnWMB3sk0sbaCVOoQZjv8u1rDoTV0HTdGem9hkAZtl4JZy8P2z4Bg0nT+YMeOFyVr4zcG5Tw==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -2905,6 +2917,10 @@ packages:
 
   ts-dedent@2.2.0:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
+    engines: {node: '>=6.10'}
+
+  ts-dedent@2.3.0:
+    resolution: {integrity: sha512-JfJeIHke7y2egdGGgRAvpCwYFUsHlM2gPcrVOxFkznt/4uzQ7HFmvE63iFHVLBJNDuyDOQgijDK/tXH/f6Msjg==}
     engines: {node: '>=6.10'}
 
   ts-interface-checker@0.1.13:
@@ -3648,6 +3664,12 @@ snapshots:
       '@iconify/types': 2.0.0
       mlly: 1.8.2
 
+  '@iconify/utils@3.1.4':
+    dependencies:
+      '@antfu/install-pkg': 1.1.0
+      '@iconify/types': 2.0.0
+      import-meta-resolve: 4.2.0
+
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -3852,7 +3874,7 @@ snapshots:
 
   '@tnotesjs/mindmap-core@0.2.2': {}
 
-  '@tnotesjs/ui@0.1.0(vue@3.5.31(typescript@5.9.3))':
+  '@tnotesjs/ui@0.1.1(vue@3.5.31(typescript@5.9.3))':
     dependencies:
       '@tnotesjs/mindmap-core': 0.2.2
       marked: 15.0.12
@@ -4817,6 +4839,10 @@ snapshots:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
+  dompurify@3.4.14:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
+
   domutils@2.8.0:
     dependencies:
       dom-serializer: 1.4.1
@@ -5314,6 +5340,8 @@ snapshots:
       parent-module: 1.0.1
       resolve-from: 4.0.0
 
+  import-meta-resolve@4.2.0: {}
+
   imurmurhash@0.1.4: {}
 
   internal-slot@1.1.0:
@@ -5582,7 +5610,7 @@ snapshots:
   mermaid@11.17.2:
     dependencies:
       '@braintree/sanitize-url': 7.1.2
-      '@iconify/utils': 3.1.0
+      '@iconify/utils': 3.1.4
       '@mermaid-js/parser': 1.2.1
       '@types/d3': 7.4.3
       '@upsetjs/venn.js': 2.0.0
@@ -5593,15 +5621,15 @@ snapshots:
       d3-sankey: 0.12.3
       dagre-d3-es: 7.0.14
       dayjs: 1.11.23
-      dompurify: 3.3.3
+      dompurify: 3.4.14
       es-toolkit: 1.52.0
       fastdom: 1.0.12
       katex: 0.16.47
       khroma: 2.1.0
       marked: 16.4.2
       roughjs: 4.6.6
-      stylis: 4.3.6
-      ts-dedent: 2.2.0
+      stylis: 4.4.0
+      ts-dedent: 2.3.0
       uuid: 11.1.0
 
   mhchemparser@4.2.1: {}
@@ -6174,6 +6202,8 @@ snapshots:
 
   stylis@4.3.6: {}
 
+  stylis@4.4.0: {}
+
   sucrase@3.35.1:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
@@ -6240,6 +6270,8 @@ snapshots:
       typescript: 5.9.3
 
   ts-dedent@2.2.0: {}
+
+  ts-dedent@2.3.0: {}
 
   ts-interface-checker@0.1.13: {}
 

@@ -4,10 +4,6 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
-
-## [0.8.0] - 2026-09-01
-
 ### Added
 
 - 接入 `@tnotesjs/ui@^0.1.0`：BilibiliVideo、WordList、Mermaid、Mindmap、NotesTable、Footprints 共享 Vue 组件与 `--tn-*` token。

@@ -4,6 +4,11 @@
  * Markdown 配置
  */
 
+import { highlightCodeSync } from '@tnotesjs/ui/code'
+import {
+  parseFootprintsDatetime,
+  parseFootprintsSource,
+} from '@tnotesjs/ui/footprints-parse'
 import markdownItContainer from 'markdown-it-container'
 import mila from 'markdown-it-link-attributes'
 import markdownItTaskLists from 'markdown-it-task-lists'
@@ -13,12 +18,9 @@ import {
   normalizeMindmapMarkdown,
   parseMindmapFence,
 } from '../components/MindmapPreview/markdown'
+
 // Pure helper only — do not import `@tnotesjs/ui` root from Node config
 // (package entry is .ts; Node cannot strip types under node_modules).
-import {
-  parseFootprintsDatetime,
-  parseFootprintsSource,
-} from '@tnotesjs/ui/footprints-parse'
 
 import type MarkdownIt from 'markdown-it'
 import type { MarkdownOptions } from 'vitepress'
@@ -36,8 +38,46 @@ function esc(s = '') {
         '>': '&gt;',
         '"': '&quot;',
         "'": '&#39;',
-      }[ch]!)
+      })[ch]!,
   )
+}
+
+const bindJson = (value: unknown) =>
+  `JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(value)).replace(/'/g, '%27')}'))`
+
+/** Replace VitePress's code DOM while retaining its parser/snippet pipeline. */
+function configureSharedCodeBlocks(md: MarkdownIt) {
+  const previousFence = md.renderer.rules.fence
+  md.renderer.rules.fence = (tokens, index, options, env, slf) => {
+    const token = tokens[index]
+    if ((token as typeof token & { src?: unknown }).src) {
+      previousFence?.(tokens, index, options, env, slf)
+    }
+    const html = highlightCodeSync(token.content, token.info)
+    const block = `<CodeBlock :code="${bindJson(token.content)}" :info="${bindJson(token.info)}" :highlighted-html="${bindJson(html)}" />`
+    return token.meta?.tnCodeGroupIndex === undefined
+      ? `${block}\n`
+      : `<div class="tn-code-group__panel" role="tabpanel">${block}</div>\n`
+  }
+  const open = 'container_code-group_open'
+  const close = 'container_code-group_close'
+  md.renderer.rules[open] = (tokens, index) => {
+    const items: Array<{ info: string }> = []
+    let itemIndex = 0
+    for (
+      let i = index + 1;
+      i < tokens.length && tokens[i].type !== close;
+      i++
+    ) {
+      const token = tokens[i]
+      if (token.type !== 'fence') continue
+      token.meta ??= {}
+      token.meta.tnCodeGroupIndex = itemIndex++
+      items.push({ info: token.info })
+    }
+    return `<CodeGroup :items="${bindJson(items)}">\n`
+  }
+  md.renderer.rules[close] = () => '</CodeGroup>\n'
 }
 
 /**
@@ -55,7 +95,9 @@ const simpleMermaidMarkdown = (md: MarkdownIt) => {
     // `mermaid` or `mermaid center`
     if (parts[0] === 'mermaid') {
       try {
-        const centered = parts.slice(1).some((part) => part.toLowerCase() === 'center')
+        const centered = parts
+          .slice(1)
+          .some((part) => part.toLowerCase() === 'center')
         const key = `mermaid-${Date.now()}-${Math.random()
           .toString(36)
           .substr(2, 9)}`
@@ -97,7 +139,9 @@ function configureMindmapFence(md: MarkdownIt) {
       fenceOptions.initialExpandLevel === undefined
         ? ''
         : `:initialExpandLevel="${fenceOptions.initialExpandLevel}"`,
-    ].filter(Boolean).join(' ')
+    ]
+      .filter(Boolean)
+      .join(' ')
     return `<Mindmap ${props}></Mindmap>\n`
   }
 }
@@ -140,7 +184,7 @@ function configureSwiperContainer(md: MarkdownIt) {
           const alt = token.content || ''
           const title = alt && alt.trim() ? alt : 'img'
           return `<div class="swiper-slide" data-title="${esc(
-            title
+            title,
           )}"><img src="${esc(src)}" alt="${esc(alt)}"></div>`
         }
 
@@ -183,7 +227,9 @@ function escapeHtmlText(s: string) {
   return s.replace(
     /[&<>"']/g,
     (ch) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch] as string
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[
+        ch
+      ] as string,
   )
 }
 
@@ -211,7 +257,9 @@ function extractFootprintsPayloadFromTokens(tokens: any[], idx: number) {
     if (Array.isArray(t.children)) {
       for (const c of t.children) {
         if (c.type === 'image') {
-          const src = c.attrGet?.('src') || c.attrs?.find((a: string[]) => a[0] === 'src')?.[1]
+          const src =
+            c.attrGet?.('src') ||
+            c.attrs?.find((a: string[]) => a[0] === 'src')?.[1]
           if (src) childImgs.push(src)
         }
       }
@@ -263,9 +311,14 @@ function configureFootprintsContainer(md: MarkdownIt) {
       }
       const raw = String(env?.src ?? env?.source ?? '')
       if (raw && endLine > startLine) {
-        const slice = raw.split(/\r?\n/).slice(startLine, endLine + 1).join('\n')
+        const slice = raw
+          .split(/\r?\n/)
+          .slice(startLine, endLine + 1)
+          .join('\n')
         const fromSource = parseFootprintsSource(
-          slice.includes(':::') ? slice : `::: ${tokens[idx].info}\n${slice}\n:::`
+          slice.includes(':::')
+            ? slice
+            : `::: ${tokens[idx].info}\n${slice}\n:::`,
         )
         if (!payload.paragraphs.length && fromSource.paragraphs.length) {
           payload = { ...payload, paragraphs: fromSource.paragraphs }
@@ -364,6 +417,8 @@ export function getMarkdownConfig(): MarkdownOptions {
 
       // Footprints 容器（Type A）
       configureFootprintsContainer(md)
+      // Last on purpose: replace only VitePress code DOM and styling.
+      configureSharedCodeBlocks(md)
     },
     anchor: {
       slugify: generateAnchor,

@@ -109,8 +109,7 @@ vitepress/components/Layout/Layout.vue
         </template>
       </AboutModal>
     </template>
-    <template #doc-footer-before>
-    </template>
+    <template #doc-footer-before> </template>
     <template #doc-after>
       <!-- 自定义 DocFooter -->
       <DocFooter />
@@ -193,11 +192,11 @@ vitepress/components/Layout/Layout.vue
 </template>
 
 <script setup>
+import { ImagePreview } from "@tnotesjs/ui";
 import { useData, useRoute, useRouter } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import { computed, onMounted, ref, watch } from "vue";
 
-import { useCodeBlockFullscreen } from "../CodeBlockFullscreen";
 import { SIDEBAR_SHOW_NOTE_ID_KEY } from "../constants";
 import { data as allNotesConfig } from "../notesConfig.data.ts";
 import AboutModal from "./AboutModal.vue";
@@ -217,7 +216,6 @@ import CustomSidebar from "./CustomSidebar.vue";
 import DocBeforeControls from "./DocBeforeControls.vue";
 import DocFooter from "./DocFooter.vue";
 import { data as readmeData } from "./homeReadme.data.ts";
-import ImagePreview from "./ImagePreview.vue";
 import NavBarSettingsTrigger from "./NavBarSettingsTrigger.vue";
 import NoteStatus from "./NoteStatus.vue";
 import SidebarNavBefore from "./SidebarNavBefore.vue";
@@ -231,7 +229,6 @@ const router = useRouter();
 const route = useRoute();
 
 // 启用代码块全屏功能
-useCodeBlockFullscreen();
 
 const { initDocLayout, updateResponsiveLayout } = useDocLayout();
 
@@ -350,7 +347,9 @@ const modalIsHomeReadme = computed(
   () => !sidebarAboutNoteId.value && isHomeReadme.value,
 );
 
-const modalNoteId = computed(() => sidebarAboutNoteId.value || currentNoteId.value);
+const modalNoteId = computed(
+  () => sidebarAboutNoteId.value || currentNoteId.value,
+);
 
 function safeDecode(value) {
   try {
@@ -400,12 +399,7 @@ const {
   hasConfigChanges,
   resetNoteConfig,
   updateOriginalValues,
-} = useNoteConfig(
-  modalNoteId,
-  modalNoteConfig,
-  modalNoteTitle,
-  timeModalOpen,
-);
+} = useNoteConfig(modalNoteId, modalNoteConfig, modalNoteTitle, timeModalOpen);
 
 // 标题验证
 const { onTitleInput: validateTitleInput, onTitleBlur: validateTitleBlur } =
@@ -588,8 +582,6 @@ watch(
 </script>
 
 <style>
-@import "../CodeBlockFullscreen/styles.css";
-
 #VPSidebarNav > .group {
   display: none;
 }

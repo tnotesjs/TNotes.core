@@ -10,24 +10,24 @@
 /* ===================================== */
 
 :root {
-  /* 品牌色 */
-  --vp-c-brand-1: #646cff;
-  --vp-c-brand-2: #747bff;
-
-  /* Map VitePress tokens onto @tnotesjs/ui --tn-* */
-  --tn-c-brand: var(--vp-c-brand-1);
-  --tn-c-text: var(--vp-c-text-1);
-  --tn-c-text-2: var(--vp-c-text-2);
-  --tn-c-bg: var(--vp-c-bg);
-  --tn-c-bg-soft: var(--vp-c-bg-soft);
-  --tn-c-bg-elv: var(--vp-c-bg-elv);
-  --tn-c-divider: var(--vp-c-divider);
-  --tn-c-danger: var(--vp-c-danger-1);
-  --tn-c-success-soft: var(--vp-c-green-soft);
-  --tn-c-danger-soft: var(--vp-c-danger-soft);
-  --tn-c-default-soft: var(--vp-c-default-soft);
-  --tn-shadow-2: var(--vp-shadow-2);
-  --tn-font-mono: var(--vp-font-family-mono);
+  /* VitePress is now a host of the canonical @tnotesjs/ui tokens. */
+  --vp-c-brand-1: var(--tn-c-brand);
+  --vp-c-brand-2: var(--tn-c-brand-hover);
+  --vp-c-brand-3: var(--tn-c-brand-strong);
+  --vp-c-text-1: var(--tn-c-text);
+  --vp-c-text-2: var(--tn-c-text-2);
+  --vp-c-bg: var(--tn-c-bg);
+  --vp-c-bg-soft: var(--tn-c-bg-soft);
+  --vp-c-bg-elv: var(--tn-c-bg-elv);
+  --vp-c-divider: var(--tn-c-divider);
+  --vp-c-gutter: var(--tn-c-divider);
+  --vp-c-default-soft: var(--tn-c-default-soft);
+  --vp-c-green-soft: var(--tn-c-success-soft);
+  --vp-c-danger-1: var(--tn-c-danger);
+  --vp-c-danger-soft: var(--tn-c-danger-soft);
+  --vp-shadow-2: var(--tn-shadow-2);
+  --vp-font-family-base: var(--tn-font-sans);
+  --vp-font-family-mono: var(--tn-font-mono);
 }
 
 /* #endregion */
@@ -35,11 +35,6 @@
 /* ===================================== */
 /* #region 全局样式重置                  */
 /* ===================================== */
-
-/* 移除所有链接的下划线 */
-a {
-  text-decoration: none !important;
-}
 
 /* 任务列表样式优化 */
 ul > li.task-list-item {
@@ -52,22 +47,9 @@ ul > li.task-list-item > ul {
   padding-left: 3rem;
 }
 
-.vp-doc h2 {
-  // margin 默认值：
-  // margin: 48px 0 16px;
-  // 缩小上边距
-  margin: 1rem 0 1rem;
-  // border-top 默认值：
-  // border-top: 1px solid var(--vp-c-divider);
-  // 移除上横线：
-  border-top: none;
-}
-
 .vp-doc :is(h1, h2, h3, h4, h5, h6) {
   /* 修复锚点定位：为标题添加滚动偏移，避免被顶部固定导航栏遮挡 */
   scroll-margin-top: calc(var(--vp-nav-height) + 1rem);
-  /* 所有标题统一上下边距 */
-  margin: 1rem 0 1rem;
 }
 
 /* #endregion */

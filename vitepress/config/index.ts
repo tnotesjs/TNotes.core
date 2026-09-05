@@ -8,6 +8,7 @@
  *   export default defineNotesConfig()
  */
 
+import { prepareCodeHighlighter } from '@tnotesjs/ui/code'
 import fs from 'fs'
 import path from 'path'
 import { defineConfig, type UserConfig } from 'vitepress'
@@ -21,6 +22,7 @@ import {
   getMarkdownConfig,
   getThemeConfig,
 } from '../configs'
+import { collectCodeLanguages } from './codeLanguages'
 import { buildProgressPlugin } from '../plugins/buildProgressPlugin'
 import { fileWatcherBridgePlugin } from '../plugins/fileWatcherBridgePlugin'
 import { getNoteByConfigIdPlugin } from '../plugins/getNoteByConfigIdPlugin'
@@ -35,7 +37,7 @@ import { updateConfigPlugin } from '../plugins/updateConfigPlugin'
  * @param overrides - 可选的覆盖配置，会与默认配置合并
  * @returns VitePress 配置对象
  */
-export function defineNotesConfig(overrides: UserConfig = {}) {
+export async function defineNotesConfig(overrides: UserConfig = {}) {
   const rootPath = process.cwd()
   ConfigManager.init({ rootPath })
   const config = ConfigManager.getInstance().getAll()
@@ -43,6 +45,7 @@ export function defineNotesConfig(overrides: UserConfig = {}) {
 
   const IGNORE_LIST = getIgnoreList(config)
   const GITHUB_PAGE_URL = getGithubPageUrl(config)
+  await prepareCodeHighlighter(collectCodeLanguages(rootPath))
 
   const {
     transformPageData: overrideTransformPageData,

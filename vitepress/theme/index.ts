@@ -12,8 +12,19 @@
  * v2 - https://vitepress.dev/zh/guide/custom-theme
  */
 
+import {
+  BilibiliVideo,
+  WordList,
+  Mermaid,
+  Mindmap,
+  Footprints,
+  CodeBlock,
+  CodeGroup,
+  Badge,
+  ImagePreview,
+} from '@tnotesjs/ui'
 import DefaultTheme from 'vitepress/theme'
-import { BilibiliVideo, WordList, Mermaid, Mindmap, Footprints } from '@tnotesjs/ui'
+
 import { initTnotesSearchIndexHmr } from '../client/localSearchIndexBridge'
 import Discussions from '../components/Discussions/Discussions.vue'
 import { useRenameOverlay } from '../components/Layout/composables/useRenameOverlay'
@@ -23,9 +34,10 @@ import NotesTable from '../components/NotesTable/NotesTable.vue'
 import SidebarCard from '../components/SidebarCard/SidebarCard.vue'
 import Tooltip from '../components/Tooltip/Tooltip.vue'
 
-
 import type { Theme, EnhanceAppContext } from 'vitepress'
 import '@tnotesjs/ui/styles/tokens.css'
+import '@tnotesjs/ui/styles/prose.css'
+import '@tnotesjs/ui/styles/code.css'
 import './styles/index.scss'
 
 /**
@@ -46,6 +58,10 @@ function registerCoreComponents(ctx: EnhanceAppContext) {
   app.component('Mermaid', Mermaid)
   app.component('NotesTable', NotesTable)
   app.component('Tooltip', Tooltip)
+  app.component('CodeBlock', CodeBlock)
+  app.component('CodeGroup', CodeGroup)
+  app.component('Badge', Badge)
+  app.component('ImagePreview', ImagePreview)
 }
 
 /**
@@ -73,7 +89,10 @@ function registerRenameHmrListener() {
       if (!window.location.pathname.includes(oldSegment)) return
 
       handling = true
-      overlay.show({ message: '检测到文件夹重命名', tip: '正在跳转到新地址...' })
+      overlay.show({
+        message: '检测到文件夹重命名',
+        tip: '正在跳转到新地址...',
+      })
 
       try {
         await redirectAfterRename(

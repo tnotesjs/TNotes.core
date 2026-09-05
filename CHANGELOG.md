@@ -4,7 +4,18 @@
 
 ## [Unreleased]
 
-暂无待发布的变更。
+### Added
+
+- 代码块与 code-group 改用 `@tnotesjs/ui` 的共享 Shiki 高亮器和 Vue 壳组件，支持双主题、按语料预加载语言、标题、复制、全屏、行号起点与逐块开关。
+- 全局注册共享 `Badge` 与 `ImagePreview`，并加入 Core/Desk 代码块契约测试。
+
+### Changed
+
+- 颜色 token 与正文排版改由 `@tnotesjs/ui` 单一提供，Core 仅将 VitePress 宿主变量映射到共享 token。
+
+### Removed
+
+- 移除 Core 内重复的代码全屏和图片预览实现。
 
 ## [0.8.0] - 2026-09-01
 

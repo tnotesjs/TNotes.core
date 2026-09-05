@@ -3,17 +3,22 @@
   then renders host-neutral @tnotesjs/ui NotesTable.
 -->
 <template>
-  <NotesTable :notes="tableData" :missing-ids="notFoundIds" :error="errorMessage" />
+  <NotesTable
+    :notes="tableData"
+    :missing-ids="notFoundIds"
+    :error="errorMessage"
+  />
 </template>
 
 <script setup lang="ts">
 import { NotesTable } from '@tnotesjs/ui'
-import type { NotesTableRow } from '@tnotesjs/ui'
 import { useData } from 'vitepress'
 import { computed } from 'vue'
 
 // @ts-expect-error - VitePress data loader exports data at runtime
 import { data as allNotesConfig } from '../notesConfig.data.ts'
+
+import type { NotesTableRow } from '@tnotesjs/ui'
 
 interface Props {
   ids: string[]
@@ -53,7 +58,7 @@ const tableData = computed((): NotesTableRow[] => {
         id,
         title,
         description: config.description || '',
-        url: config.redirect ? `${base}${config.redirect}` : '#'
+        url: config.redirect ? `${base}${config.redirect}` : '#',
       }
     })
 })

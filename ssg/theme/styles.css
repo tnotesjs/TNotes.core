@@ -1,0 +1,22 @@
+.tn-prose .tn-swiper-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tn-prose .swiper-wrapper {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.tn-prose .swiper-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.tn-prose mjx-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+}

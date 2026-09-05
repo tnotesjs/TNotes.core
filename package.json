@@ -1,7 +1,7 @@
 {
   "name": "@tnotesjs/core",
   "version": "0.8.0",
-  "description": "TNotes 知识库核心框架 —— 基于 VitePress 的笔记管理系统",
+  "description": "TNotes 知识库核心框架 —— 本地优先的笔记管理与静态站点工具",
   "type": "module",
   "packageManager": "pnpm@10.17.1",
   "bin": {
@@ -23,6 +23,16 @@
       "require": "./dist/markdown/index.cjs",
       "import": "./dist/markdown/index.js"
     },
+    "./ssg/config": {
+      "types": "./dist/ssg/config/index.d.ts",
+      "require": "./dist/ssg/config/index.cjs",
+      "import": "./dist/ssg/config/index.js"
+    },
+    "./ssg/theme": {
+      "types": "./ssg/theme/index.ts",
+      "import": "./ssg/theme/index.ts"
+    },
+    "./ssg/*": "./ssg/*",
     "./vitepress/config": {
       "require": "./dist/vitepress/config/index.cjs",
       "import": "./dist/vitepress/config/index.js"
@@ -42,6 +52,7 @@
     "utils/",
     "dist/",
     "templates/",
+    "ssg/",
     "vitepress/",
     "types/",
     "workspace/"
@@ -56,12 +67,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "audit:vitepress": "node scripts/audit-frozen-vitepress.mjs"
   },
   "peerDependencies": {
-    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",
-    "vitepress": "^1.6.0",
+    "vitepress": "1.6.4",
     "vue": "^3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "vitepress": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@tnotesjs/mindmap-core": "^0.2.2",
@@ -93,11 +109,13 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.6",
+    "vite": "7.3.6",
+    "vitepress": "1.6.4",
     "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^3.2.7"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "license": "MIT",
   "repository": {

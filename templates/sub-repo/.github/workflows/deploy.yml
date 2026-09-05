@@ -1,6 +1,5 @@
-# doc => https://vitepress.dev/zh/guide/deploy
-# 构建 VitePress 站点并将其部署到 GitHub Pages 的示例工作流程
-name: Deploy VitePress site to Pages
+# 构建 TNotes SSG 站点并部署到 GitHub Pages
+name: Deploy TNotes site to Pages
 
 on:
   # 在针对 `main` 分支的推送上运行。如果你
@@ -12,7 +11,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: '0 0 1 * *'   # 每月 1 号 UTC 00:00 自动触发 deploy
+    - cron: "0 0 1 * *" # 每月 1 号 UTC 00:00 自动触发 deploy
 # 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages
 permissions:
   contents: read
@@ -37,12 +36,12 @@ jobs:
           submodules: true
       - uses: pnpm/action-setup@v3 # 如果使用 pnpm，请取消此区域注释
         with:
-          version: 10
+          version: 11.10.0
       # - uses: oven-sh/setup-bun@v1 # 如果使用 Bun，请取消注释
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.22.0
           cache: pnpm # npm 或 pnpm / yarn
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -50,14 +49,14 @@ jobs:
         run: pnpm install # npm ci 或 pnpm install / yarn install / bun install
       - name: Gen Toc
         run: pnpm tn:update
-      - name: Build with VitePress
+      - name: Build with TNotes SSG
         env:
           NODE_OPTIONS: --max-old-space-size=8192
         run: pnpm tn:build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .vitepress/dist
+          path: .tnotes/dist
 
   # 部署工作
   deploy:

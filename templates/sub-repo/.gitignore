@@ -88,8 +88,9 @@ tmp/
 *.min.css
 *.map
 
-# 忽略 VitePress 临时文件
-.vitepress/**/*.timestamp-*.mjs
+# 忽略 TNotes SSG 产物
+.tnotes/dist/
+node_modules/.tnotes-ssg/
 
 # 忽略词典数据解析后生成的文件
 results

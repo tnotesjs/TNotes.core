@@ -31,15 +31,10 @@
     "strictTemplates": false
   },
   "include": [
-    ".vitepress/**/*.ts",
-    ".vitepress/**/*.d.ts",
-    ".vitepress/**/*.tsx",
-    ".vitepress/**/*.vue"
+    ".tnotes/**/*.ts",
+    ".tnotes/**/*.d.ts",
+    ".tnotes/**/*.tsx",
+    ".tnotes/**/*.vue"
   ],
-  "exclude": [
-    "node_modules",
-    ".vitepress/dist",
-    ".vitepress/cache",
-    ".vitepress/.temp"
-  ]
+  "exclude": ["node_modules", ".tnotes/dist", "node_modules/.tnotes-ssg"]
 }

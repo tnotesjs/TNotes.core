@@ -1,5 +1,10 @@
 # @tnotesjs/core
 
+> **⚠️ 已冻结归档（2026-09-10）**：本包冻结于 **0.8.0**，不再维护。
+> 继任包：[`@tnotesjs/kb`](https://www.npmjs.com/package/@tnotesjs/kb)（知识库读写 API）+
+> [`@tnotesjs/ssg`](https://www.npmjs.com/package/@tnotesjs/ssg)（静态站点生成）。
+> 全部 32 个子库已切流，Pages 产物由 ssg 构建（`.tnotes/dist`）。
+
 TNotes 知识库系统的核心框架，以 NPM 包形式发布，被所有
 [TNotes.xxx](https://github.com/orgs/tnotesjs/repositories) 知识库引用。
 
